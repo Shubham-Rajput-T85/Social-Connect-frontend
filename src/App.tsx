@@ -1,26 +1,57 @@
-import React from 'react';
-import logo from './logo.svg';
+import { Routes, Route } from 'react-router-dom';
 import './App.css';
+import Header from './components/header/Header';
+import Navbar from './components/header/Navbar';
+import Main from './components/ui/Main';
 
-function App() {
+import Signup from "./components/auth/Signup"
+import Login from './components/auth/Login';
+import { useDispatch, useSelector } from 'react-redux';
+import SnackbarAlert from './components/ui/SnackbarAlert';
+import { alertActions } from './components/store/alert-slice';
+import AuthRoute from "./components/auth/AuthRoute";
+import { useEffect } from 'react';
+import { authActions } from './components/store/auth-slice';
+import Home from './components/pages/Home';
+
+function App() {  
+  const alertState = useSelector((state: any) => state.alert);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      dispatch(authActions.login(JSON.parse(storedUser)));
+    } else {
+      dispatch(authActions.setInitialized()); // mark as checked
+    }
+  }, [dispatch]);
+
+  const handleOnClose = () => {
+    if (alertState.callBack) {
+      alertState.callBack();
+    }
+    dispatch(alertActions.clearAlert());
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Header>
+        <Navbar />
+      </Header>
+      <Main>
+        <SnackbarAlert severity={ alertState.severity } message={ alertState.message } onClose={ handleOnClose } />
+        <Routes>
+          <Route path='/' element={ <AuthRoute><div>Authorized</div></AuthRoute> }/>      
+          <Route path='/Home' element={ <AuthRoute><Home /></AuthRoute> }/>  
+          <Route path='/signup' element={ <Signup /> }/>
+          <Route path='/login' element={ <Login/> }/>
+          <Route path='/*' element={ <div>Page Not Found</div> }/>
+        </Routes>
+      </Main>
     </div>
   );
 }
 
 export default App;
+
