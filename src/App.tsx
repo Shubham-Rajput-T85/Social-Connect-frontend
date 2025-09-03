@@ -19,12 +19,26 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      dispatch(authActions.login(JSON.parse(storedUser)));
-    } else {
-      dispatch(authActions.setInitialized()); // mark as checked
-    }
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("http://localhost:8080/auth/me", {
+          method: "GET",
+          credentials: "include", // VERY important for HttpOnly cookies
+        });
+        console.log(res);
+
+        if (!res.ok) {
+          throw new Error("Not authenticated");
+        }
+
+        const data = await res.json();
+        dispatch(authActions.setUser(data.user));
+      } catch (err) {
+        dispatch(authActions.clearUser());
+      }
+    };
+
+    fetchUser();
   }, [dispatch]);
 
   const handleOnClose = () => {
@@ -42,7 +56,7 @@ function App() {
       <Main>
         <SnackbarAlert severity={ alertState.severity } message={ alertState.message } onClose={ handleOnClose } />
         <Routes>
-          <Route path='/' element={ <AuthRoute><div>Authorized</div></AuthRoute> }/>      
+          <Route path='/' element={ <AuthRoute><Home /></AuthRoute> }/>      
           <Route path='/Home' element={ <AuthRoute><Home /></AuthRoute> }/>  
           <Route path='/signup' element={ <Signup /> }/>
           <Route path='/login' element={ <Login/> }/>
