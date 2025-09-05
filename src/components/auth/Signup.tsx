@@ -1,27 +1,63 @@
-import { Container, Box, Button, TextField, Card, CardContent, Typography } from "@mui/material";
-import React, { FormEvent } from 'react';
-
+import {
+  Container,
+  Box,
+  Button,
+  TextField,
+  Card,
+  CardContent,
+  Typography,
+  Link,
+  Avatar,
+  InputAdornment,
+  IconButton
+} from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import React, { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { alertActions } from "../store/alert-slice";
 import useInput from "../hooks/use-input";
+import { alpha } from "@mui/material/styles";
 
+// Validation functions
+const nameInputValidation = (inputValue: string) => {
+  return inputValue.trim() !== "" && /^[A-Za-z ]+$/.test(inputValue.trim());
+};
 
 const emailInputValidation = (emailInput: string) => {
   const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return pattern.test(emailInput) && emailInput.trim() !== "";
-}
+};
+
+const usernameInputValidation = (usernameInput: string) => {
+  const pattern = /^[A-Za-z][A-Za-z0-9._]{2,}$/; // Starts with a letter, 3+ chars total
+  return pattern.test(usernameInput.trim());
+};
 
 const passwordInputValidation = (inputValue: string) => {
   return inputValue.trim().length >= 4;
-}
+};
 
-const nameInputValidation = (inputValue: string) => {
-  return inputValue.trim() !== "" && /^[A-Za-z ]+$/.test(inputValue.trim());
-}
+const bioInputValidation = (inputValue: string) => {
+  return inputValue.trim().length <= 150; // max 150 chars
+};
 
 const Signup = () => {
+  // Password visibility state
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
+
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // State for profile picture
+  const [profilePic, setProfilePic] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // Inputs using custom hook
   const {
     value: nameValue,
     hasError: nameError,
@@ -41,6 +77,15 @@ const Signup = () => {
   } = useInput(emailInputValidation);
 
   const {
+    value: usernameValue,
+    hasError: usernameError,
+    blurHandler: usernameBlurHandler,
+    inputHandler: usernameInputHandler,
+    reset: usernameReset,
+    isValid: usernameIsValid,
+  } = useInput(usernameInputValidation);
+
+  const {
     value: passwordValue,
     hasError: passwordError,
     blurHandler: passwordBlurHandler,
@@ -49,50 +94,66 @@ const Signup = () => {
     isValid: passwordIsValid,
   } = useInput(passwordInputValidation);
 
-  const dispatch = useDispatch();
+  const {
+    value: bioValue,
+    hasError: bioError,
+    blurHandler: bioBlurHandler,
+    inputHandler: bioInputHandler,
+    reset: bioReset,
+    isValid: bioIsValid,
+  } = useInput(bioInputValidation);
 
   let isFormValid = false;
-  if (!passwordIsValid && !emailIsValid && !nameIsValid) {
-    isFormValid = true;
+  // Form validation
+  if (nameIsValid 
+    && emailIsValid 
+    && usernameIsValid 
+    && passwordIsValid 
+    && bioIsValid 
+    // && profilePic !== null
+  ) {
+      isFormValid = true;
   }
 
-  let nameErrorProp = !!nameError;
-  let emailErrorProp = !!emailError;
-  let passwordErrorProp = !!passwordError;
 
-  let nameHelperText = "name must only have characters";
-  let emailHelperText = "email is invalid";
-  let passwordHelperText = "password must have atleast 5 characters";
+  // Profile picture change handler
+  const handleProfilePicChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setProfilePic(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
 
+  // Form submit handler
   const formSubmitHandler = async (event: FormEvent) => {
     event.preventDefault();
+
     try {
-      const response = await fetch("http://localhost:8080/auth/signup",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            name: nameValue.trim(),
-            email: emailValue,
-            password: passwordValue
-          })
-        }
-      );
+      const formData = new FormData();
+      formData.append("name", nameValue.trim());
+      formData.append("email", emailValue.trim());
+      formData.append("username", usernameValue.trim());
+      formData.append("password", passwordValue.trim());
+      formData.append("bio", bioValue.trim());
+      if (profilePic) {
+        formData.append("profilePic", profilePic);
+      }
+
+      const response = await fetch("http://localhost:8080/auth/signup", {
+        method: "POST",
+        body: formData,
+      });
 
       if (!response.ok) {
         let errorMessage = "Something went wrong";
         try {
           const errorData = await response.json();
-
           if (errorData.data && Array.isArray(errorData.data)) {
-            // Collect all field-level errors into one string
             errorMessage = errorData.data
               .map((err: any) => `${err.path}: ${err.msg}`)
               .join(" | ");
           } else if (errorData.message) {
-            // Generic fallback
             errorMessage = errorData.message;
           }
         } catch (e) {
@@ -103,40 +164,246 @@ const Signup = () => {
         return;
       }
 
-      // const data = await response.json();
-      // console.log("Signup success:", data);
+      // Success
       emailReset();
       passwordReset();
       nameReset();
+      usernameReset();
+      bioReset();
+      setProfilePic(null);
+      setPreviewUrl(null);
+
       navigate("/login", { replace: true });
-    }
-    catch (error) {
-      dispatch(alertActions.showAlert({ severity: "error", message: "Network error: Something went wrong" + error }));
+    } catch (error) {
+      dispatch(
+        alertActions.showAlert({
+          severity: "error",
+          message: "Network error: " + error,
+        })
+      );
     }
   };
 
   return (
-    <>
-      {/* Signup Form here */}
+    <Container maxWidth="sm">
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          p: 2,
+        }}
+      >
+        {/* Title */}
+        <Typography
+          variant="h3"
+          sx={{
+            fontFamily: "algerian",
+            textAlign: "center",
+            color: "primary.main",
+            mb: 4,
+          }}
+        >
+          SocialConnect
+        </Typography>
 
-      {/* <SnackbarAlert severity="error" onClose={() => setServerError("")} message = { serverError }  /> */}
-      <Container maxWidth="sm" sx={{ marginTop: "-80px" }}>
-        <Box sx={{ py: 4 }}>
-          <Typography variant="h4" gutterBottom>Sign Up page</Typography>
-          <Card>
-            <CardContent>
-              <form onSubmit={formSubmitHandler}>
-                <TextField value={nameValue} error={nameErrorProp} helperText={nameErrorProp ? nameHelperText : ""} fullWidth label="Name" margin="normal" onChange={nameInputHandler} onBlur={nameBlurHandler} />
-                <TextField value={emailValue} error={emailErrorProp} helperText={emailErrorProp ? emailHelperText : ""} fullWidth label="Email" margin="normal" onChange={emailInputHandler} onBlur={emailBlurHandler} />
-                <TextField value={passwordValue} error={passwordErrorProp} helperText={passwordErrorProp ? passwordHelperText : ""} fullWidth label="Password" type="password" margin="normal" onChange={passwordInputHandler} onBlur={passwordBlurHandler} />
-                <Button type="submit" variant="contained" size="large" disabled={!isFormValid}>Sign up</Button>
-              </form>
-            </CardContent>
-          </Card>
-        </Box>
-      </Container>
-    </>
-  )
-}
+        {/* Signup Form */}
+        <Card
+          sx={{
+            width: "100%",
+            boxShadow: 2,
+            borderRadius: 2,
+            p: 2,
+          }}
+        >
+          <CardContent>
+            <form onSubmit={formSubmitHandler}>
+              {/* Name */}
+              <TextField sx={{ backgroundColor:"#ffffff", borderRadius:"25px" }}
+                value={nameValue}
+                error={!!nameError}
+                fullWidth
+                label="Full Name"
+                margin="normal"
+                onChange={nameInputHandler}
+                onBlur={nameBlurHandler}
+              />
+              {nameError && (
+                <Typography color="error" variant="caption">
+                  Name must only contain letters *
+                </Typography>
+              )}
 
-export default Signup
+              {/* Email */}
+              <TextField sx={{ backgroundColor:"#ffffff", borderRadius:"25px" }}
+                value={emailValue}
+                error={!!emailError}
+                fullWidth
+                label="Email"
+                margin="normal"
+                onChange={emailInputHandler}
+                onBlur={emailBlurHandler}
+              />
+              {emailError && (
+                <Typography color="error" variant="caption">
+                  Invalid email address *
+                </Typography>
+              )}
+
+              {/* Username */}
+              <TextField sx={{ backgroundColor:"#ffffff", borderRadius:"25px" }}
+                value={usernameValue}
+                error={!!usernameError}
+                fullWidth
+                label="Username"
+                margin="normal"
+                onChange={usernameInputHandler}
+                onBlur={usernameBlurHandler}
+              />
+              {usernameError && (
+                <Typography color="error" variant="caption">
+                  Username must start with a letter and be at least 3 characters *
+                </Typography>
+              )}
+
+              {/* Password */}
+              <TextField
+                sx={{
+                  backgroundColor: "#ffffff",
+                  borderRadius: "25px",
+                  mt: 2,
+                }}
+                value={passwordValue}
+                error={!!passwordError}
+                fullWidth
+                label="Password"
+                type={showPassword ? "text" : "password"} // Toggle between password and text
+                margin="normal"
+                onChange={passwordInputHandler}
+                onBlur={passwordBlurHandler}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={togglePasswordVisibility}
+                          aria-label="toggle password visibility"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+              {passwordError && (
+                <Typography color="error" variant="caption">
+                  Password must be at least 4 characters *
+                </Typography>
+              )}
+
+              {/* Bio */}
+              <TextField sx={{ backgroundColor:"#ffffff", borderRadius:"25px" }}
+                value={bioValue}
+                error={!!bioError}
+                fullWidth
+                label="Bio"
+                multiline
+                rows={3}
+                margin="normal"
+                onChange={bioInputHandler}
+                onBlur={bioBlurHandler}
+                helperText={`${bioValue.length}/150`}
+              />
+
+              {/* Profile Picture */}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  mt: 2,
+                  gap: 2,
+                }}
+              >
+                <Button
+                  variant="outlined"
+                  component="label"
+                  sx={{
+                    textTransform: "none",
+                  }}
+                >
+                  Upload Profile Picture
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={handleProfilePicChange}
+                  />
+                </Button>
+                {previewUrl && (
+                  <Avatar
+                    src={previewUrl}
+                    alt="Profile Preview"
+                    sx={{ width: 56, height: 56 }}
+                  />
+                )}
+              </Box>
+
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                size="large"
+                disabled={!isFormValid}
+                sx={(theme) => ({
+                  mt: 3,
+                  textTransform: "none",
+                  backgroundColor: theme.palette.primary.main,
+                  "&:hover": {
+                    backgroundColor: theme.palette.primary.dark,
+                  },
+                  "&.Mui-disabled": {
+                    backgroundColor: alpha(theme.palette.primary.main, 0.4),
+                    color: alpha("#fff", 0.7),
+                  },
+                })}
+              >
+                Sign Up
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Login Footer */}
+        <Card
+          sx={{
+            width: "100%",
+            mt: 2,
+            boxShadow: 2,
+            borderRadius: 2,
+            p: 2,
+          }}
+        >
+          <CardContent sx={{ textAlign: "center" }}>
+            <Typography variant="body2">
+              Have an account?{" "}
+              <Link
+                component="button"
+                variant="body2"
+                sx={{ fontWeight: "bold", cursor: "pointer" }}
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </Link>
+            </Typography>
+          </CardContent>
+        </Card>
+      </Box>
+    </Container>
+  );
+};
+
+export default Signup;

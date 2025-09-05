@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import './App.css';
 import Header from './components/header/Header';
 import Navbar from './components/header/Navbar';
@@ -14,10 +14,10 @@ import { useEffect } from 'react';
 import { authActions } from './components/store/auth-slice';
 import Home from './components/pages/Home';
 
-function App() {  
+function App() {
   const alertState = useSelector((state: any) => state.alert);
   const dispatch = useDispatch();
-
+  const location = useLocation();
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -48,19 +48,23 @@ function App() {
     dispatch(alertActions.clearAlert());
   }
 
+  const showHeader = !['/login', '/signup'].includes(location.pathname);
+
   return (
     <div className="App">
-      <Header>
-        <Navbar />
-      </Header>
+      {showHeader &&
+        <Header>
+          <Navbar />
+        </Header>
+      }
       <Main>
-        <SnackbarAlert severity={ alertState.severity } message={ alertState.message } onClose={ handleOnClose } />
+        <SnackbarAlert severity={alertState.severity} message={alertState.message} onClose={handleOnClose} />
         <Routes>
-          <Route path='/' element={ <AuthRoute><Home /></AuthRoute> }/>      
-          <Route path='/Home' element={ <AuthRoute><Home /></AuthRoute> }/>  
-          <Route path='/signup' element={ <Signup /> }/>
-          <Route path='/login' element={ <Login/> }/>
-          <Route path='/*' element={ <div>Page Not Found</div> }/>
+          <Route path='/' element={<AuthRoute><Home /></AuthRoute>} />
+          <Route path='/Home' element={<Navigate to="/" />} />
+          <Route path='/signup' element={<Signup />} />
+          <Route path='/login' element={<Login />} />
+          <Route path='/*' element={<div>Page Not Found</div>} />
         </Routes>
       </Main>
     </div>
