@@ -1,11 +1,12 @@
 import { useSelector } from 'react-redux'
 import { Navigate } from 'react-router-dom';
+import Loader from '../ui/Loader';
 
 const AuthRoute:React.FC<{children: React.ReactNode}> = (props) => {
     const {user, initialized} = useSelector((state: any) => state.auth);
     
     if (!initialized) {
-        return <div>Loading...</div>; // prevent redirect until checked
+        return <Loader/>; // prevent redirect until checked
     }
 
     if (!user) {

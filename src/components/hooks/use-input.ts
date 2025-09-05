@@ -11,7 +11,6 @@ const useInput = (inputValidation: (value:string) => boolean) => {
     }
 
     const inputHandler = (event: ChangeEvent<HTMLInputElement>) => {
-        setIsTouched(true);
         setEnteredValue(event.target.value);
     }
 
@@ -26,7 +25,7 @@ const useInput = (inputValidation: (value:string) => boolean) => {
         blurHandler,
         inputHandler,
         reset: resetInput,
-        isValid: !inputValidation(enteredValue)
+        isValid: inputValidation(enteredValue)
     };
 };
 
