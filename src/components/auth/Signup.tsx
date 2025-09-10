@@ -269,8 +269,7 @@ const Signup = () => {
               )}
 
               {/* Password */}
-              <TextField
-                sx={{
+              <TextField sx={{
                   backgroundColor: "#ffffff",
                   borderRadius: "25px",
                   mt: 2,
