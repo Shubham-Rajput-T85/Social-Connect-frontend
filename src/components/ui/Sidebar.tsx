@@ -29,7 +29,7 @@ interface SidebarLink {
 const Sidebar = () => {
   const links: SidebarLink[] = [
     { label: "Home", path: "/", icon: <HomeIcon /> },
-    { label: "Profile", path: "/profile/settings", icon: <PersonIcon /> },
+    { label: "Profile", path: "/profile", icon: <PersonIcon /> },
     { label: "Messages", path: "/message/1", icon: <MessageIcon /> },
   ];
 
