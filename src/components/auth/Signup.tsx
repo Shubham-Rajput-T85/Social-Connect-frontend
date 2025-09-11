@@ -110,7 +110,6 @@ const Signup = () => {
     && usernameIsValid 
     && passwordIsValid 
     && bioIsValid 
-    // && profilePic !== null
   ) {
       isFormValid = true;
   }

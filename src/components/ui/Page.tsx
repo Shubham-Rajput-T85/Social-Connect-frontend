@@ -10,6 +10,7 @@ const Page: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 gridTemplateColumns: "1fr 4fr",
                 gap: 2,
                 padding: 2,
+                paddingBottom: 0,
                 height: "100%",
             }}
         >

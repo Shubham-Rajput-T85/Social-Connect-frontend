@@ -22,7 +22,7 @@ function App() {
   const dispatch = useDispatch();
   const location = useLocation();
 
-  useEffect(() => { 
+  useEffect(() => {
     const fetchUser = async () => {
       try {
         const res = await fetch("http://localhost:8080/auth/me", {
@@ -82,7 +82,8 @@ function App() {
           {/* Redirect /Home → / */}
           <Route path='/home' element={<Navigate to="/" />} />
 
-          <Route path='/profile/settings'
+          <Route
+            path="/profile/*"
             element={
               <Page>
                 <AuthRoute>

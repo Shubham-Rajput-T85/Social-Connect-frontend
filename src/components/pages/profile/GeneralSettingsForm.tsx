@@ -5,6 +5,7 @@ import {
   Button,
   Typography,
   Avatar,
+  Card,
 } from "@mui/material";
 
 import { useNavigate } from "react-router-dom";
@@ -12,6 +13,8 @@ import { useDispatch } from "react-redux";
 import { alpha } from "@mui/material/styles";
 import useInput from "../../hooks/use-input";
 import { alertActions } from "../../store/alert-slice";
+import { useSelector } from "react-redux";
+import { authActions } from "../../store/auth-slice";
 
 
 // Validation functions
@@ -32,6 +35,7 @@ const bioInputValidation = (inputValue: string) => {
 const GeneralSettingsForm: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const user: any = useSelector((state: any) => state.auth.user);
 
   // State for profile picture
   const [profilePic, setProfilePic] = useState<File | null>(null);
@@ -45,7 +49,7 @@ const GeneralSettingsForm: React.FC = () => {
     inputHandler: nameInputHandler,
     reset: nameReset,
     isValid: nameIsValid,
-  } = useInput(nameInputValidation);
+  } = useInput(nameInputValidation, user.name);
 
   const {
     value: usernameValue,
@@ -54,7 +58,7 @@ const GeneralSettingsForm: React.FC = () => {
     inputHandler: usernameInputHandler,
     reset: usernameReset,
     isValid: usernameIsValid,
-  } = useInput(usernameInputValidation);
+  } = useInput(usernameInputValidation, user.username);
 
   const {
     value: bioValue,
@@ -63,7 +67,7 @@ const GeneralSettingsForm: React.FC = () => {
     inputHandler: bioInputHandler,
     reset: bioReset,
     isValid: bioIsValid,
-  } = useInput(bioInputValidation);
+  } = useInput(bioInputValidation, user.bio);
 
   let isFormValid = false;
   // Form validation
@@ -77,20 +81,32 @@ const GeneralSettingsForm: React.FC = () => {
   // Profile picture change handler
   const handleProfilePicChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      setProfilePic(file);
-      setPreviewUrl(URL.createObjectURL(file));
+
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      dispatch(
+        alertActions.showAlert({
+          severity: "error",
+          message: "Only image (JPG, PNG, WEBP) files are allowed!",
+        })
+      );
+      return;
     }
+    setProfilePic(file);
+    setPreviewUrl(URL.createObjectURL(file));
   };
 
   // Form submit handler
   const formSubmitHandler = async (event: FormEvent) => {
     event.preventDefault();
 
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    console.log("user:", user);
-    
-    if (!user?._id) {
+
+    // console.log("user:", user);
+
+    if (!user._id) {
       dispatch(
         alertActions.showAlert({
           severity: "error",
@@ -99,7 +115,6 @@ const GeneralSettingsForm: React.FC = () => {
       );
       return;
     }
-
 
     try {
       const formData = new FormData();
@@ -116,6 +131,8 @@ const GeneralSettingsForm: React.FC = () => {
         body: formData,
         credentials: "include",
       });
+
+      console.log("here");
 
       if (!response.ok) {
         let errorMessage = "Something went wrong while user update";
@@ -143,7 +160,20 @@ const GeneralSettingsForm: React.FC = () => {
       setProfilePic(null);
       setPreviewUrl(null);
 
-      navigate("/home", { replace: true });
+
+      const data = await response.json();
+
+      // Update redux state directly without page reload
+      dispatch(authActions.setUser(data.user));
+
+      dispatch(
+        alertActions.showAlert({
+          severity: "success",
+          message: "Profile updated successfully!",
+        })
+      );
+
+      navigate("/", { replace: true });
     } catch (error) {
       dispatch(
         alertActions.showAlert({
@@ -157,6 +187,16 @@ const GeneralSettingsForm: React.FC = () => {
 
 
   return (
+    <Card
+    sx={(theme) => ({
+      width: "100%",
+      boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", // Subtle soft shadow
+      border: `2px solid ${theme.palette.primary.main}`, // Primary color border
+      borderRadius: "16px", // Rounded edges
+      p: 2, // Space inside the border
+      backgroundColor: "transparent", // Keep transparent to show app background
+    })}
+  >
     <form onSubmit={formSubmitHandler}>
       <Typography variant="h6" sx={{ mb: 2 }}>
         General Settings
@@ -228,7 +268,7 @@ const GeneralSettingsForm: React.FC = () => {
       </Box>
 
       <Button type="submit" variant="contained" fullWidth
-        // disabled={!isFormValid}
+        disabled={!isFormValid}
         sx={(theme) => ({
           mt: 3,
           textTransform: "none",
@@ -245,6 +285,7 @@ const GeneralSettingsForm: React.FC = () => {
         Save Changes
       </Button>
     </form>
+    </Card>
   );
 };
 
