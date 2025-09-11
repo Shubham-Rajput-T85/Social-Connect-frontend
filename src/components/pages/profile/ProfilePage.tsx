@@ -1,96 +1,38 @@
-import React, { useState } from "react";
-import { Box, Paper, Typography, Avatar, Button, Divider } from "@mui/material";
-import SettingsLayout from "./SettingsLayout";
-
-type TabType = "my-posts" | "add-post" | "settings";
+import React from "react";
+import { Box } from "@mui/material";
+import { useLocation, Navigate } from "react-router-dom";
+import ProfileHeader from "./ProfileHeader";
+import SettingsMain from "./SettingsMain";
+import ProfileLayout from "./ProfileLayout";
+import AddPostForm from "../../post/AddPostForm";
+import MyPosts from "./MyPosts";
 
 const ProfilePage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>("settings");
+  const location = useLocation();
+  const path = location.pathname.split("/").pop(); // last segment of URL
+
+  // Determine active tab based on URL
+  const activeTab = path === "my-posts" 
+    ? "my-posts" 
+    : path === "add-post" 
+      ? "add-post" 
+      : "settings"; // default tab
+
+  // Redirect /profile → /profile/settings
+  if (location.pathname === "/profile") {
+    return <Navigate to="/profile/settings" replace />;
+  }
 
   return (
     <Box>
-      {/* Profile Header */}
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          {/* Left - Avatar + Bio */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Avatar
-              src="https://i.pravatar.cc/150?img=12"
-              alt="User Avatar"
-              sx={{ width: 80, height: 80 }}
-            />
-            <Box>
-              <Typography variant="h6">Alex Johnson</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Building the future 🚀
-              </Typography>
-            </Box>
-          </Box>
-
-          {/* Right - Stats */}
-          <Box sx={{ display: "flex", gap: 4 }}>
-            <Box>
-              <Typography variant="h6" align="center">
-                120
-              </Typography>
-              <Typography variant="body2" color="text.secondary" align="center">
-                Posts
-              </Typography>
-            </Box>
-            <Box>
-              <Typography variant="h6" align="center">
-                350
-              </Typography>
-              <Typography variant="body2" color="text.secondary" align="center">
-                Followers
-              </Typography>
-            </Box>
-            <Box>
-              <Typography variant="h6" align="center">
-                180
-              </Typography>
-              <Typography variant="body2" color="text.secondary" align="center">
-                Following
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-
-        <Divider sx={{ my: 2 }} />
-
-        {/* Tabs Navigation */}
-        <Box sx={{ display: "flex", gap: 2 }}>
-          <Button
-            onClick={() => setActiveTab("my-posts")}
-            variant={activeTab === "my-posts" ? "contained" : "text"}
-          >
-            My Posts
-          </Button>
-          <Button
-            onClick={() => setActiveTab("add-post")}
-            variant={activeTab === "add-post" ? "contained" : "text"}
-          >
-            Add Post
-          </Button>
-          <Button
-            onClick={() => setActiveTab("settings")}
-            variant={activeTab === "settings" ? "contained" : "text"}
-          >
-            Settings
-          </Button>
-        </Box>
-      </Paper>
+      <ProfileHeader
+        stats={{ posts: 1, followers: 2, following: 3 }}
+      />
 
       {/* Tab Content */}
-      {activeTab === "settings" && <SettingsLayout />}
-      {activeTab === "my-posts" && <Typography>My Posts Component</Typography>}
-      {activeTab === "add-post" && <Typography>Add Post Form Component</Typography>}
+      {activeTab === "settings" && <ProfileLayout><SettingsMain /></ProfileLayout>}
+      {activeTab === "my-posts" && <ProfileLayout><MyPosts /></ProfileLayout>}
+      {activeTab === "add-post" && <ProfileLayout><AddPostForm /></ProfileLayout>}
     </Box>
   );
 };

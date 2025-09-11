@@ -1,7 +1,7 @@
 import { ChangeEvent, FocusEvent, useState } from "react";
 
-const useInput = (inputValidation: (value:string) => boolean) => {
-    const [enteredValue, setEnteredValue] = useState<string>("");
+const useInput = (inputValidation: (value:string) => boolean, initialValue?: string) => {
+    const [enteredValue, setEnteredValue] = useState<string>(initialValue ?? "");
     const [isTouched, setIsTouched] = useState<boolean>(false);
 
     const hasError = !inputValidation(enteredValue) && isTouched; 

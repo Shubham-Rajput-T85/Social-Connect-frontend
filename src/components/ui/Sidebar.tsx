@@ -72,9 +72,10 @@ const Sidebar = () => {
                 <ListItem key={path} disablePadding>
                   <NavLink to={path} style={{ textDecoration: "none", width: "100%" }}>
                     {({ isActive }: { isActive: boolean }) => (
-                      <ListItemButton
+                      <ListItemButton 
+                      selected={ isActive }
+                      // onClick={() => setActiveTab("general")}
                         sx={{
-                          backgroundColor: isActive ? "#ccc" : "transparent",
                           color: isActive ? "primary.main" : "inherit",
                           "& .MuiListItemIcon-root": {
                             color: isActive ? "primary.main" : "inherit",

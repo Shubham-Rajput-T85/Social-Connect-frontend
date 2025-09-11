@@ -24,7 +24,7 @@ import {
   Favorite,
   ChatBubbleOutline,
 } from "@mui/icons-material";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { alertActions } from "../store/alert-slice"; // your existing alert slice
 import SuggestedFriend from "../friendSection/SuggestedFriend";
 
@@ -43,7 +43,7 @@ interface Post {
 
 const Home = () => {
   const dispatch = useDispatch();
-
+  const user = useSelector((state: any) => state.auth.user);
   const [posts, setPosts] = useState<Post[]>([
     {
       id: 1,
@@ -89,7 +89,7 @@ const Home = () => {
   const handlePostSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    
     if (!user?._id) {
       dispatch(
         alertActions.showAlert({

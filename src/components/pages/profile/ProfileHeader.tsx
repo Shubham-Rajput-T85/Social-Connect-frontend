@@ -1,10 +1,9 @@
 import React from "react";
-import { Box, Paper, Typography, Avatar, Divider } from "@mui/material";
+import { Box, Paper, Typography, Avatar, Button, Divider } from "@mui/material";
+import { useSelector } from "react-redux";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface ProfileHeaderProps {
-  name: string;
-  bio: string;
-  avatarUrl: string;
   stats: {
     posts: number;
     followers: number;
@@ -12,10 +11,17 @@ interface ProfileHeaderProps {
   };
 }
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, bio, avatarUrl, stats }) => {
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({ stats }) => {
+  const user = useSelector((state: any) => state.auth.user);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Extract the last segment of the path to determine active tab
+  const path = location.pathname.split("/").pop();
+  const activeTab = path === "my-posts" ? "my-posts" : path === "add-post" ? "add-post" : "settings";
+
   return (
     <Paper sx={{ p: 3, mb: 3 }}>
-      {/* Main Header */}
       <Box
         sx={{
           display: "flex",
@@ -26,14 +32,17 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, bio, avatarUrl, sta
         {/* Left - Avatar + Bio */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Avatar
-            src={avatarUrl}
-            alt={`${name}'s Avatar`}
+            src={user?.profileUrl ? `http://localhost:8080${user.profileUrl}` : undefined}
+            alt="User Avatar"
             sx={{ width: 80, height: 80 }}
           />
           <Box>
-            <Typography variant="h6">{name}</Typography>
+            <Typography variant="h6">{user?.name}</Typography>
+            <Typography variant="body1" color="gray">
+              {user?.username}
+            </Typography>
             <Typography variant="body2" color="text.secondary">
-              {bio}
+              {user?.bio}
             </Typography>
           </Box>
         </Box>
@@ -67,7 +76,31 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, bio, avatarUrl, sta
         </Box>
       </Box>
 
-      <Divider sx={{ mt: 2 }} />
+      <Divider sx={{ my: 2 }} />
+
+      {/* Tabs Navigation */}
+      <Box sx={{ display: "flex", gap: 2 }}>
+        <Button
+          onClick={() => navigate("/profile/my-posts")}
+          variant={activeTab === "my-posts" ? "contained" : "text"}
+        >
+          My Posts
+        </Button>
+
+        <Button
+          onClick={() => navigate("/profile/add-post")}
+          variant={activeTab === "add-post" ? "contained" : "text"}
+        >
+          Add Post
+        </Button>
+
+        <Button
+          onClick={() => navigate("/profile/settings")}
+          variant={activeTab === "settings" ? "contained" : "text"}
+        >
+          Settings
+        </Button>
+      </Box>
     </Paper>
   );
 };
