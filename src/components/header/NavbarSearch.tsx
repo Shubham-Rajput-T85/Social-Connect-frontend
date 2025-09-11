@@ -15,6 +15,9 @@ import {
 import { useSelector } from "react-redux";
 import Loader from "../ui/Loader";
 
+import UserProfileModal from "./UserProfileModal"; 
+/** */
+
 export interface NavbarSearchProps {
     onClose: () => void; // Required for desktop close action
     isMobile?: boolean; // Optional - controls mobile layout
@@ -36,6 +39,10 @@ const NavbarSearch: React.FC<NavbarSearchProps> = ({
     const searchTimeout = useRef<NodeJS.Timeout | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const user = useSelector((state: any) => state.auth.user);
+
+    const [selectedUser, setSelectedUser] = useState<any>(null);
+    const [profileModalOpen, setProfileModalOpen] = useState<boolean>(false);
+    /** */
 
     /**
      * Fetch users from backend (merged functionality)
@@ -121,9 +128,12 @@ const NavbarSearch: React.FC<NavbarSearchProps> = ({
                     disablePadding
                     onClick={() => {
                         console.log("Navigate to user profile:", user._id);
-                        resetSearch();
-                        if (isMobile && onCloseModal) onCloseModal();
-                        else onClose();
+                        // resetSearch();
+                        // if (isMobile && onCloseModal) onCloseModal();
+                        // else onClose();
+                        setSelectedUser(user);       // set clicked user
+                        setProfileModalOpen(true); 
+                        /** */
                     }}
                     sx={{
                         cursor: "pointer",
@@ -297,7 +307,26 @@ const NavbarSearch: React.FC<NavbarSearchProps> = ({
         </Modal>
     );
 
-    return isMobile ? mobileSearch : desktopSearch;
+    // return isMobile ? mobileSearch : desktopSearch;
+    console.log("ids: ", selectedUser, user?._id);
+    
+
+    return (
+        <>
+            {isMobile ? mobileSearch : desktopSearch}
+    
+            {selectedUser && (
+                <UserProfileModal
+                    open={profileModalOpen}
+                    onClose={() => setProfileModalOpen(false)}
+                    userData={selectedUser}
+                    currentUserId={user?._id}
+                />
+            )}
+        </>
+    );
+    /** */
+
 };
 
 export default NavbarSearch;
