@@ -302,6 +302,6 @@ const Navbar: React.FC = () => {
       <NavbarSearch onClose={function (): void { }} isMobile={true} openModal={searchModalOpen} onCloseModal={() => setSearchModalOpen(false)} />
     </AppBar>
   );
-};
+}
 
 export default Navbar;

@@ -49,7 +49,7 @@ function App() {
       alertState.callBack();
     }
     dispatch(alertActions.clearAlert());
-  };
+  }
 
   const showHeader = !['/login', '/signup'].includes(location.pathname);
 
@@ -101,7 +101,7 @@ function App() {
                 gridTemplateColumns: "1fr 4fr",
                 gap: 2,
                 padding: 2,
-                height: "100%",
+                height: "100%"
               }}
             >
               <Sidebar />
@@ -113,7 +113,7 @@ function App() {
         </Routes>
       </Main>
     </div>
-  );
+  )
 }
 
 export default App;
