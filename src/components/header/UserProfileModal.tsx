@@ -1,268 +1,3 @@
-// import React, { useState } from "react";
-// import {
-//   Box,
-//   Paper,
-//   Typography,
-//   Avatar,
-//   Button,
-//   Divider,
-//   Tabs,
-//   Tab,
-//   List,
-//   ListItem,
-//   ListItemAvatar,
-//   ListItemText,
-//   IconButton,
-//   Modal,
-//   Backdrop,
-// } from "@mui/material";
-// import CloseIcon from "@mui/icons-material/Close";
-
-// interface UserProfileModalProps {
-//   open: boolean;
-//   onClose: () => void;
-//   userData: any; // clicked user object
-//   currentUserId: string;
-// }
-
-// type FollowState = "Follow" | "Requested" | "Following";
-
-// const UserProfileModal: React.FC<UserProfileModalProps> = ({
-//   open,
-//   onClose,
-//   userData,
-//   currentUserId,
-// }) => {
-//   const [tabIndex, setTabIndex] = useState(0);
-//   const [followState, setFollowState] = useState<FollowState>(
-//     userData.isFollowing ? "Following" : "Follow"
-//   );
-
-//   const handleFollowClick = () => {
-//     if (followState === "Follow") setFollowState("Requested");
-//     else if (followState === "Requested") setFollowState("Following");
-//     else setFollowState("Follow");
-//   };
-
-//   const isFollowing = followState === "Following";
-
-//   return (
-//     <Modal
-//       open={open}
-//       onClose={() => { }}
-//       closeAfterTransition
-//       slots={{ backdrop: Backdrop }}
-//       slotProps={{
-//         backdrop: {
-//           sx: {
-//             backgroundColor: "rgba(0,0,0,0.3)",
-//             backdropFilter: "blur(4px)",
-//           },
-//         },
-//       }}
-//       disableEscapeKeyDown
-//       sx={{
-//         display: "flex",
-//         justifyContent: "center",
-//         alignItems: "center",
-//       }}
-//     >
-//       <Paper
-//         sx={{
-//           width: "90%",
-//           maxWidth: 800,
-//           maxHeight: "90%",
-//           p: 3,
-//           position: "relative",
-//           overflowY: "auto",
-//         }}
-//       >
-//         {/* Close button */}
-//         <IconButton
-//           onClick={onClose}
-//           sx={{ position: "absolute", top: 16, right: 16, zIndex: 10 }}
-//         >
-//           <CloseIcon />
-//         </IconButton>
-
-
-//         {/* Heading */}
-//         <Typography variant="h5" fontWeight={600} mb={2} mt={4}>
-//           {userData.name || userData.username}
-//         </Typography>
-
-//         <Box
-//           sx={{
-//             display: "flex",
-//             justifyContent: "space-between",
-//             alignItems: "center",
-//           }}
-//         >
-//           {/* Profile Info */}
-//           <Box sx={{ display: "flex", alignItems: "center", mb: 2, gap: 2 }}>
-//             <Avatar
-//               src={userData.profileUrl}
-//               sx={{ width: 110, height: 110 }}
-//             >
-//               {(userData.username?.[0] || "U").toUpperCase()}
-//             </Avatar>
-//             <Box>
-//               <Typography variant="subtitle1">@{userData.username}</Typography>
-//               <Typography variant="subtitle1" color="text.secondary">
-//                 {userData.bio ?? "bio"}
-//               </Typography>
-//               {userData.followedBy?.length ? (
-//                 <Typography variant="subtitle1">
-//                   Followed by{" "}
-//                   {userData.followedBy.slice(0, 3).map((f: any) => f.username).join(", ")}
-//                 </Typography>
-//               ) :
-//                 (
-//                   <Typography variant="subtitle1" mt={2}>
-//                     Followed by{" "}
-//                     {"ABC, DEF, GHI"}
-//                   </Typography>
-//                 )
-//               }
-//             </Box>
-//           </Box>
-
-//           {/* Right - Stats */}
-//           <Box sx={{ display: "flex", mb: 2, mr: 2, gap: 4 }}>
-//             <Box>
-//               <Typography variant="h6" align="center">
-//                 1
-//               </Typography>
-//               <Typography variant="body2" color="text.secondary" align="center">
-//                 Posts
-//               </Typography>
-//             </Box>
-//             <Box>
-//               <Typography variant="h6" align="center">
-//                 1
-//               </Typography>
-//               <Typography variant="body2" color="text.secondary" align="center">
-//                 Followers
-//               </Typography>
-//             </Box>
-//             <Box>
-//               <Typography variant="h6" align="center">
-//                 1
-//               </Typography>
-//               <Typography variant="body2" color="text.secondary" align="center">
-//                 Following
-//               </Typography>
-//             </Box>
-//           </Box>
-//         </Box>
-//         {/* Follow Button Full Width */}
-//         <Button
-//           variant={followState === "Follow" ? "contained" : "outlined"}
-//           fullWidth
-//           sx={{ mt: 3 }}
-//           onClick={handleFollowClick}
-//         >
-//           {followState}
-//         </Button>
-
-//         <Divider sx={{ my: 2 }} />
-
-//         {/* Tabs */}
-//         <Tabs
-//           value={tabIndex}
-//           onChange={(e, val) => setTabIndex(val)}
-//           textColor="primary"
-//           indicatorColor="primary"
-//           sx={{ mb: 2 }}
-//         >
-//           <Tab label={`Posts (${userData.posts?.length || 0})`} />
-//           <Tab label={`Followers (${userData.followers?.length || 0})`} />
-//           <Tab label={`Following (${userData.following?.length || 0})`} />
-//         </Tabs>
-
-//         <Divider sx={{ mb: 2 }} />
-
-//         {/* Tab Content */}
-//         <Box>
-//           {!isFollowing && tabIndex !== 0 ? (
-//             <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
-//               Follow this user to see content.
-//             </Typography>
-//           ) : (
-//             <>
-//               {tabIndex === 0 && (
-//                 <Box
-//                   sx={{
-//                     display: "flex",
-//                     overflowX: "auto",
-//                     gap: 2,
-//                     "&::-webkit-scrollbar": { display: "none" },
-//                     scrollBehavior: "smooth",
-//                     pb: 2,
-//                   }}
-//                 >
-//                   {userData.posts?.map((post: any) => (
-//                     <Box
-//                       key={post._id}
-//                       component="img"
-//                       src={post.mediaUrl}
-//                       alt="post"
-//                       sx={{
-//                         width: 150,
-//                         height: 150,
-//                         objectFit: "cover",
-//                         borderRadius: 2,
-//                       }}
-//                     />
-//                   ))}
-//                 </Box>
-//               )}
-//               {tabIndex === 1 && (
-//                 <List sx={{ maxHeight: 300, overflowY: "auto" }}>
-//                   {userData.followers?.map((f: any) => (
-//                     <ListItem key={f._id}>
-//                       <ListItemAvatar>
-//                         <Avatar src={f.profileUrl}>
-//                           {(f.username?.[0] || "U").toUpperCase()}
-//                         </Avatar>
-//                       </ListItemAvatar>
-//                       <ListItemText primary={f.username} />
-//                     </ListItem>
-//                   ))}
-//                 </List>
-//               )}
-//               {tabIndex === 2 && (
-//                 <List sx={{ maxHeight: 300, overflowY: "auto" }}>
-//                   {userData.following?.map((f: any) => (
-//                     <ListItem key={f._id}>
-//                       <ListItemAvatar>
-//                         <Avatar src={f.profileUrl}>
-//                           {(f.username?.[0] || "U").toUpperCase()}
-//                         </Avatar>
-//                       </ListItemAvatar>
-//                       <ListItemText primary={f.username} />
-//                     </ListItem>
-//                   ))}
-//                 </List>
-//               )}
-//             </>
-//           )}
-//         </Box>
-
-
-//       </Paper>
-//     </Modal>
-//   );
-// };
-
-// export default UserProfileModal;
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -291,7 +26,7 @@ interface UserProfileModalProps {
 }
 
 type FollowState = "Follow" | "Requested" | "Following" | "Follow Back";
-type ActiveTab = "posts" | "followers" | "following";
+type ActiveTab = "posts" | "followers" | "following" | "";
 
 const UserProfileModal: React.FC<UserProfileModalProps> = ({
   open,
@@ -301,9 +36,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 }) => {
   const dispatch = useDispatch();
 
-  const [activeTab, setActiveTab] = useState<ActiveTab>("posts");
   const [followState, setFollowState] = useState<FollowState>("Follow");
+  const [activeTab, setActiveTab] = useState<ActiveTab>(followState === "Following" ? "posts" : "");
   const [loading, setLoading] = useState(false);
+  const [buttonUI, setButtonUI] = useState<{ variant: string, color: string }>({ variant: "contained", color: "primary" });
 
   // Local state for tab data
   const [posts, setPosts] = useState<any[]>([]);
@@ -312,119 +48,145 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   // ===== Fetch initial follow state =====
   useEffect(() => {
+    const fetchFollowState = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:8080/user/followState?currentUserId=${currentUserId}&targetUserId=${userData._id}`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to fetch state");
+
+        setFollowState(data.state);
+      } catch (error: any) {
+        dispatch(
+          alertActions.showAlert({
+            severity: "error",
+            message: error.message || "Error fetching follow state",
+          })
+        );
+      }
+    };
+
     if (open && userData?._id) {
       fetchFollowState();
-      fetchPosts();
     }
   }, [open, userData]);
 
-  const fetchFollowState = async () => {
-    try {
-      const res = await fetch(
-        `http://localhost:8080/user/state?currentUserId=${currentUserId}&targetUserId=${userData._id}`,
-        {
-          method: "GET",
-          credentials: "include",
-        }
-      );
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to fetch state");
-
-      setFollowState(data.state);
-    } catch (error: any) {
-      dispatch(
-        alertActions.showAlert({
-          severity: "error",
-          message: error.message || "Error fetching follow state",
-        })
-      );
-    }
-  };
-
-  const fetchPosts = async () => {
-    try {
-      const res = await fetch(
-        `http://localhost:8080/posts/getPosts?userId=${userData._id}`,
-        { credentials: "include" }
-      );
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to fetch posts");
-
-      setPosts(data.posts || []);
-    } catch (error: any) {
-      dispatch(
-        alertActions.showAlert({
-          severity: "error",
-          message: error.message || "Error fetching posts",
-        })
-      );
-    }
-  };
-
-  const fetchFollowers = async () => {
-    try {
-      const res = await fetch(
-        `http://localhost:8080/user/list?userId=${userData._id}`,
-        { credentials: "include" }
-      );
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to fetch followers");
-
-      setFollowers(data.followers || []);
-    } catch (error: any) {
-      dispatch(
-        alertActions.showAlert({
-          severity: "error",
-          message: error.message || "Error fetching followers",
-        })
-      );
-    }
-  };
-
-  const fetchFollowing = async () => {
-    try {
-      const res = await fetch(
-        `http://localhost:8080/user/list?userId=${userData._id}`,
-        { credentials: "include" }
-      );
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to fetch following");
-
-      setFollowing(data.following || []);
-    } catch (error: any) {
-      dispatch(
-        alertActions.showAlert({
-          severity: "error",
-          message: error.message || "Error fetching following",
-        })
-      );
-    }
-  };
-
   // Load tab data dynamically when switching
   useEffect(() => {
-    if (activeTab === "followers") fetchFollowers();
-    if (activeTab === "following") fetchFollowing();
-  }, [activeTab]);
+    const fetchFollowers = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:8080/user/list?userId=${userData._id}`,
+          { credentials: "include" }
+        );
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to fetch followers");
+
+        setFollowers(data.followers || []);
+      } catch (error: any) {
+        dispatch(
+          alertActions.showAlert({
+            severity: "error",
+            message: error.message || "Error fetching followers",
+          })
+        );
+      }
+    };
+    const fetchFollowing = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:8080/user/list?userId=${userData._id}`,
+          { credentials: "include" }
+        );
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to fetch following");
+
+        setFollowing(data.following || []);
+      } catch (error: any) {
+        dispatch(
+          alertActions.showAlert({
+            severity: "error",
+            message: error.message || "Error fetching following",
+          })
+        );
+      }
+    };
+    const fetchPosts = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:8080/posts/getPosts?userId=${userData._id}`,
+          { credentials: "include" }
+        );
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to fetch posts");
+
+        setPosts(data.postList || []);
+      } catch (error: any) {
+        dispatch(
+          alertActions.showAlert({
+            severity: "error",
+            message: error.message || "Error fetching posts",
+          })
+        );
+      }
+    };
+
+    // if (followState === "Following" || followState === "Follow Back") {
+      if (activeTab === "followers") fetchFollowers();
+      if (activeTab === "following") fetchFollowing();
+      if (activeTab === "posts") fetchPosts();
+    // }
+  }, [activeTab, followState]);
+
+  useEffect(() => {
+    // ===== Dynamic button styling =====
+    const getButtonStyles = () => {
+      switch (followState) {
+        case "Follow":
+          return { variant: "contained", color: "primary" };
+        case "Requested":
+          return { variant: "outlined", color: "secondary" };
+        case "Following":
+          return { variant: "outlined", color: "error" };
+        case "Follow Back":
+          return { variant: "contained", color: "success" };
+        default:
+          return { variant: "contained", color: "primary" };
+      }
+    };
+    setButtonUI(getButtonStyles());
+  }, [followState])
 
   // ===== Handle follow/unfollow =====
   const handleFollowClick = async () => {
     setLoading(true);
+    let successMessage = "";
+    let errorMessage = "";
     try {
       let url = "";
       let method = "POST";
-
       if (followState === "Follow" || followState === "Follow Back") {
         url = "http://localhost:8080/user/follow";
+        successMessage = "Follow Request sent";
+        errorMessage = "Error while Follow User, action failed!";
       } else if (followState === "Following") {
         url = "http://localhost:8080/user/unfollow";
+        successMessage = "Unfollowing User";
+        errorMessage = "Error while Unfollow User, action failed!";
       }
-      else if(followState === "Requested"){
+      else if (followState === "Requested") {
         url = "http://localhost:8080/user/reject";
+        successMessage = "Cancel Follow Request";
+        errorMessage = "Error in Cancelling follow request, action failed!";
       }
 
       const res = await fetch(url, {
@@ -440,40 +202,21 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
       setFollowState(data.currentState);
       dispatch(
         alertActions.showAlert({
-          severity: "success",
-          message: data.message || "Action successful",
+          severity: "info",
+          message: successMessage,
         })
       );
     } catch (error: any) {
       dispatch(
         alertActions.showAlert({
           severity: "error",
-          message: error.message || "Error performing follow action",
+          message: error.message || errorMessage,
         })
       );
     } finally {
       setLoading(false);
     }
   };
-
-  // ===== Dynamic button styling =====
-  const getButtonStyles = () => {
-    switch (followState) {
-      case "Follow":
-        return { variant: "contained", color: "primary" };
-      case "Requested":
-        return { variant: "outlined", color: "secondary" };
-      case "Following":
-        return { variant: "outlined", color: "error" };
-      case "Follow Back":
-        return { variant: "contained", color: "success" };
-      default:
-        return { variant: "contained", color: "primary" };
-    }
-  };
-
-  console.log(userData);
-  
 
   // ======= UI =======
   return (
@@ -530,7 +273,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
           {/* Profile Info */}
           <Box sx={{ display: "flex", alignItems: "center", mb: 2, gap: 2 }}>
             <Avatar
-              src={userData.profileUrl}
+              src={userData?.profileUrl ? `http://localhost:8080${userData.profileUrl}` : undefined}
               sx={{ width: 110, height: 110 }}
             >
               {(userData.username?.[0] || "U").toUpperCase()}
@@ -552,15 +295,22 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
             ].map((tab) => (
               <Box
                 key={tab.value}
-                onClick={() => setActiveTab(tab.value as ActiveTab)}
+                onClick={() => {
+                  if (followState === "Following" || followState === "Follow Back") {                    
+                    if (tab.value === activeTab) {
+                      setActiveTab("");
+                    }
+                    else {
+                      setActiveTab(tab.value as ActiveTab)
+                    }
+                  }
+                }
+                }
                 sx={{
-                  cursor: "pointer",
+                  cursor: (followState === "Following" || followState === "Follow Back") ? "pointer": "",
                   transition: "0.2s",
                   padding: "4px 8px",
                   borderRadius: "8px",
-                  backgroundColor:
-                    activeTab === tab.value ? "rgba(0,0,0,0.05)" : "transparent",
-                  "&:hover": { backgroundColor: "rgba(0,0,0,0.08)" },
                 }}
               >
                 <Typography
@@ -592,13 +342,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
         {/* Follow Button */}
         <Button
           fullWidth
+          variant={buttonUI.variant as any}
+          color={buttonUI.color as any}
           sx={{
             mt: 3,
-            backgroundColor: "#3f51b5", // custom color
-            color: "#fff",
-            "&:hover": {
-              backgroundColor: "#303f9f", // darker shade on hover
-            },
           }}
           disabled={loading}
           onClick={handleFollowClick}
@@ -606,81 +353,161 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
           {loading ? "Processing..." : followState}
         </Button>
 
-
         <Divider sx={{ my: 2 }} />
 
         {/* Tab Content */}
-        <Box>
-          {activeTab === "posts" && (
-            <Box
-              sx={{
-                display: "flex",
-                overflowX: "auto",
-                gap: 2,
-                "&::-webkit-scrollbar": { display: "none" },
-                scrollBehavior: "smooth",
-                pb: 2,
-              }}
-            >
-              {posts.length > 0 ? (
-                posts.map((post) => (
-                  <Box
-                    key={post._id}
-                    component="img"
-                    src={post.mediaUrl}
-                    alt="post"
+        {(followState === "Following" || followState === "Follow Back") &&
+          <Box>
+            <Typography variant="h4" color="text.secondary" m={1}>
+            {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+            </Typography>
+            {activeTab === "posts" && (
+              <Box
+                sx={{
+                  display: "flex",
+                  overflowX: "auto",
+                  gap: 2,
+                  pb: 2,
+                  scrollBehavior: "smooth",
+                  "&::-webkit-scrollbar": {
+                    display: "none", // Hide scrollbar in Chrome/Safari
+                  },
+                  scrollbarWidth: "none", // Hide scrollbar in Firefox
+                }}
+              >
+                {posts.length > 0 ? (
+                  posts.map((post) => {
+                    const isVideo = post.media?.type === "video";
+                    const mediaUrl = post.media?.url
+                      ? `http://localhost:8080${post.media.url}`
+                      : "/placeholder.png"; // fallback if no media
+
+                    return (
+                      <Box
+                        key={post._id}
+                        sx={{
+                          position: "relative",
+                          minWidth: { xs: 200, sm: 250 }, // Responsive landscape width
+                          height: { xs: 120, sm: 150 },   // Responsive height
+                          borderRadius: 2,
+                          overflow: "hidden",
+                          flexShrink: 0,
+                          cursor: "pointer",
+                          backgroundColor: "black", // for portrait letterboxing
+                          transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                          "&:hover": {
+                            transform: "scale(1.05)",
+                            boxShadow: 4,
+                          },
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {/* MEDIA RENDERING */}
+                        {isVideo ? (
+                          <Box
+                            component="video"
+                            src={mediaUrl}
+                            controls
+                            sx={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "contain", // Ensures video fits inside without overflow
+                              bgcolor: "black",
+                            }}
+                          />
+                        ) : (
+                          <Box
+                            component="img"
+                            src={mediaUrl}
+                            alt={post.postContent || "Post"}
+                            sx={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "contain", // Black bars for portrait images
+                              bgcolor: "black",
+                            }}
+                          />
+                        )}
+
+                        {/* OVERLAY FOR CAPTION */}
+                        {post.postContent && (
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              bgcolor: "rgba(0, 0, 0, 0.5)",
+                              color: "white",
+                              px: 1,
+                              py: 0.5,
+                              fontSize: "0.75rem",
+                              textAlign: "center",
+                              backdropFilter: "blur(2px)",
+                            }}
+                          >
+                            {post.postContent}
+                          </Box>
+                        )}
+                      </Box>
+                    );
+                  })
+                ) : (
+                  <Typography
                     sx={{
-                      width: 150,
-                      height: 150,
-                      objectFit: "cover",
-                      borderRadius: 2,
+                      p: 2,
+                      textAlign: "center",
+                      color: "text.secondary",
+                      width: "100%",
                     }}
-                  />
-                ))
-              ) : (
-                <Typography sx={{ p: 2 }}>No posts yet</Typography>
-              )}
-            </Box>
-          )}
+                  >
+                    No posts yet
+                  </Typography>
+                )}
+              </Box>
+            )}
 
-          {activeTab === "followers" && (
-            <List sx={{ maxHeight: 300, overflowY: "auto" }}>
-              {followers.length > 0 ? (
-                followers.map((f) => (
-                  <ListItem key={f._id}>
-                    <ListItemAvatar>
-                      <Avatar src={f.profileUrl}>
-                        {(f.username?.[0] || "U").toUpperCase()}
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText primary={f.username} />
-                  </ListItem>
-                ))
-              ) : (
-                <Typography sx={{ p: 2 }}>No followers yet</Typography>
-              )}
-            </List>
-          )}
+            {activeTab === "followers" && (
+              <List sx={{ maxHeight: 300, overflowY: "auto" }}>
+                {followers.length > 0 ? (
+                  followers.map((f) => (
+                    <ListItem key={f._id}>
+                      <ListItemAvatar>
+                        <Avatar src={f.profileUrl}>
+                          {(f.username?.[0] || "U").toUpperCase()}
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText primary={f.username} />
+                    </ListItem>
+                  ))
+                ) : (
+                  <Typography sx={{ p: 2 }}>No followers yet</Typography>
+                )}
+              </List>
+            )}
 
-          {activeTab === "following" && (
-            <List sx={{ maxHeight: 300, overflowY: "auto" }}>
-              {following.length > 0 ? (
-                following.map((f) => (
-                  <ListItem key={f._id}>
-                    <ListItemAvatar>
-                      <Avatar src={f.profileUrl}>
-                        {(f.username?.[0] || "U").toUpperCase()}
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText primary={f.username} />
-                  </ListItem>
-                ))
-              ) : (
-                <Typography sx={{ p: 2 }}>Not following anyone</Typography>
-              )}
-            </List>
-          )}
-        </Box>
+            {activeTab === "following" && (
+              <List sx={{ maxHeight: 300, overflowY: "auto" }}>
+                {following.length > 0 ? (
+                  following.map((f) => (
+                    <ListItem key={f._id}>
+                      <ListItemAvatar>
+                        <Avatar src={f.profileUrl}>
+                          {(f.username?.[0] || "U").toUpperCase()}
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText primary={f.username} />
+                    </ListItem>
+                  ))
+                ) : (
+                  <Typography sx={{ p: 2 }}>Not following anyone</Typography>
+                )}
+              </List>
+            )}
+          </Box>
+        }
       </Paper>
     </Modal>
   );

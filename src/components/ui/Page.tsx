@@ -11,7 +11,7 @@ const Page: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 gap: 2,
                 padding: 2,
                 paddingBottom: 0,
-                height: "100%",
+                height: "100%"
             }}
         >
             <Sidebar />

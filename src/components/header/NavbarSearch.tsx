@@ -127,7 +127,7 @@ const NavbarSearch: React.FC<NavbarSearchProps> = ({
                     key={user._id}
                     disablePadding
                     onClick={() => {
-                        console.log("Navigate to user profile:", user._id);
+                        // console.log("Navigate to user profile:", user._id);
                         // resetSearch();
                         // if (isMobile && onCloseModal) onCloseModal();
                         // else onClose();
@@ -308,7 +308,7 @@ const NavbarSearch: React.FC<NavbarSearchProps> = ({
     );
 
     // return isMobile ? mobileSearch : desktopSearch;
-    console.log("ids: ", selectedUser, user?._id);
+    // console.log("ids: ", selectedUser, user?._id);
     
 
     return (
