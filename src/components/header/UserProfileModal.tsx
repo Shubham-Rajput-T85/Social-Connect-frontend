@@ -15,7 +15,7 @@ import {
   ListItemText,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { alertActions } from "../store/alert-slice";
 
 interface UserProfileModalProps {
@@ -35,16 +35,26 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   currentUserId,
 }) => {
   const dispatch = useDispatch();
-
   const [followState, setFollowState] = useState<FollowState>("Follow");
-  const [activeTab, setActiveTab] = useState<ActiveTab>(followState === "Following" ? "posts" : "");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("");
   const [loading, setLoading] = useState(false);
-  const [buttonUI, setButtonUI] = useState<{ variant: string, color: string }>({ variant: "contained", color: "primary" });
+  const [buttonUI, setButtonUI] = useState<{ variant: string; color: string }>({
+    variant: "contained",
+    color: "primary",
+  });
 
   // Local state for tab data
   const [posts, setPosts] = useState<any[]>([]);
   const [followers, setFollowers] = useState<any[]>([]);
   const [following, setFollowing] = useState<any[]>([]);
+
+  const userIsPrivate = useSelector((state: any) => state.auth.user.isPrivate);
+  // ===== Reset state whenever modal opens for a new user =====
+  useEffect(() => {
+    if (open) {
+      setActiveTab("posts");
+    }
+  }, [open, userData]);
 
   // ===== Fetch initial follow state =====
   useEffect(() => {
@@ -75,21 +85,30 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     if (open && userData?._id) {
       fetchFollowState();
     }
-  }, [open, userData]);
+  }, [open, userData, dispatch, currentUserId, userIsPrivate]);
 
-  // Load tab data dynamically when switching
+  // ===== Automatically set tab to posts when following =====
+  useEffect(() => {
+    if (followState === "Following" || followState === "Follow Back" || !userIsPrivate) {
+      setActiveTab("posts");
+    } else {
+      setActiveTab("");
+    }
+  }, [followState, userIsPrivate]);
+
+  // ===== Fetch tab data dynamically =====
   useEffect(() => {
     const fetchFollowers = async () => {
       try {
         const res = await fetch(
-          `http://localhost:8080/user/list?userId=${userData._id}`,
+          `http://localhost:8080/user/getFollowers?userId=${userData._id}`,
           { credentials: "include" }
         );
 
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to fetch followers");
-
-        setFollowers(data.followers || []);
+        console.log(data.followersList);
+        setFollowers(data.followersList.followers || []);
       } catch (error: any) {
         dispatch(
           alertActions.showAlert({
@@ -99,17 +118,18 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
         );
       }
     };
+
     const fetchFollowing = async () => {
       try {
         const res = await fetch(
-          `http://localhost:8080/user/list?userId=${userData._id}`,
+          `http://localhost:8080/user/getFollowing?userId=${userData._id}`,
           { credentials: "include" }
         );
 
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to fetch following");
-
-        setFollowing(data.following || []);
+        console.log(data.followingList);
+        setFollowing(data.followingList.following || []);
       } catch (error: any) {
         dispatch(
           alertActions.showAlert({
@@ -119,6 +139,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
         );
       }
     };
+
     const fetchPosts = async () => {
       try {
         const res = await fetch(
@@ -140,15 +161,15 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
       }
     };
 
-    // if (followState === "Following" || followState === "Follow Back") {
-      if (activeTab === "followers") fetchFollowers();
-      if (activeTab === "following") fetchFollowing();
-      if (activeTab === "posts") fetchPosts();
-    // }
-  }, [activeTab, followState]);
+    if (!userData?._id) return;
 
+    if (activeTab === "followers") fetchFollowers();
+    if (activeTab === "following") fetchFollowing();
+    if (activeTab === "posts") fetchPosts();
+  }, [activeTab, userData, dispatch]);
+
+  // ===== Dynamic button styling =====
   useEffect(() => {
-    // ===== Dynamic button styling =====
     const getButtonStyles = () => {
       switch (followState) {
         case "Follow":
@@ -156,15 +177,15 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
         case "Requested":
           return { variant: "outlined", color: "secondary" };
         case "Following":
-          return { variant: "outlined", color: "error" };
+          return { variant: "outlined", color: "primary" };
         case "Follow Back":
-          return { variant: "contained", color: "success" };
+          return { variant: "contained", color: "secondary" };
         default:
           return { variant: "contained", color: "primary" };
       }
     };
     setButtonUI(getButtonStyles());
-  }, [followState])
+  }, [followState]);
 
   // ===== Handle follow/unfollow =====
   const handleFollowClick = async () => {
@@ -182,9 +203,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
         url = "http://localhost:8080/user/unfollow";
         successMessage = "Unfollowing User";
         errorMessage = "Error while Unfollow User, action failed!";
-      }
-      else if (followState === "Requested") {
-        url = "http://localhost:8080/user/reject";
+      } else if (followState === "Requested") {
+        url = "http://localhost:8080/user/cancel";
         successMessage = "Cancel Follow Request";
         errorMessage = "Error in Cancelling follow request, action failed!";
       }
@@ -193,7 +213,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
         method,
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentUserId, targetUserId: userData._id }),
+        body: JSON.stringify({
+          currentUserId: currentUserId,
+          targetUserId: userData._id,
+        }),
       });
 
       const data = await res.json();
@@ -273,7 +296,11 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
           {/* Profile Info */}
           <Box sx={{ display: "flex", alignItems: "center", mb: 2, gap: 2 }}>
             <Avatar
-              src={userData?.profileUrl ? `http://localhost:8080${userData.profileUrl}` : undefined}
+              src={
+                userData?.profileUrl
+                  ? `http://localhost:8080${userData.profileUrl}`
+                  : undefined
+              }
               sx={{ width: 110, height: 110 }}
             >
               {(userData.username?.[0] || "U").toUpperCase()}
@@ -290,24 +317,29 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
           <Box sx={{ display: "flex", mb: 2, mr: 2, gap: 4 }}>
             {[
               { label: "Posts", value: "posts", count: userData.postCount },
-              { label: "Followers", value: "followers", count: userData.followersCount },
-              { label: "Following", value: "following", count: userData.followingCount },
+              {
+                label: "Followers",
+                value: "followers",
+                count: userData.followersCount,
+              },
+              {
+                label: "Following",
+                value: "following",
+                count: userData.followingCount,
+              },
             ].map((tab) => (
               <Box
                 key={tab.value}
                 onClick={() => {
-                  if (followState === "Following" || followState === "Follow Back") {                    
-                    if (tab.value === activeTab) {
-                      setActiveTab("");
-                    }
-                    else {
-                      setActiveTab(tab.value as ActiveTab)
-                    }
+                  if (followState === "Following" || followState === "Follow Back" || !userIsPrivate) {
+                    setActiveTab(tab.value as ActiveTab);
                   }
-                }
-                }
+                }}
                 sx={{
-                  cursor: (followState === "Following" || followState === "Follow Back") ? "pointer": "",
+                  cursor:
+                    followState === "Following" || followState === "Follow Back" || !userIsPrivate
+                      ? "pointer"
+                      : "",
                   transition: "0.2s",
                   padding: "4px 8px",
                   borderRadius: "8px",
@@ -317,7 +349,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   variant="h6"
                   align="center"
                   sx={{
-                    color: activeTab === tab.value ? "primary.main" : "text.primary",
+                    color:
+                      activeTab === tab.value ? "primary.main" : "text.primary",
                     fontWeight: activeTab === tab.value ? 600 : 400,
                   }}
                 >
@@ -325,10 +358,12 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 </Typography>
                 <Typography
                   variant="body2"
-                  color="text.secondary"
                   align="center"
                   sx={{
-                    color: activeTab === tab.value ? "primary.main" : "text.secondary",
+                    color:
+                      activeTab === tab.value
+                        ? "primary.main"
+                        : "text.secondary",
                     fontWeight: activeTab === tab.value ? 500 : 400,
                   }}
                 >
@@ -344,23 +379,24 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
           fullWidth
           variant={buttonUI.variant as any}
           color={buttonUI.color as any}
-          sx={{
-            mt: 3,
-          }}
+          sx={{ mt: 3 }}
           disabled={loading}
           onClick={handleFollowClick}
         >
           {loading ? "Processing..." : followState}
         </Button>
 
-        <Divider sx={{ my: 2 }} />
+        
 
         {/* Tab Content */}
-        {(followState === "Following" || followState === "Follow Back") &&
-          <Box>
+        {(followState === "Following" || followState === "Follow Back" || !userIsPrivate) && (
+          <Box sx={{mt:2}}>
             <Typography variant="h4" color="text.secondary" m={1}>
-            {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+              {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
             </Typography>
+
+            <Divider sx={{ my: 2 }} />
+            {/* POSTS TAB */}
             {activeTab === "posts" && (
               <Box
                 sx={{
@@ -369,10 +405,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   gap: 2,
                   pb: 2,
                   scrollBehavior: "smooth",
-                  "&::-webkit-scrollbar": {
-                    display: "none", // Hide scrollbar in Chrome/Safari
-                  },
-                  scrollbarWidth: "none", // Hide scrollbar in Firefox
+                  // "&::-webkit-scrollbar": {
+                  //   display: "none",
+                  // },
+                  // scrollbarWidth: "none",
                 }}
               >
                 {posts.length > 0 ? (
@@ -380,20 +416,20 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     const isVideo = post.media?.type === "video";
                     const mediaUrl = post.media?.url
                       ? `http://localhost:8080${post.media.url}`
-                      : "/placeholder.png"; // fallback if no media
+                      : "/placeholder.png";
 
                     return (
                       <Box
                         key={post._id}
                         sx={{
                           position: "relative",
-                          minWidth: { xs: 200, sm: 250 }, // Responsive landscape width
-                          height: { xs: 120, sm: 150 },   // Responsive height
+                          minWidth: { xs: 200, sm: 250 },
+                          height: { xs: 120, sm: 150 },
                           borderRadius: 2,
                           overflow: "hidden",
                           flexShrink: 0,
                           cursor: "pointer",
-                          backgroundColor: "black", // for portrait letterboxing
+                          backgroundColor: "black",
                           transition: "transform 0.3s ease, box-shadow 0.3s ease",
                           "&:hover": {
                             transform: "scale(1.05)",
@@ -404,7 +440,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                           justifyContent: "center",
                         }}
                       >
-                        {/* MEDIA RENDERING */}
                         {isVideo ? (
                           <Box
                             component="video"
@@ -413,7 +448,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                             sx={{
                               width: "100%",
                               height: "100%",
-                              objectFit: "contain", // Ensures video fits inside without overflow
+                              objectFit: "contain",
                               bgcolor: "black",
                             }}
                           />
@@ -425,13 +460,11 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                             sx={{
                               width: "100%",
                               height: "100%",
-                              objectFit: "contain", // Black bars for portrait images
+                              objectFit: "contain",
                               bgcolor: "black",
                             }}
                           />
                         )}
-
-                        {/* OVERLAY FOR CAPTION */}
                         {post.postContent && (
                           <Box
                             sx={{
@@ -469,13 +502,14 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
               </Box>
             )}
 
+            {/* FOLLOWERS TAB */}
             {activeTab === "followers" && (
               <List sx={{ maxHeight: 300, overflowY: "auto" }}>
                 {followers.length > 0 ? (
                   followers.map((f) => (
                     <ListItem key={f._id}>
                       <ListItemAvatar>
-                        <Avatar src={f.profileUrl}>
+                        <Avatar src={`localhost:8080/${f.profileUrl}`}>
                           {(f.username?.[0] || "U").toUpperCase()}
                         </Avatar>
                       </ListItemAvatar>
@@ -488,6 +522,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
               </List>
             )}
 
+            {/* FOLLOWING TAB */}
             {activeTab === "following" && (
               <List sx={{ maxHeight: 300, overflowY: "auto" }}>
                 {following.length > 0 ? (
@@ -507,7 +542,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
               </List>
             )}
           </Box>
-        }
+        )}
       </Paper>
     </Modal>
   );

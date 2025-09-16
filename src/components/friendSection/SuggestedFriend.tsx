@@ -1,21 +1,40 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Box,
   Paper,
   Typography,
   List,
   ListItem,
-  ListItemText,
   Button,
   Avatar,
 } from "@mui/material";
 
+// interface IFollowRequest {
+//   _id: string;
+//   username: string;
+//   name: string;
+//   email: string;
+//   profileUrl?: string;
+// }
+
 export default function SuggestedFriend() {
+  // const [requests, setRequests] = useState<IFollowRequest[]>([]);
   // Explicitly type the refs for scrollable containers
   const friendsScrollRef = useRef<HTMLDivElement | null>(null);
 
   // State to control fade visibility
   const [showFadeFriends, setShowFadeFriends] = useState<boolean>(true);
+
+
+  useEffect(() => {
+    const element = friendsScrollRef.current;
+    if (element) {
+      // Show fade only if scrolling is possible
+      setShowFadeFriends(element.scrollHeight > element.clientHeight);
+    }
+  },[
+    // requests
+  ]); 
 
   /**
    * Generic scroll handler to detect bottom and hide fade effect
@@ -42,10 +61,11 @@ export default function SuggestedFriend() {
       sx={{
         display: "flex",
         flexDirection: "column",
-        maxHeight: "800px",
+        maxHeight: "300px",
         borderLeft: "1px solid #eee",
         overflow: "hidden",
         borderRadius: "10px",
+        mb:2
       }}
     >
       {/* ---- TOP SECTION: Suggested Friends ---- */}
@@ -62,7 +82,6 @@ export default function SuggestedFriend() {
         <Box
           sx={{
             p: 2,
-            pb: 0,
             position: "sticky",
             top: 0,
             backgroundColor: "background.paper",
@@ -73,15 +92,14 @@ export default function SuggestedFriend() {
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             Suggested Friends
           </Typography>
-          <hr style={{ color: "gray" }} />
         </Box>
-
+        <hr style={{ color: "gray", margin:"10px", marginTop:"0" }} />
         {/* Scrollable List */}
         <Box
           ref={friendsScrollRef}
           onScroll={() => handleScroll((friendsScrollRef as any), setShowFadeFriends)}
           sx={{
-            maxHeight: 300,
+            maxHeight: 200,
             overflowY: "auto",
             px: 2,
             pb: 2,
@@ -92,7 +110,7 @@ export default function SuggestedFriend() {
           }}
         >
           <List sx={{ p: 0 }}>
-            {Array.from({ length: 15 }, (_, i) => (
+            {Array.from({ length: 10 }, (_, i) => (
               <ListItem
                 key={i}
                 sx={{
@@ -177,7 +195,7 @@ export default function SuggestedFriend() {
               right: 0,
               height: 40,
               background:
-                "linear-gradient(to top, rgba(250,250,250,1), rgba(250,250,250,0))",
+                "linear-gradient(to top, rgba(245,245,245,1), rgba(245,245,245,0))",
               pointerEvents: "none",
               transition: "opacity 0.3s ease",
             }}
