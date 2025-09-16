@@ -18,6 +18,7 @@ import { alertActions } from "../store/alert-slice";
 import { useNavigate } from "react-router-dom";
 import { authActions } from "../store/auth-slice";
 import useInput from "../hooks/use-input";
+import { connectSocket, registerUser } from "../../socket";
 
 const emailOrUsernameValidation = (input: string): boolean => {
   const trimmedInput = input.trim();
@@ -113,6 +114,16 @@ const Login = () => {
 
       emailReset();
       passwordReset();
+
+////////////////////////////////////////
+      // ----------------------
+      // REGISTER SOCKET HERE
+      // ----------------------
+      if (data.user && data.user._id) {
+        connectSocket();           // Establish connection only after login
+        registerUser(data.user._id.toString()); // Register the user
+      }
+////////////////////////////////////////
 
       navigate("/", { replace: true });
     } catch (error) {

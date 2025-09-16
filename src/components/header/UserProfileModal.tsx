@@ -107,7 +107,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to fetch followers");
-        console.log(data.followersList);
         setFollowers(data.followersList.followers || []);
       } catch (error: any) {
         dispatch(
@@ -128,7 +127,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to fetch following");
-        console.log(data.followingList);
         setFollowing(data.followingList.following || []);
       } catch (error: any) {
         dispatch(
