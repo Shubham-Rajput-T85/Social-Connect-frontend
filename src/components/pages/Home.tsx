@@ -27,6 +27,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { alertActions } from "../store/alert-slice"; // your existing alert slice
 import SuggestedFriend from "../friendSection/SuggestedFriend";
+import AddPostForm from "../post/AddPostForm";
 
 interface Post {
   id: number;
@@ -200,57 +201,9 @@ const Home = () => {
       {/* CENTER AREA */}
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {/* Add Post */}
-        <Paper sx={{ padding: 2 }} component="form" onSubmit={handlePostSubmit}>
-          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-            <Avatar src="https://i.pravatar.cc/150?img=1" sx={{ mr: 2 }} />
-            <TextField
-              variant="outlined"
-              placeholder="What's on your mind?"
-              fullWidth
-              size="small"
-              value={postContent}
-              onChange={(e) => setPostContent(e.target.value)}
-            />
-          </Box>
-
-          {/* Preview of selected media */}
-          {preview && (
-            <Box sx={{ mb: 2 }}>
-              {selectedFile?.type.startsWith("video") ? (
-                <video
-                  src={preview}
-                  controls
-                  style={{ width: "100%", borderRadius: 8 }}
-                />
-              ) : (
-                <img
-                  src={preview}
-                  alt="Preview"
-                  style={{ width: "100%", borderRadius: 8 }}
-                />
-              )}
-            </Box>
-          )}
-
-          <Divider sx={{ mb: 2 }} />
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Button
-              startIcon={<ImageIcon />}
-              component="label"
-            >
-              Add Media
-              <input
-                type="file"
-                hidden
-                accept="image/jpeg,image/png,image/webp,video/mp4,video/webm"
-                onChange={handleFileChange}
-              />
-            </Button>
-            <Button variant="contained" color="primary" type="submit">
-              Post
-            </Button>
-          </Box>
-        </Paper>
+        <div style={{ marginLeft:"10px" }}>
+        <AddPostForm />
+        </div>
 
         {/* Posts List */}
         <Box sx={{ overflowY: "auto", flex: 1, pr: 1, padding: 1 }}>

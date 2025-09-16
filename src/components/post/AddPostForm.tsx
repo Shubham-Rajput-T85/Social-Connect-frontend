@@ -130,7 +130,7 @@ const AddPostForm = () => {
     <div style={{ width: "800px" }}>
       {/* Show loader while uploading */}
       {loading && (
-        <Box
+        <Box 
           sx={{
             position: "absolute",
             top: 0,
@@ -156,6 +156,7 @@ const AddPostForm = () => {
             variant="outlined"
             placeholder="What's on your mind?"
             fullWidth
+            multiline
             size="small"
             value={postContent}
             onChange={(e) => setPostContent(e.target.value)}

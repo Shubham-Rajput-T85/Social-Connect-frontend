@@ -80,7 +80,11 @@ function App() {
           />
 
           {/* Redirect /Home → / */}
-          <Route path='/home' element={<Navigate to="/" />} />
+          <Route path='/home' element={ 
+            <AuthRoute>
+              <Navigate to="/" />
+            </AuthRoute>
+            } />
 
           <Route
             path="/profile/*"

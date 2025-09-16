@@ -15,7 +15,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ stats }) => {
   const user = useSelector((state: any) => state.auth.user);
   const navigate = useNavigate();
   const location = useLocation();
-
+  console.log(user);
+  
   // Extract the last segment of the path to determine active tab
   const path = location.pathname.split("/").pop();
   const activeTab = path === "my-posts" ? "my-posts" : path === "add-post" ? "add-post" : "settings";
@@ -51,7 +52,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ stats }) => {
         <Box sx={{ display: "flex", gap: 4 }}>
           <Box>
             <Typography variant="h6" align="center">
-              {stats.posts}
+              {user.postCount}
             </Typography>
             <Typography variant="body2" color="text.secondary" align="center">
               Posts
@@ -59,7 +60,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ stats }) => {
           </Box>
           <Box>
             <Typography variant="h6" align="center">
-              {stats.followers}
+              {user.followersCount}
             </Typography>
             <Typography variant="body2" color="text.secondary" align="center">
               Followers
@@ -67,7 +68,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ stats }) => {
           </Box>
           <Box>
             <Typography variant="h6" align="center">
-              {stats.following}
+              {user.followingCount}
             </Typography>
             <Typography variant="body2" color="text.secondary" align="center">
               Following

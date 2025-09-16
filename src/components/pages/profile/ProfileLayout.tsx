@@ -17,7 +17,7 @@ const ProfileLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </Box>
 
       {/* Right Section - 25% */}
-      <Box sx={{ flex: 1 }}>
+      <Box sx={{ flex: 1, gap:2 }}>
         <FollowRequest currentUserId={currentUserId} />
         <SuggestedFriend />
 

@@ -177,7 +177,7 @@ const ProfilePostList: React.FC = () => {
               </Box>
             <hr />
               {/* Post Content */}
-              <Typography variant="body1" sx={{ mb: 1 }}>
+              <Typography variant="body1" sx={{ mb: 1, whiteSpace: "pre-line" }}>
                 {post.postContent}
               </Typography>
 
