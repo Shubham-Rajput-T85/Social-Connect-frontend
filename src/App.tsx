@@ -16,6 +16,9 @@ import { Box } from '@mui/material';
 import Sidebar from './components/ui/Sidebar';
 import Page from './components/ui/Page';
 import ProfilePage from './components/pages/profile/ProfilePage';
+import { connectSocket, initSocket, registerUser } from './socket';
+
+initSocket();
 
 function App() {
   const alertState = useSelector((state: any) => state.alert);
@@ -25,6 +28,7 @@ function App() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
+
         const res = await fetch("http://localhost:8080/auth/me", {
           method: "GET",
           credentials: "include", // VERY important for HttpOnly cookies
@@ -35,6 +39,12 @@ function App() {
         }
 
         const data = await res.json();
+
+        if (data.user && data.user._id) {
+          connectSocket();
+          registerUser(data.user._id.toString());
+        }
+
         dispatch(authActions.setUser(data.user));
       } catch (err) {
         dispatch(authActions.clearUser());
