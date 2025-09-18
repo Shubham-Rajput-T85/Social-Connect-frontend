@@ -11,7 +11,7 @@ import { alertActions } from './components/store/alert-slice';
 import AuthRoute from "./components/auth/AuthRoute";
 import { useEffect } from 'react';
 import { authActions } from './components/store/auth-slice';
-import Home from './components/pages/Home';
+import Home from './components/pages/Home/Home';
 import { Box } from '@mui/material';
 import Sidebar from './components/ui/Sidebar';
 import Page from './components/ui/Page';
