@@ -11,24 +11,10 @@ import {
   DeleteOutline as DeleteOutlineIcon,
 } from "@mui/icons-material";
 import { useSelector } from "react-redux";
-
-interface Post {
-  _id: string;
-  postContent: string;
-  media?: {
-    url: string;
-    type: "image" | "video";
-  };
-  createdAt: string;
-  userId: {
-    username: string;
-    email: string;
-    name: string;
-  };
-}
+import { IPost, PostService } from "../../api/services/post.service";
 
 const ProfilePostList: React.FC = () => {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<IPost[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const user = useSelector((state: any) => state.auth.user);
@@ -40,16 +26,7 @@ const ProfilePostList: React.FC = () => {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `http://localhost:8080/posts/getPosts?userId=${userId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
+      const response = await PostService.getMyPost();
 
       if (!response.ok) {
         throw new Error("Failed to fetch posts");
