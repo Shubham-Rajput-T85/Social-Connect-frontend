@@ -20,27 +20,43 @@ export interface IPost {
 }
 
 export const PostService = {
-    getMyPost: async () => {
-        const response = await fetch(API_ENDPOINTS.POSTS.FEED_MYPOST, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-          }); 
-          return response;
-    },
-    getHomeFeed: async (page: number = 1, limit: number = 10) => {
-      const response = await fetch(API_ENDPOINTS.POSTS.FEED_HOME(page, limit), {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-  
-      if (!response.ok) throw new Error("Failed to fetch home feed");
-  
-      return await response.json();
-    },
+  getPostByUser: async (userId: string) => {
+    const response = await fetch(API_ENDPOINTS.POSTS.GET_POST_BY_USER(userId), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) throw new Error("Failed to fetch post feed");
+
+    return await response.json();
+  },
+  getMyPost: async () => {
+    const response = await fetch(API_ENDPOINTS.POSTS.FEED_MYPOST, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) throw new Error("Failed to fetch post feed");
+
+    return await response.json();
+  },
+  getHomeFeed: async (page: number = 1, limit: number = 10) => {
+    const response = await fetch(API_ENDPOINTS.POSTS.FEED_HOME(page, limit), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) throw new Error("Failed to fetch home feed");
+
+    return await response.json();
+  },
 }

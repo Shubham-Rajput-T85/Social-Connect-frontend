@@ -19,6 +19,7 @@ export const API_ENDPOINTS = {
   POSTS: {
     // CREATE: `${BASE_URL}/posts/create`,
     FEED_MYPOST: `${BASE_URL}/posts/feed/myPost`,
+    GET_POST_BY_USER: (userId: string) => `${BASE_URL}/posts/getPosts/${userId}`,
     FEED_HOME: (page: number, limit: number) => `${BASE_URL}/posts/feed/home?page=${page}&limit=${limit}`,
   },
   LIKE: {

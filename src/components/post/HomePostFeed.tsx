@@ -187,7 +187,7 @@ const HomePostFeed = () => {
                 </Typography>
               </Box>
 
-              <Typography variant="body1" sx={{ mb: 1 }}>
+              <Typography variant="body1" sx={{ mb: 1, whiteSpace: "pre-line" }}>
                 {post.postContent}
               </Typography>
 
@@ -204,7 +204,7 @@ const HomePostFeed = () => {
 
               <PostAction initialLikeCount={post.likeCount} onToggleComments={() => toggleComments(post._id)} initialCommentCount={post.commentsCount} postId={post._id} />
 
-              {openComments === post._id && (
+              {/* {openComments === post._id && (
                 <Box sx={{ maxHeight: "200px", overflowY: "auto", border: "1px solid #ddd", borderRadius: 1, p: 1, mb: 1 }}>
                   {[...Array(5)].map((_, idx) => (
                     <Typography key={idx} variant="body2" sx={{ mb: 0.5 }}>
@@ -212,7 +212,69 @@ const HomePostFeed = () => {
                     </Typography>
                   ))}
                 </Box>
-              )}
+              )} */}
+
+{openComments === post._id && (
+  <Box
+    sx={{
+      maxHeight: "250px",
+      overflowY: "auto",
+      border: "1px solid #ddd",
+      borderRadius: 2,
+      p: 1,
+      mb: 1,
+      backgroundColor: "#fafafa",
+    }}
+  >
+    {[...Array(5)].map((_, idx) => (
+      <Paper
+        key={idx}
+        elevation={1}
+        sx={{
+          p: 1.5,
+          mb: 1,
+          borderRadius: 2,
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 1.5,
+        }}
+      >
+        {/* User Avatar */}
+        <Avatar
+          src={`${BASE_URL}${user?.profileUrl}`}
+          sx={{ width: 40, height: 40 }}
+        />
+
+        {/* Comment Content */}
+        <Box sx={{ flex: 1 }}>
+          {/* Username and Bio */}
+          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
+            <Box>
+              <Typography variant="subtitle2" fontWeight={600}>
+                User {idx + 1}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Software Engineer • Loves Coding
+              </Typography>
+            </Box>
+            <Typography variant="caption" color="text.secondary">
+              {new Date().toLocaleDateString()}
+            </Typography>
+          </Box>
+
+          {/* Comment Text */}
+          <Typography
+            variant="body2"
+            sx={{ color: "text.primary", whiteSpace: "pre-line" }}
+          >
+            This is a sample comment! 🚀
+          </Typography>
+        </Box>
+      </Paper>
+    ))}
+  </Box>
+)}
+
 
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Avatar src={`${BASE_URL}${user?.profileUrl}`} />
