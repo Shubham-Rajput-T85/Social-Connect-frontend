@@ -16,7 +16,8 @@ import {
   Message as MessageIcon,
 } from "@mui/icons-material";
 import { NavLink } from "react-router-dom";
-
+import { useSelector } from "react-redux";
+import { BASE_URL } from "../../api/endpoints";
 
 interface SidebarLink {
   label: string;
@@ -24,14 +25,20 @@ interface SidebarLink {
   icon: React.ReactNode;
 }
 
-
-
 const Sidebar = () => {
+  const user = useSelector((state:any) => state.auth.user);
+  console.log("user from sidebar:", user);
+
   const links: SidebarLink[] = [
     { label: "Home", path: "/", icon: <HomeIcon /> },
     { label: "Profile", path: "/profile", icon: <PersonIcon /> },
     { label: "Messages", path: "/message/1", icon: <MessageIcon /> },
   ];
+
+
+  if(!user){
+    return <></>;
+  }
 
   return (
     <>
@@ -41,7 +48,7 @@ const Sidebar = () => {
           <Box sx={{ textAlign: "center" }}>
             <Box sx={{ position: "relative", display: "inline-block" }}>
               <Avatar
-                src="https://i.pravatar.cc/150?img=1"
+                src={BASE_URL + user.profileUrl}
                 alt="User Avatar"
                 sx={{ width: 80, height: 80, margin: "auto" }}
               />
@@ -59,10 +66,10 @@ const Sidebar = () => {
               />
             </Box>
             <Typography variant="h6" sx={{ mt: 1 }}>
-              Alex Johnson
+              {user.name}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Building the future 🚀
+              {user.bio}
             </Typography>
           </Box>
           <Box>

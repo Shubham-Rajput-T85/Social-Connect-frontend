@@ -26,14 +26,7 @@ const ProfilePostList: React.FC = () => {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const response = await PostService.getMyPost();
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch posts");
-      }
-
-      const data = await response.json();
-      console.log("data", data);
+      const data = await PostService.getMyPost();
 
       setPosts(data.postList || []);
     } catch (err) {

@@ -17,6 +17,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
 import { alertActions } from "../store/alert-slice";
+import { PostService } from "../../api/services/post.service";
 
 interface UserProfileModalProps {
   open: boolean;
@@ -48,7 +49,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [followers, setFollowers] = useState<any[]>([]);
   const [following, setFollowing] = useState<any[]>([]);
 
-  const userIsPrivate = useSelector((state: any) => state.auth.user.isPrivate);
+  const userIsPrivate = useSelector((state: any) => state.auth.user?.isPrivate);
   // ===== Reset state whenever modal opens for a new user =====
   useEffect(() => {
     if (open) {
@@ -140,13 +141,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
     const fetchPosts = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:8080/posts/getPosts?userId=${userData._id}`,
-          { credentials: "include" }
-        );
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Failed to fetch posts");
+        const data = await PostService.getPostByUser(userData._id);
 
         setPosts(data.postList || []);
       } catch (error: any) {
