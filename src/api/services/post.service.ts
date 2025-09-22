@@ -11,6 +11,7 @@ export interface IPost {
   commentsCount: number;
   createdAt: string;
   userId: {
+    _id: string;
     username: string;
     email: string;
     name: string;

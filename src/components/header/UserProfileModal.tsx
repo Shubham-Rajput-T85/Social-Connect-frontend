@@ -380,18 +380,18 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
           {loading ? "Processing..." : followState}
         </Button>
 
-        
+
 
         {/* Tab Content */}
         {(followState === "Following" || followState === "Follow Back" || !userIsPrivate) && (
-          <Box sx={{mt:2}}>
+          <Box sx={{ mt: 2 }}>
             <Typography variant="h4" color="text.secondary" m={1}>
               {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
             </Typography>
 
             <Divider sx={{ my: 2 }} />
             {/* POSTS TAB */}
-            {activeTab === "posts" && (
+            {/* {activeTab === "posts" && (
               <Box
                 sx={{
                   display: "flex",
@@ -476,6 +476,149 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                             }}
                           >
                             {post.postContent}
+                          </Box>
+                        )}
+                      </Box>
+                    );
+                  })
+                ) : (
+                  <Typography
+                    sx={{
+                      p: 2,
+                      textAlign: "center",
+                      color: "text.secondary",
+                      width: "100%",
+                    }}
+                  >
+                    No posts yet
+                  </Typography>
+                )}
+              </Box>
+            )} */}
+            {activeTab === "posts" && (
+              <Box
+                sx={{
+                  display: "flex",
+                  overflowX: "auto",
+                  gap: 2,
+                  pb: 2,
+                  scrollBehavior: "smooth",
+                  "&::-webkit-scrollbar": {
+                    display: "none",
+                  },
+                  scrollbarWidth: "none",
+                }}
+              >
+                {posts.length > 0 ? (
+                  posts.map((post) => {
+                    const isVideo = post.media?.type === "video";
+                    const hasMedia = Boolean(post.media?.url);
+                    const mediaUrl = hasMedia
+                      ? `http://localhost:8080${post.media.url}`
+                      : null;
+
+                    // Helper to truncate text
+                    const truncateText = (text: string, maxWords: number) => {
+                      const words = text.split(" ");
+                      return words.length > maxWords
+                        ? `${words.slice(0, maxWords).join(" ")}...`
+                        : text;
+                    };
+
+                    return (
+                      <Box
+                        key={post._id}
+                        sx={{
+                          position: "relative",
+                          minWidth: { xs: 220, sm: 250 },
+                          height: { xs: 140, sm: 160 },
+                          borderRadius: "10px",
+                          overflow: "hidden",
+                          flexShrink: 0,
+                          cursor: "pointer",
+                          backgroundColor: hasMedia ? "#000" : "#f5f5f5",
+                          transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          "&:hover": {
+                            transform: "scale(1.03)",
+                            boxShadow: 4,
+                          },
+                        }}
+                      >
+                        {/* MEDIA DISPLAY */}
+                        {hasMedia ? (
+                          isVideo ? (
+                            <Box
+                              component="video"
+                              {...({
+                                src: mediaUrl,
+                                controls: true,
+                              } as React.VideoHTMLAttributes<HTMLVideoElement>)}
+                              sx={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "contain", // ensures full video is visible
+                                backgroundColor: "#ccc", // extra space visible for portrait
+                              }}
+                            />
+                          ) : (
+                            <Box
+                              component="img"
+                              {...({
+                                src: mediaUrl,
+                                alt: post.postContent || "Post",
+                                loading: "lazy",
+                              } as React.ImgHTMLAttributes<HTMLImageElement>)}
+                              sx={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "contain", // full image visible, no cropping
+                                backgroundColor: "#ccc", // fills extra space
+                              }}
+                            />
+                          )
+                        ) : (
+                          /* TEXT-ONLY POST */
+                          <Typography
+                            sx={{
+                              px: 2,
+                              textAlign: "center",
+                              fontSize: "0.9rem",
+                              color: "text.primary",
+                              fontWeight: 500,
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              width: "100%",
+                            }}
+                          >
+                            {truncateText(post.postContent || "No content", 5)}
+                          </Typography>
+                        )}
+
+                        {/* CAPTION OVERLAY (if media exists and text present) */}
+                        {hasMedia && post.postContent && (
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              bgcolor: "rgba(0, 0, 0, 0.5)",
+                              color: "white",
+                              px: 1,
+                              py: 0.5,
+                              fontSize: "0.75rem",
+                              textAlign: "center",
+                              backdropFilter: "blur(2px)",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {truncateText(post.postContent, 8)}
                           </Box>
                         )}
                       </Box>
