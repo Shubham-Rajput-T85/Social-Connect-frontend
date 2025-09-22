@@ -36,7 +36,6 @@ const Notification: React.FC = () => {
 
       const data = await response.json();
       const notifications: NotificationItem[] = data.notifications;
-      console.log(notifications);
       setNotifications(notifications);
     } catch (error) {
       console.error("Error fetching notifications:", error);
@@ -88,10 +87,7 @@ const Notification: React.FC = () => {
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
-  };
-
-  console.log(notifications);
-  
+  };  
 
   return (
     <>

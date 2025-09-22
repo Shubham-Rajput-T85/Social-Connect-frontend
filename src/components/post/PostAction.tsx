@@ -5,9 +5,11 @@ import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 import { LikeService } from "../../api/services/likeFeature.service";
 import { formatCount } from "../../api/services/common";
+import { useSelector } from "react-redux";
 
 interface PostActionProps {
   postId: string;
+  postOwnerUserId: string
   initialCommentCount: number;
   initialLikeCount: number;
   onToggleComments: () => void;
@@ -15,6 +17,7 @@ interface PostActionProps {
 
 const PostAction: React.FC<PostActionProps> = ({
   postId,
+  postOwnerUserId,
   initialCommentCount,
   initialLikeCount,
   onToggleComments,
@@ -22,11 +25,9 @@ const PostAction: React.FC<PostActionProps> = ({
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [isLiked, setIsLiked] = useState(false);
   const [loading, setLoading] = useState(false);
-    console.log("postId:", postId);
     
-    console.log(initialCommentCount);
-    console.log(initialLikeCount);
-    
+  const currentUserId = useSelector((state: any) => state.auth.user._id);
+
   // On mount, check if the user has liked this post
   useEffect(() => {
     const fetchLikeStatus = async () => {
@@ -67,9 +68,7 @@ const PostAction: React.FC<PostActionProps> = ({
     } finally {
       setLoading(false);
     }
-  };
-  console.log(isLiked);
-  
+  }; 
 
   return (
     <Box
@@ -82,7 +81,7 @@ const PostAction: React.FC<PostActionProps> = ({
     >
       {/* Comment Button */}
       <Box display="flex" alignItems="center">
-        <IconButton onClick={onToggleComments}>
+        <IconButton onClick={onToggleComments} disabled={ initialCommentCount === 0}>
           <ChatBubbleOutline />
         </IconButton>
         <Typography variant="body2">{formatCount(initialCommentCount)}</Typography>
@@ -90,7 +89,7 @@ const PostAction: React.FC<PostActionProps> = ({
 
       {/* Like Button */}
       <Box display="flex" alignItems="center">
-        <IconButton onClick={toggleLike} disabled={loading}>
+        <IconButton onClick={toggleLike} disabled={loading || currentUserId === postOwnerUserId}>
           {isLiked ? (
             <ThumbUpAltIcon color="secondary" />
           ) : (

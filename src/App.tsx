@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import './App.css';
 import Header from './components/header/Header';
 import Navbar from './components/header/Navbar';
@@ -24,6 +24,7 @@ function App() {
   const alertState = useSelector((state: any) => state.alert);
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -35,6 +36,7 @@ function App() {
         });
 
         if (!res.ok) {
+          navigate("/login");
           throw new Error("Not authenticated");
         }
 

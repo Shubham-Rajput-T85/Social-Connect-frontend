@@ -28,6 +28,12 @@ export const API_ENDPOINTS = {
     CHECK_IS_LIKE: (postId: string) => `${BASE_URL}/posts/${postId}/islike`,
     GET_USER_WHO_LIKE: (postId: string) => `${BASE_URL}/posts/${postId}/getUser`,
   },
+  COMMENTS: {
+    GET_COMMENTS: (postId: string, page: number, limit: number) => `${BASE_URL}/posts/${postId}/comments?page=${page}&limit=${limit}`,
+    ADD_COMMENTS: (postId: string) => `${BASE_URL}/posts/${postId}/comments/add`,
+    EDIT_COMMENTS: (postId: string, commentId: string) => `${BASE_URL}/posts/${postId}/comments/edit/${commentId}`,
+    DELETE_COMMENTS: (postId: string, commentId: string) => `${BASE_URL}/posts/${postId}/comments/delete/${commentId}`
+  },
   NOTIFICATION: {
     GET: (userId: string) => `${BASE_URL}/notification?userId=${userId}`,
     CLEAR: (userId: string) => `${BASE_URL}/notification/clear?userId=${userId}`,

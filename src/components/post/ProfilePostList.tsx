@@ -12,6 +12,7 @@ import {
 } from "@mui/icons-material";
 import { useSelector } from "react-redux";
 import { IPost, PostService } from "../../api/services/post.service";
+import { BASE_URL } from "../../api/endpoints";
 
 const ProfilePostList: React.FC = () => {
   const [posts, setPosts] = useState<IPost[]>([]);
@@ -60,7 +61,7 @@ const ProfilePostList: React.FC = () => {
       // Update state locally without re-fetching
       setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
 
-      
+
     } catch (err) {
       console.error(err);
       alert("Failed to delete post. Please try again.");
@@ -127,7 +128,7 @@ const ProfilePostList: React.FC = () => {
               <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <Avatar src={`http://localhost:8080${user.profileUrl}`}
-                   sx={{ mr: 1 }}>
+                    sx={{ mr: 1 }}>
                     {post.userId.username.charAt(0).toUpperCase()}
                   </Avatar>
                   <Box>
@@ -135,7 +136,11 @@ const ProfilePostList: React.FC = () => {
                       {post.userId.name}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {new Date(post.createdAt).toLocaleDateString()}
+                      {new Date(post.createdAt).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
                     </Typography>
                   </Box>
                 </Box>
@@ -145,7 +150,7 @@ const ProfilePostList: React.FC = () => {
                   <DeleteOutlineIcon />
                 </IconButton>
               </Box>
-            <hr />
+              <hr />
               {/* Post Content */}
               <Typography variant="body1" sx={{ mb: 1, whiteSpace: "pre-line" }}>
                 {post.postContent}
@@ -154,18 +159,46 @@ const ProfilePostList: React.FC = () => {
               {/* Post Media */}
               {post.media?.url && (
                 <Box
-                  component={post.media.type === "video" ? "video" : "img"}
-                  src={`http://localhost:8080${post.media.url}`}
-                  controls={post.media.type === "video"}
-                  alt={post.media.type === "image" ? "Post Media" : undefined}
                   sx={{
                     width: "100%",
-                    maxHeight: 350, // uniform height
-                    objectFit: "cover",
-                    borderRadius: 2,
+                    maxHeight: 400, // sets a max display height
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    backgroundColor: "#f9f9f9", // light background behind image/video
+                    borderRadius: "10px",
+                    overflow: "hidden",
                     mb: 1,
+                    p: 1, // padding around the content
                   }}
-                />
+                >
+                  {post.media.type === "image" ? (
+                    <Box
+                      component="img"
+                      src={`${BASE_URL}${post.media.url}`}
+                      alt="Post Media"
+                      loading="lazy"
+                      sx={{
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        objectFit: "contain", // ensures entire image is visible
+                        borderRadius: "10px",
+                      }}
+                    />
+                  ) : (
+                    <Box
+                      component="video"
+                      src={`${BASE_URL}${post.media.url}`}
+                      controls
+                      sx={{
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        objectFit: "contain", // same handling as image
+                        borderRadius: "10px",
+                      }}
+                    />
+                  )}
+                </Box>
               )}
             </Paper>
           ))
