@@ -17,6 +17,7 @@ import Sidebar from './components/ui/Sidebar';
 import Page from './components/ui/Page';
 import ProfilePage from './components/pages/profile/ProfilePage';
 import { connectSocket, initSocket, registerUser } from './socket';
+import { initFetchInterceptor } from './api/fetchInterceptor';
 
 initSocket();
 
@@ -25,6 +26,11 @@ function App() {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log("redirected to login when token expires");
+    initFetchInterceptor(navigate);
+  }, [navigate]);
 
   useEffect(() => {
     const fetchUser = async () => {

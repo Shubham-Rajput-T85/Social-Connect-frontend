@@ -49,7 +49,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [followers, setFollowers] = useState<any[]>([]);
   const [following, setFollowing] = useState<any[]>([]);
 
-  const userIsPrivate = useSelector((state: any) => state.auth.user?.isPrivate);
+  const userIsPrivate = useSelector((state: any) => state.auth.user?.isPrivate) ?? true;
+  const user = useSelector((state: any) => state.auth.user);
+  console.log("log--------------------------------------------------------------------------------------------------: ",user , user.isPrivate);
   // ===== Reset state whenever modal opens for a new user =====
   useEffect(() => {
     if (open) {
@@ -156,10 +158,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     };
 
     if (!userData?._id) return;
-
-    if (activeTab === "followers") fetchFollowers();
-    if (activeTab === "following") fetchFollowing();
-    if (activeTab === "posts") fetchPosts();
+    console.log("log user private:",userIsPrivate);
+    if (activeTab === "followers" && (followState === "Following" || !userIsPrivate)) fetchFollowers();
+    if (activeTab === "following" && (followState === "Following" || !userIsPrivate)) fetchFollowing();
+    if (activeTab === "posts" && (followState === "Following" || !userIsPrivate)) fetchPosts();
   }, [activeTab, userData, dispatch]);
 
   // ===== Dynamic button styling =====
@@ -391,110 +393,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
             <Divider sx={{ my: 2 }} />
             {/* POSTS TAB */}
-            {/* {activeTab === "posts" && (
-              <Box
-                sx={{
-                  display: "flex",
-                  overflowX: "auto",
-                  gap: 2,
-                  pb: 2,
-                  scrollBehavior: "smooth",
-                  // "&::-webkit-scrollbar": {
-                  //   display: "none",
-                  // },
-                  // scrollbarWidth: "none",
-                }}
-              >
-                {posts.length > 0 ? (
-                  posts.map((post) => {
-                    const isVideo = post.media?.type === "video";
-                    const mediaUrl = post.media?.url
-                      ? `http://localhost:8080${post.media.url}`
-                      : "/placeholder.png";
-
-                    return (
-                      <Box
-                        key={post._id}
-                        sx={{
-                          position: "relative",
-                          minWidth: { xs: 200, sm: 250 },
-                          height: { xs: 120, sm: 150 },
-                          borderRadius: 2,
-                          overflow: "hidden",
-                          flexShrink: 0,
-                          cursor: "pointer",
-                          backgroundColor: "black",
-                          transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                          "&:hover": {
-                            transform: "scale(1.05)",
-                            boxShadow: 4,
-                          },
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        {isVideo ? (
-                          <Box
-                            component="video"
-                            src={mediaUrl}
-                            controls
-                            sx={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "contain",
-                              bgcolor: "black",
-                            }}
-                          />
-                        ) : (
-                          <Box
-                            component="img"
-                            src={mediaUrl}
-                            alt={post.postContent || "Post"}
-                            sx={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "contain",
-                              bgcolor: "black",
-                            }}
-                          />
-                        )}
-                        {post.postContent && (
-                          <Box
-                            sx={{
-                              position: "absolute",
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              bgcolor: "rgba(0, 0, 0, 0.5)",
-                              color: "white",
-                              px: 1,
-                              py: 0.5,
-                              fontSize: "0.75rem",
-                              textAlign: "center",
-                              backdropFilter: "blur(2px)",
-                            }}
-                          >
-                            {post.postContent}
-                          </Box>
-                        )}
-                      </Box>
-                    );
-                  })
-                ) : (
-                  <Typography
-                    sx={{
-                      p: 2,
-                      textAlign: "center",
-                      color: "text.secondary",
-                      width: "100%",
-                    }}
-                  >
-                    No posts yet
-                  </Typography>
-                )}
-              </Box>
-            )} */}
             {activeTab === "posts" && (
               <Box
                 sx={{

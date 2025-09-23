@@ -157,6 +157,7 @@ const AddPostForm = () => {
             placeholder="What's on your mind?"
             fullWidth
             multiline
+            maxRows={5}
             size="small"
             value={postContent}
             onChange={(e) => setPostContent(e.target.value)}

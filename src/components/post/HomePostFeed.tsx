@@ -9,18 +9,23 @@ import {
 import { IPost, PostService } from "../../api/services/post.service";
 import { BASE_URL } from "../../api/endpoints";
 import PostAction from "./PostAction";
-import CommentList from "./CommentList";
+import CommentList, { CommentListHandle } from "./CommentList";
 import AddCommentForm from "./AddCommentForm";
 
 const PAGE_SIZE = 10;
 
 const HomePostFeed = () => {
   const [posts, setPosts] = useState<IPost[]>([]);
+  const [commentCounts, setCommentCounts] = useState<{ [postId: string]: number }>(
+    () => posts.reduce((acc, post) => ({ ...acc, [post._id]: post.commentsCount }), {})
+  );
+
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [openComments, setOpenComments] = useState<string | null>(null);
 
+  const commentsRef = useRef<CommentListHandle>(null);
   // Refs
   const observer = useRef<IntersectionObserver | null>(null);
   const loaderRef = useRef<HTMLDivElement | null>(null); // sentinel element at bottom
@@ -58,6 +63,17 @@ const HomePostFeed = () => {
             //   return Array.from(map.values());
             // });
             setPosts((prev) => [...prev, ...data.postList])
+
+            setCommentCounts(prevCounts => {
+              const newCounts = { ...prevCounts };
+              data.postList.forEach((post: any) => {
+                // If count not already initialized, set it
+                if (newCounts[post._id] === undefined) {
+                  newCounts[post._id] = post.commentsCount;
+                }
+              });
+              return newCounts;
+            });
 
             setHasMore(Boolean(data.pagination?.hasMore));
           } else {
@@ -141,6 +157,9 @@ const HomePostFeed = () => {
   useEffect(() => {
     console.log("page:", page, "loading:", loading, "posts:", posts.length, "hasMore:", hasMore);
   }, [page, loading, posts.length, hasMore]);
+
+  console.log("comment count: ", commentCounts);
+
 
   return (
     <Box
@@ -234,13 +253,28 @@ const HomePostFeed = () => {
             </Box>
           )}
 
-          <PostAction initialLikeCount={post.likeCount} onToggleComments={() => toggleComments(post._id)} initialCommentCount={post.commentsCount} postId={post._id} postOwnerUserId={post.userId._id} />
+          <PostAction initialLikeCount={post.likeCount} onToggleComments={() => toggleComments(post._id)} initialCommentCount={commentCounts[post._id] ?? post.commentsCount} postId={post._id} postOwnerUserId={post.userId._id} />
 
           {openComments === post._id && (
-            <CommentList postId={post._id} postOwnerUserId={post.userId._id} />
+            <CommentList
+              ref={commentsRef}
+              postId={post._id} postOwnerUserId={post.userId._id}
+              onDeleteComment={(postId: string) => { setCommentCounts(prev => ({ ...prev, [postId]: Math.max((prev[postId] || 1) - 1, 0), })); }}
+            />
           )}
 
-          <AddCommentForm postId={post._id} />
+          <AddCommentForm postId={post._id}
+            onCommentAdded={(postId, newComment) => {
+              // Pass the new comment to CommentList
+              commentsRef.current?.addNewComment(newComment);
+              console.log(commentCounts[postId]);
+              setCommentCounts(prev => ({
+                ...prev,
+                [postId]: (prev[postId] || 0) + 1
+              }));
+
+            }}
+          />
         </Paper>
       ))}
 
