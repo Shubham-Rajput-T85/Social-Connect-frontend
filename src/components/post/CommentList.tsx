@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback,forwardRef, useImperativeHandle } from "react";
 import {
   Box,
   Paper,
@@ -18,7 +18,19 @@ import { useSelector } from "react-redux";
 
 const COMMENT_PAGE_SIZE = 10;
 
-const CommentList: React.FC<{ postId: string, postOwnerUserId: string }> = ({ postId, postOwnerUserId }) => {
+interface CommentListProps {
+  postId: string;
+  postOwnerUserId: string;
+  onDeleteComment?: (postId: string) => void;
+}
+
+export interface CommentListHandle {
+  addNewComment: (newComment: IComment) => void;
+}
+
+const CommentList = forwardRef<CommentListHandle, CommentListProps>(
+  ({ postId, postOwnerUserId, onDeleteComment }, ref) => {
+
   const currentUserId = useSelector((state: any) => state.auth.user._id);
   console.log("current user id:", currentUserId);
   const [comments, setComments] = useState<IComment[]>([]);
@@ -94,6 +106,10 @@ const CommentList: React.FC<{ postId: string, postOwnerUserId: string }> = ({ po
     try {
       const response = await CommentsService.deleteComment(postId, commentId);
       setComments(prev => prev.filter(c => c._id !== commentId));
+
+      if (onDeleteComment) {
+        onDeleteComment(postId);
+      }
     } catch (err) { console.error(err); }
   };
 
@@ -114,6 +130,13 @@ const CommentList: React.FC<{ postId: string, postOwnerUserId: string }> = ({ po
   };
 
   console.log(comments);
+
+  useImperativeHandle(ref, () => ({
+    addNewComment: (newComment: IComment) => {
+      console.log(newComment);
+      setComments(prev => [newComment, ...prev]); // prepend new comment
+    }
+  }));
 
   if (comments.length === 0) {
     return <></>
@@ -203,28 +226,28 @@ const CommentList: React.FC<{ postId: string, postOwnerUserId: string }> = ({ po
           transform: "translate(-50%, -50%)",
           bgcolor: "background.paper",
           p: 3,
-          borderRadius: 2,
-          width: 400
+          borderRadius: "10px",
+          width: 600,
+
         }}>
           <Typography variant="h6" mb={2}>Edit Comment</Typography>
           <TextField
             fullWidth
             multiline
-            rows={4}
+            maxRows={5}
             value={editText}
             onChange={(e) => setEditText(e.target.value)}
           />
           <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2, gap: 1 }}>
-            <Button onClick={() => setEditComment(null)}>Cancel</Button>
+            <Button variant="outlined" onClick={() => setEditComment(null)}>Cancel</Button>
             <Button variant="contained" onClick={handleEditSave}>Save</Button>
           </Box>
         </Box>
       </Modal>
     </>
   );
-};
+}
+)
+;
 
 export default CommentList;
-
-
-

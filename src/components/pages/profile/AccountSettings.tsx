@@ -90,12 +90,12 @@ const AccountSettings: React.FC = () => {
                         Are you sure you want to <b>delete</b> your account? This action cannot be undone.
                     </Typography>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpen(false)}>Cancel</Button>
+                <DialogActions sx={{ pb: 2, pr: 2 }}>
+                    <Button color="success" variant="outlined" onClick={() => setOpen(false)}>Cancel</Button>
                     <Button
                         onClick={handleDeleteAccount}
                         color="error"
-                        variant="contained"
+                        variant="outlined"
                     >
                         Delete
                     </Button>

@@ -8,9 +8,11 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { alertActions } from "../store/alert-slice";
 import Loader from "../ui/Loader"; // Import your custom loader
-import { CommentDTO, CommentsService } from "../../api/services/comments.service";
+import { CommentDTO, CommentsService, IComment } from "../../api/services/comments.service";
 
-const AddCommentForm: React.FC<{ postId: string }> = ({ postId }) => {
+const AddCommentForm: React.FC<{ postId: string,
+  onCommentAdded?: (postId: string,newComment: IComment) => void
+ }> = ({ postId, onCommentAdded }) => {
     const dispatch = useDispatch();
     const user = useSelector((state: any) => state.auth.user);
   
@@ -20,7 +22,6 @@ const AddCommentForm: React.FC<{ postId: string }> = ({ postId }) => {
     /** Submit new comment */
     const handleCommentSubmit = async (event: FormEvent) => {
       event.preventDefault();
-  
       if (!user?._id) {
         dispatch(
           alertActions.showAlert({
@@ -45,25 +46,11 @@ const AddCommentForm: React.FC<{ postId: string }> = ({ postId }) => {
         setLoading(true); // Start loader
         const data: CommentDTO = { commentText: commentContent };
         const response = await CommentsService.addComments(postId, data);
-  
-        // if (!response.ok) {
-        //   let errorMessage = "Something went wrong while commenting";
-        //   try {
-        //     const errorData = await response.json();
-        //     errorMessage = errorData.message || errorMessage;
-        //   } catch {
-        //     errorMessage = "Server returned an unexpected error";
-        //   }
-  
-        //   dispatch(
-        //     alertActions.showAlert({
-        //       severity: "error",
-        //       message: errorMessage,
-        //     })
-        //   );
-        //   return;
-        // }
-  
+        console.log(response);
+        if (onCommentAdded) {
+          onCommentAdded(postId, response.comment);
+        }
+
         // Reset form
         setCommentContent("");
   
@@ -84,7 +71,6 @@ const AddCommentForm: React.FC<{ postId: string }> = ({ postId }) => {
         setLoading(false); // Stop loader
       }
     };
-  
     return (
       <>
         {loading && (
@@ -111,9 +97,10 @@ const AddCommentForm: React.FC<{ postId: string }> = ({ postId }) => {
             <Avatar src={`http://localhost:8080${user.profileUrl}`} sx={{ mr: 2 }} />
             <TextField
               variant="outlined"
-              placeholder="What's on your mind?"
+              placeholder="How's this post?"
               fullWidth
               multiline
+              maxRows={5}
               size="small"
               value={commentContent}
               onChange={(e) => setCommentContent(e.target.value)}
