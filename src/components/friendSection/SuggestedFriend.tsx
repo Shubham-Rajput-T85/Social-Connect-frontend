@@ -8,37 +8,52 @@ import {
   Button,
   Avatar,
 } from "@mui/material";
+import { userService } from "../../api/services/user.service";
+import { useSelector, useDispatch } from "react-redux";
+import { BASE_URL } from "../../api/endpoints";
+import { alertActions } from "../store/alert-slice";
 
-// interface IFollowRequest {
-//   _id: string;
-//   username: string;
-//   name: string;
-//   email: string;
-//   profileUrl?: string;
-// }
+interface SuggestedUser {
+  _id: string;
+  name: string;
+  username: string;
+  bio?: string;
+  profileUrl?: string;
+  followersCount: number;
+  followingCount: number;
+  isPrivate: boolean;
+}
 
 export default function SuggestedFriend() {
-  // const [requests, setRequests] = useState<IFollowRequest[]>([]);
-  // Explicitly type the refs for scrollable containers
   const friendsScrollRef = useRef<HTMLDivElement | null>(null);
-
-  // State to control fade visibility
   const [showFadeFriends, setShowFadeFriends] = useState<boolean>(true);
+  const [suggestedFriends, setSuggestedFriends] = useState<SuggestedUser[]>([]);
+  const [loadingIds, setLoadingIds] = useState<string[]>([]); // track loading per user
+  const currentUserId = useSelector((state: any) => state.auth.user._id);
+  const dispatch = useDispatch();
 
+  // Fetch suggested friends on mount
+  useEffect(() => {
+    const fetchSuggested = async () => {
+      try {
+        const res = await userService.getSuggestedFriends(currentUserId);
+        setSuggestedFriends(res.users || []);
+      } catch (err) {
+        console.error("Failed to fetch suggested friends:", err);
+      }
+    };
 
+    fetchSuggested();
+  }, [currentUserId]);
+
+  // Show fade only if scrollable
   useEffect(() => {
     const element = friendsScrollRef.current;
     if (element) {
-      // Show fade only if scrolling is possible
       setShowFadeFriends(element.scrollHeight > element.clientHeight);
     }
-  },[
-    // requests
-  ]); 
+  }, [suggestedFriends]);
 
-  /**
-   * Generic scroll handler to detect bottom and hide fade effect
-   */
   const handleScroll = (
     ref: React.RefObject<HTMLDivElement>,
     setShowFade: React.Dispatch<React.SetStateAction<boolean>>
@@ -48,11 +63,45 @@ export default function SuggestedFriend() {
 
     const { scrollTop, scrollHeight, clientHeight } = element;
 
-    // If scrolled to bottom, hide fade
-    if (scrollTop + clientHeight >= scrollHeight - 2) {
-      setShowFade(false);
-    } else {
-      setShowFade(true);
+    setShowFade(!(scrollTop + clientHeight >= scrollHeight - 2));
+  };
+
+  // Follow button click handler
+  const handleFollowClick = async (targetUserId: string) => {
+    setLoadingIds((prev) => [...prev, targetUserId]);
+    try {
+      const res = await fetch("http://localhost:8080/user/follow", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentUserId,
+          targetUserId,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Follow action failed");
+
+      // Show success alert
+      dispatch(
+        alertActions.showAlert({
+          severity: "success",
+          message: "Follow request sent",
+        })
+      );
+
+      // Remove user from suggested friends
+      setSuggestedFriends((prev) => prev.filter((u) => u._id !== targetUserId));
+    } catch (error: any) {
+      dispatch(
+        alertActions.showAlert({
+          severity: "error",
+          message: error.message || "Error while sending follow request",
+        })
+      );
+    } finally {
+      setLoadingIds((prev) => prev.filter((id) => id !== targetUserId));
     }
   };
 
@@ -65,126 +114,61 @@ export default function SuggestedFriend() {
         borderLeft: "1px solid #eee",
         overflow: "hidden",
         borderRadius: "10px",
-        mb:2
+        mb: 2,
       }}
     >
-      {/* ---- TOP SECTION: Suggested Friends ---- */}
       <Paper
         elevation={0}
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          bgcolor: "background.paper",
-          position: "relative", // Required for fade positioning
-        }}
+        sx={{ display: "flex", flexDirection: "column", bgcolor: "background.paper", position: "relative" }}
       >
-        {/* Sticky Heading */}
-        <Box
-          sx={{
-            p: 2,
-            position: "sticky",
-            top: 0,
-            backgroundColor: "background.paper",
-            zIndex: 2,
-            borderRadius: "10px",
-          }}
-        >
+        <Box sx={{ p: 2, position: "sticky", top: 0, backgroundColor: "background.paper", zIndex: 2, borderRadius: "10px" }}>
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             Suggested Friends
           </Typography>
         </Box>
-        <hr style={{ color: "gray", margin:"10px", marginTop:"0" }} />
-        {/* Scrollable List */}
+        <hr style={{ color: "gray", margin: "10px", marginTop: "0" }} />
         <Box
           ref={friendsScrollRef}
-          onScroll={() => handleScroll((friendsScrollRef as any), setShowFadeFriends)}
-          sx={{
-            maxHeight: 200,
-            overflowY: "auto",
-            px: 2,
-            pb: 2,
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": {
-              display: "none",
-            },
-          }}
+          onScroll={() => handleScroll(friendsScrollRef as any, setShowFadeFriends)}
+          sx={{ maxHeight: 200, overflowY: "auto", px: 2, pb: 2, scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } }}
         >
           <List sx={{ p: 0 }}>
-            {Array.from({ length: 10 }, (_, i) => (
+            {suggestedFriends.map((friend) => (
               <ListItem
-                key={i}
+                key={friend._id}
                 sx={{
                   py: 1,
                   px: 0,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  gap: 2, // Adds breathing room for responsiveness
+                  gap: 2,
                 }}
               >
-                {/* Avatar + Info */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1.5,
-                    flex: 1, // Takes available space naturally
-                    minWidth: 0, // Prevents overflow in small widths
-                  }}
-                >
-                  <Avatar
-                    src={`https://i.pravatar.cc/150?img=${i + 10}`}
-                    sx={{ width: 44, height: 44 }}
-                  />
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flex: 1, minWidth: 0 }}>
+                  <Avatar src={(BASE_URL + friend.profileUrl) || `https://i.pravatar.cc/150?u=${friend._id}`} sx={{ width: 44, height: 44 }} />
                   <Box sx={{ overflow: "hidden" }}>
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        fontWeight: 500,
-                        lineHeight: 1.2,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      Friend {i + 1}
+                    <Typography variant="body1" sx={{ fontWeight: 500, lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {friend.name}
                     </Typography>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      New to platform
+                    <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      @{friend.username}
                     </Typography>
                   </Box>
                 </Box>
-
-                {/* Follow Button */}
                 <Button
                   variant="outlined"
                   size="small"
-                  sx={{
-                    textTransform: "none",
-                    fontSize: "0.75rem",
-                    px: 2,
-                    py: 0.5,
-                    ml: 2, // Space between text block and button
-                    flexShrink: 0, // Prevent button from shrinking
-                  }}
+                  disabled={loadingIds.includes(friend._id)}
+                  onClick={() => handleFollowClick(friend._id)}
+                  sx={{ textTransform: "none", fontSize: "0.75rem", px: 2, py: 0.5, ml: 2, flexShrink: 0 }}
                 >
-                  Follow
+                  {loadingIds.includes(friend._id) ? "Loading..." : "Follow"}
                 </Button>
               </ListItem>
-
             ))}
           </List>
         </Box>
-
-        {/* Fade Effect */}
         {showFadeFriends && (
           <Box
             sx={{
@@ -194,15 +178,13 @@ export default function SuggestedFriend() {
               left: 0,
               right: 0,
               height: 40,
-              background:
-                "linear-gradient(to top, rgba(245,245,245,1), rgba(245,245,245,0))",
+              background: "linear-gradient(to top, rgba(245,245,245,1), rgba(245,245,245,0))",
               pointerEvents: "none",
               transition: "opacity 0.3s ease",
             }}
           />
         )}
       </Paper>
-
     </Box>
   );
-};
+}
