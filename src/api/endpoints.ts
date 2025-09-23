@@ -3,13 +3,14 @@ export const BASE_URL = "http://localhost:8080";
 
 export const API_ENDPOINTS = {
   AUTH: {
-    LOGIN: `${BASE_URL}/auth/login`,
-    REGISTER: `${BASE_URL}/auth/register`,
-    LOGOUT: `${BASE_URL}/auth/logout`,
+    // LOGIN: `${BASE_URL}/auth/login`,
+    // REGISTER: `${BASE_URL}/auth/register`,
+    // LOGOUT: `${BASE_URL}/auth/logout`,
   },
   USER: {
-    PROFILE: (userId: string) => `${BASE_URL}/users/${userId}`,
-    UPDATE: `${BASE_URL}/users/update`,
+    SUGGESTED_FRIEND: `${BASE_URL}/user/suggestedFriends`
+    // PROFILE: (userId: string) => `${BASE_URL}/user/${userId}`,
+    // UPDATE: `${BASE_URL}/user/update`,
   },
   // MESSAGES: {
   //   SEND: `${BASE_URL}/messages/send`,
@@ -33,6 +34,10 @@ export const API_ENDPOINTS = {
     ADD_COMMENTS: (postId: string) => `${BASE_URL}/posts/${postId}/comments/add`,
     EDIT_COMMENTS: (postId: string, commentId: string) => `${BASE_URL}/posts/${postId}/comments/edit/${commentId}`,
     DELETE_COMMENTS: (postId: string, commentId: string) => `${BASE_URL}/posts/${postId}/comments/delete/${commentId}`
+  },
+  FOLLOW: {
+    getFollowState: (targetUserId: string) => `${BASE_URL}/user/followState?targetUserId=${targetUserId}`,
+    sendFollowRequest: (targetUserId: string) => `${BASE_URL}/user/follow/${targetUserId}`
   },
   NOTIFICATION: {
     GET: (userId: string) => `${BASE_URL}/notification?userId=${userId}`,
