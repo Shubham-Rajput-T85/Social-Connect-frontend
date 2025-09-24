@@ -36,7 +36,7 @@ export default function SuggestedFriend() {
   useEffect(() => {
     const fetchSuggested = async () => {
       try {
-        const res = await userService.getSuggestedFriends(currentUserId);
+        const res = await userService.getSuggestedFriends();
         setSuggestedFriends(res.users || []);
       } catch (err) {
         console.error("Failed to fetch suggested friends:", err);
@@ -44,7 +44,7 @@ export default function SuggestedFriend() {
     };
 
     fetchSuggested();
-  }, [currentUserId]);
+  }, []);
 
   // Show fade only if scrollable
   useEffect(() => {
