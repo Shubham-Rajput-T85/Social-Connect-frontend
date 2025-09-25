@@ -21,3 +21,8 @@
   color: rgb(218, 214, 214);
 }
 
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}

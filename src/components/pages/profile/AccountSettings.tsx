@@ -1,3 +1,4 @@
+// components/AccountSettings.tsx
 import React, { useState } from "react";
 import {
     Box,
@@ -7,11 +8,14 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
+    Switch,
+    FormControlLabel,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { alertActions } from "../../store/alert-slice";
-import { useDispatch } from "react-redux";
+import { authActions } from "../../store/auth-slice";
+import { userService } from "../../../api/services/user.service";
 
 interface DeleteResponse {
     success: boolean;
@@ -19,30 +23,60 @@ interface DeleteResponse {
 }
 
 const AccountSettings: React.FC = () => {
-    const [open, setOpen] = useState<boolean>(false);
+    const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+
     const navigate = useNavigate();
-    const user = useSelector((state: any) => state.auth.user);
     const dispatch = useDispatch();
 
+    const user = useSelector((state: any) => state.auth.user);
+
+    // Handle Privacy Toggle
+    const handleTogglePrivacy = async () => {
+        try {
+            setLoading(true);
+            const updatedUser = await userService.toggleAccountStatus();
+            console.log("update after db: ",updatedUser);
+            
+            // Update Redux state with new isPrivate value
+            dispatch(authActions.updateUserPrivacyStatus(updatedUser.data.isPrivate));
+
+            dispatch(
+                alertActions.showAlert({
+                    severity: "info",
+                    message: `Account is now ${updatedUser.data.isPrivate ? "Private" : "Public"}`,
+                })
+            );
+        } catch (error) {
+            if (error instanceof Error) {
+                dispatch(
+                    alertActions.showAlert({
+                        severity: "error",
+                        message: error.message,
+                    })
+                );
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Handle Account Deletion
     const handleDeleteAccount = async (): Promise<void> => {
         try {
-
             const response = await fetch(`http://localhost:8080/user/delete?userId=${user._id}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                credentials: 'include'
+                credentials: "include",
             });
-
-            console.log("here");
 
             if (!response.ok) {
                 const errorData: DeleteResponse = await response.json();
                 throw new Error(errorData.message || "Failed to delete account");
             }
 
-            // If success
             const data: DeleteResponse = await response.json();
             console.log(data.message);
 
@@ -50,28 +84,58 @@ const AccountSettings: React.FC = () => {
             localStorage.removeItem("token");
 
             dispatch(
-                alertActions.showAlert({ severity: "success", message: "account deleted successfully" })
+                alertActions.showAlert({ severity: "success", message: "Account deleted successfully" })
             );
 
-            // Redirect to login
             navigate("/login");
         } catch (error) {
             if (error instanceof Error) {
-                console.error("Error deleting account:", error.message);
                 dispatch(
                     alertActions.showAlert({ severity: "error", message: error.message })
                 );
-            } else {
-                console.error("Unknown error occurred while deleting account");
             }
         }
     };
 
     return (
         <Box>
+            {/* Account Status Section */}
+            <Typography variant="h6" mb={2}>
+                Account Status
+            </Typography>
+
+            <Box
+                sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    border: "1px solid #ccc",
+                    borderRadius: "8px",
+                    p: 2,
+                    mb: 3,
+                }}
+            >
+                <Typography>
+                    {user?.isPrivate ? "Private" : "Public"}
+                </Typography>
+                <FormControlLabel
+                    control={
+                        <Switch
+                            checked={user?.isPrivate || false}
+                            onChange={handleTogglePrivacy}
+                            disabled={loading}
+                            color="primary"
+                        />
+                    }
+                    label={loading ? "Updating..." : ""}
+                />
+            </Box>
+
+            {/* Danger Zone Section */}
             <Typography variant="h6" mb={2}>
                 Danger Zone
             </Typography>
+
             <Button
                 variant="outlined"
                 color="error"
@@ -81,9 +145,7 @@ const AccountSettings: React.FC = () => {
             </Button>
 
             {/* Confirmation Dialog */}
-            <Dialog open={open}
-            //   onClose={() => setOpen(false)}
-            >
+            <Dialog open={open}>
                 <DialogTitle>Confirm Deletion</DialogTitle>
                 <DialogContent>
                     <Typography>

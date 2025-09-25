@@ -56,12 +56,6 @@ const HomePostFeed = () => {
 
         if (!cancelled) {
           if (data?.postList?.length > 0) {
-            // Deduplicate with Map as safety-net
-            // setPosts((prev) => {
-            //   const map = new Map<string, IPost>();
-            //   [...prev, ...data.postList].forEach((p) => map.set(p._id, p));
-            //   return Array.from(map.values());
-            // });
             setPosts((prev) => [...prev, ...data.postList])
 
             setCommentCounts(prevCounts => {
@@ -167,7 +161,7 @@ const HomePostFeed = () => {
       id="posts-scroll-container"
       sx={{
         overflowY: "auto",
-        height: "700px", // fixed height so it's scrollable; adjust as needed
+        height: "70vh", // fixed height so it's scrollable; adjust as needed
         pr: 1,
         p: 1,
         /* Hide scrollbar - Chrome, Safari and Edge */

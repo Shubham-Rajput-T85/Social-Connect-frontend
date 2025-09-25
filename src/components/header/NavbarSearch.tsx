@@ -16,7 +16,6 @@ import { useSelector } from "react-redux";
 import Loader from "../ui/Loader";
 
 import UserProfileModal from "./UserProfileModal"; 
-/** */
 
 export interface NavbarSearchProps {
     onClose: () => void; // Required for desktop close action

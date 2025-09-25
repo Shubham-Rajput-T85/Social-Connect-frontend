@@ -27,7 +27,12 @@ const authSlice = createSlice({
         clearUser(state) {
             state.user = null;
             state.initialized = true;
-        }
+        },
+        updateUserPrivacyStatus(state: any, action: PayloadAction<boolean>) {
+            if (state.user) {
+                state.user.isPrivate = action.payload;
+            }
+        },
     }
 });
 

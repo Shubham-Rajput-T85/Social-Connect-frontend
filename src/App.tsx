@@ -16,8 +16,10 @@ import { Box } from '@mui/material';
 import Sidebar from './components/ui/Sidebar';
 import Page from './components/ui/Page';
 import ProfilePage from './components/pages/profile/ProfilePage';
-import { connectSocket, initSocket, registerUser } from './socket';
+import { connectSocket, getSocket, initSocket, registerUser } from './socket';
 import { initFetchInterceptor } from './api/fetchInterceptor';
+import { onlineUsersActions } from './components/store/onlineUsers-slice';
+import MessageChatLayout from './components/pages/message/MessageChatLayout';
 
 initSocket();
 
@@ -42,7 +44,6 @@ function App() {
         });
 
         if (!res.ok) {
-          navigate("/login");
           throw new Error("Not authenticated");
         }
 
@@ -61,6 +62,32 @@ function App() {
 
     fetchUser();
   }, [dispatch]);
+
+
+  useEffect(() => {
+    const socket = getSocket();
+
+    // Fetch initial list
+    socket.emit("getOnlineUsers", (onlineUserIds: string[]) => {
+      dispatch(onlineUsersActions.setOnlineUsers(onlineUserIds));
+    });
+
+    // Listen for user online/offline events
+    socket.on("userOnline", ({ userId }) => {
+      dispatch(onlineUsersActions.addOnlineUser(userId));
+    });
+
+    socket.on("userOffline", ({ userId }) => {
+      dispatch(onlineUsersActions.removeOnlineUser(userId));
+    });
+
+    return () => {
+      socket.off("userOnline");
+      socket.off("userOffline");
+    };
+  }, [dispatch]);
+
+
 
   const handleOnClose = () => {
     if (alertState.callBack) {
@@ -98,11 +125,11 @@ function App() {
           />
 
           {/* Redirect /Home → / */}
-          <Route path='/home' element={ 
+          <Route path='/home' element={
             <AuthRoute>
               <Navigate to="/" />
             </AuthRoute>
-            } />
+          } />
 
           <Route
             path="/profile/*"
@@ -110,6 +137,17 @@ function App() {
               <Page>
                 <AuthRoute>
                   <ProfilePage />
+                </AuthRoute>
+              </Page>
+            }
+          />
+
+          <Route
+            path="/message/*"
+            element={
+              <Page>
+                <AuthRoute>
+                  <MessageChatLayout />
                 </AuthRoute>
               </Page>
             }
@@ -127,7 +165,7 @@ function App() {
               }}
             >
               <Sidebar />
-              <Box>
+              <Box sx={{ width: "100%" }}>
                 <div>Page not found</div>
               </Box>
             </Box>

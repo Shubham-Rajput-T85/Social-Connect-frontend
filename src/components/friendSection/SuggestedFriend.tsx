@@ -36,7 +36,7 @@ export default function SuggestedFriend() {
   useEffect(() => {
     const fetchSuggested = async () => {
       try {
-        const res = await userService.getSuggestedFriends(currentUserId);
+        const res = await userService.getSuggestedFriends();
         setSuggestedFriends(res.users || []);
       } catch (err) {
         console.error("Failed to fetch suggested friends:", err);
@@ -44,7 +44,7 @@ export default function SuggestedFriend() {
     };
 
     fetchSuggested();
-  }, [currentUserId]);
+  }, []);
 
   // Show fade only if scrollable
   useEffect(() => {
@@ -118,7 +118,6 @@ export default function SuggestedFriend() {
       }}
     >
       <Paper
-        elevation={0}
         sx={{ display: "flex", flexDirection: "column", bgcolor: "background.paper", position: "relative" }}
       >
         <Box sx={{ p: 2, position: "sticky", top: 0, backgroundColor: "background.paper", zIndex: 2, borderRadius: "10px" }}>

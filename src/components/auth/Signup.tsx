@@ -9,9 +9,9 @@ import {
   Link,
   Avatar,
   InputAdornment,
-  IconButton
+  IconButton,
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Visibility, VisibilityOff, Close as CloseIcon } from "@mui/icons-material";
 import React, { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -45,10 +45,7 @@ const bioInputValidation = (inputValue: string) => {
 const Signup = () => {
   // Password visibility state
   const [showPassword, setShowPassword] = useState<boolean>(false);
-
-  const togglePasswordVisibility = () => {
-    setShowPassword((prev) => !prev);
-  };
+  const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -103,25 +100,27 @@ const Signup = () => {
     isValid: bioIsValid,
   } = useInput(bioInputValidation);
 
-  let isFormValid = false;
   // Form validation
-  if (nameIsValid 
-    && emailIsValid 
-    && usernameIsValid 
-    && passwordIsValid 
-    && bioIsValid 
-  ) {
-      isFormValid = true;
-  }
+  const isFormValid =
+    nameIsValid && emailIsValid && usernameIsValid && passwordIsValid && bioIsValid;
 
-
-  // Profile picture change handler
+  // Profile picture change handler (with fix for same file re-upload)
   const handleProfilePicChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      setProfilePic(file);
-      setPreviewUrl(URL.createObjectURL(file));
-    }
+
+    if (!file) return;
+
+    setProfilePic(file);
+    setPreviewUrl(URL.createObjectURL(file));
+
+    // **Reset the input value so selecting the same file again triggers onChange**
+    event.target.value = "";
+  };
+
+  // Clear profile picture
+  const handleClearProfilePic = () => {
+    setProfilePic(null);
+    setPreviewUrl(null);
   };
 
   // Form submit handler
@@ -220,7 +219,8 @@ const Signup = () => {
           <CardContent>
             <form onSubmit={formSubmitHandler}>
               {/* Name */}
-              <TextField sx={{ backgroundColor:"#ffffff", borderRadius:"25px" }}
+              <TextField
+                sx={{ backgroundColor: "#ffffff", borderRadius: "25px" }}
                 value={nameValue}
                 error={!!nameError}
                 fullWidth
@@ -236,7 +236,8 @@ const Signup = () => {
               )}
 
               {/* Email */}
-              <TextField sx={{ backgroundColor:"#ffffff", borderRadius:"25px" }}
+              <TextField
+                sx={{ backgroundColor: "#ffffff", borderRadius: "25px" }}
                 value={emailValue}
                 error={!!emailError}
                 fullWidth
@@ -252,7 +253,8 @@ const Signup = () => {
               )}
 
               {/* Username */}
-              <TextField sx={{ backgroundColor:"#ffffff", borderRadius:"25px" }}
+              <TextField
+                sx={{ backgroundColor: "#ffffff", borderRadius: "25px" }}
                 value={usernameValue}
                 error={!!usernameError}
                 fullWidth
@@ -268,7 +270,8 @@ const Signup = () => {
               )}
 
               {/* Password */}
-              <TextField sx={{
+              <TextField
+                sx={{
                   backgroundColor: "#ffffff",
                   borderRadius: "25px",
                   mt: 2,
@@ -277,7 +280,7 @@ const Signup = () => {
                 error={!!passwordError}
                 fullWidth
                 label="Password"
-                type={showPassword ? "text" : "password"} // Toggle between password and text
+                type={showPassword ? "text" : "password"}
                 margin="normal"
                 onChange={passwordInputHandler}
                 onBlur={passwordBlurHandler}
@@ -303,7 +306,8 @@ const Signup = () => {
               )}
 
               {/* Bio */}
-              <TextField sx={{ backgroundColor:"#ffffff", borderRadius:"25px" }}
+              <TextField
+                sx={{ backgroundColor: "#ffffff", borderRadius: "25px" }}
                 value={bioValue}
                 error={!!bioError}
                 fullWidth
@@ -316,7 +320,7 @@ const Signup = () => {
                 helperText={`${bioValue.length}/150`}
               />
 
-              {/* Profile Picture */}
+              {/* Profile Picture Upload Section */}
               <Box
                 sx={{
                   display: "flex",
@@ -340,12 +344,39 @@ const Signup = () => {
                     onChange={handleProfilePicChange}
                   />
                 </Button>
+
+                {/* Preview with Cross Button */}
                 {previewUrl && (
-                  <Avatar
-                    src={previewUrl}
-                    alt="Profile Preview"
-                    sx={{ width: 56, height: 56 }}
-                  />
+                  <Box
+                    sx={{
+                      position: "relative",
+                      display: "inline-block",
+                    }}
+                  >
+                    <Avatar
+                      src={previewUrl}
+                      alt="Profile Preview"
+                      sx={{ width: 56, height: 56 }}
+                    />
+
+                    {/* Cross Button */}
+                    <IconButton
+                      onClick={handleClearProfilePic}
+                      size="small"
+                      sx={{
+                        position: "absolute",
+                        top: -8,
+                        right: -8,
+                        backgroundColor: "rgba(0,0,0,0.6)",
+                        color: "#fff",
+                        "&:hover": {
+                          backgroundColor: "rgba(0,0,0,0.8)",
+                        },
+                      }}
+                    >
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
                 )}
               </Box>
 

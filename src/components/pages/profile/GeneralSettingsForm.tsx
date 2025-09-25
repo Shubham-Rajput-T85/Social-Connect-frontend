@@ -6,7 +6,9 @@ import {
   Typography,
   Avatar,
   Card,
+  IconButton
 } from "@mui/material";
+import { Close as CloseIcon } from "@mui/icons-material";
 
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -84,19 +86,16 @@ const GeneralSettingsForm: React.FC = () => {
 
     if (!file) return;
 
-    // Validate file type
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-    if (!allowedTypes.includes(file.type)) {
-      dispatch(
-        alertActions.showAlert({
-          severity: "error",
-          message: "Only image (JPG, PNG, WEBP) files are allowed!",
-        })
-      );
-      return;
-    }
     setProfilePic(file);
     setPreviewUrl(URL.createObjectURL(file));
+
+    // **Reset the input value so selecting the same file again triggers onChange**
+    event.target.value = "";
+  };
+
+  const handleClearProfilePic = () => {
+    setProfilePic(null);
+    setPreviewUrl(null);
   };
 
   // Form submit handler
@@ -263,8 +262,37 @@ const GeneralSettingsForm: React.FC = () => {
           />
         </Button>
         {previewUrl && (
-          <Avatar src={previewUrl} alt="Profile Preview" sx={{ width: 80, height: 80 }} />
-        )}
+                  <Box
+                    sx={{
+                      position: "relative",
+                      display: "inline-block",
+                    }}
+                  >
+                    <Avatar
+                      src={previewUrl}
+                      alt="Profile Preview"
+                      sx={{ width: 56, height: 56 }}
+                    />
+
+                    {/* Cross Button */}
+                    <IconButton
+                      onClick={handleClearProfilePic}
+                      size="small"
+                      sx={{
+                        position: "absolute",
+                        top: -8,
+                        right: -8,
+                        backgroundColor: "rgba(0,0,0,0.6)",
+                        color: "#fff",
+                        "&:hover": {
+                          backgroundColor: "rgba(0,0,0,0.8)",
+                        },
+                      }}
+                    >
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                )}
       </Box>
 
       <Button type="submit" variant="contained" fullWidth
