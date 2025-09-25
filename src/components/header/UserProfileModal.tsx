@@ -53,13 +53,11 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   
   const onlineUsers = useSelector((state: RootState) => state.onlineUsers.users);
 
-
-  const userIsPrivate = useSelector((state: any) => state.auth.user?.isPrivate) ?? true;
-  console.log("userIsPrivate:", userIsPrivate);
+  const userIsPrivate = userData.isPrivate;
 
   const isOnline = onlineUsers.includes(userData._id);
-  console.log("isgiven user online:",isOnline);
-  
+  console.log("is given user online:",isOnline);
+
   // ===== Reset state whenever modal opens for a new user =====
   useEffect(() => {
     if (open) {
@@ -156,12 +154,12 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
         setPosts(data.postList || []);
       } catch (error: any) {
-        dispatch(
-          alertActions.showAlert({
-            severity: "error",
-            message: error.message || "Error fetching posts",
-          })
-        );
+        // dispatch(
+        //   alertActions.showAlert({
+        //     severity: "error",
+        //     message: error.message || "Error fetching posts",
+        //   })
+        // );
       }
     };
 
@@ -170,7 +168,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     if (activeTab === "followers" && (followState === "Following" || !userIsPrivate)) fetchFollowers();
     if (activeTab === "following" && (followState === "Following" || !userIsPrivate)) fetchFollowing();
     if (activeTab === "posts" && (followState === "Following" || !userIsPrivate)) fetchPosts();
-  }, [activeTab, userData, dispatch]);
+  }, [activeTab, userData, dispatch, userIsPrivate]);
 
   // ===== Dynamic button styling =====
   useEffect(() => {
@@ -581,7 +579,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   followers.map((f) => (
                     <ListItem key={f._id}>
                       <ListItemAvatar>
-                        <Avatar src={`localhost:8080/${f.profileUrl}`}>
+                        <Avatar src={`${BASE_URL}${f.profileUrl}`}>
                           {(f.username?.[0] || "U").toUpperCase()}
                         </Avatar>
                       </ListItemAvatar>
@@ -601,7 +599,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   following.map((f) => (
                     <ListItem key={f._id}>
                       <ListItemAvatar>
-                        <Avatar src={f.profileUrl}>
+                        <Avatar src={`${BASE_URL}${f.profileUrl}`}>
                           {(f.username?.[0] || "U").toUpperCase()}
                         </Avatar>
                       </ListItemAvatar>

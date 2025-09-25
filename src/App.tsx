@@ -19,6 +19,7 @@ import ProfilePage from './components/pages/profile/ProfilePage';
 import { connectSocket, getSocket, initSocket, registerUser } from './socket';
 import { initFetchInterceptor } from './api/fetchInterceptor';
 import { onlineUsersActions } from './components/store/onlineUsers-slice';
+import MessageChatLayout from './components/pages/message/MessageChatLayout';
 
 initSocket();
 
@@ -124,11 +125,11 @@ function App() {
           />
 
           {/* Redirect /Home → / */}
-          <Route path='/home' element={ 
+          <Route path='/home' element={
             <AuthRoute>
               <Navigate to="/" />
             </AuthRoute>
-            } />
+          } />
 
           <Route
             path="/profile/*"
@@ -136,6 +137,17 @@ function App() {
               <Page>
                 <AuthRoute>
                   <ProfilePage />
+                </AuthRoute>
+              </Page>
+            }
+          />
+
+          <Route
+            path="/message/*"
+            element={
+              <Page>
+                <AuthRoute>
+                  <MessageChatLayout />
                 </AuthRoute>
               </Page>
             }
@@ -153,7 +165,7 @@ function App() {
               }}
             >
               <Sidebar />
-              <Box>
+              <Box sx={{ width: "100%" }}>
                 <div>Page not found</div>
               </Box>
             </Box>

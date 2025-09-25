@@ -52,18 +52,6 @@ const Sidebar = () => {
                 alt="User Avatar"
                 sx={{ width: 80, height: 80, margin: "auto" }}
               />
-              <Box
-                sx={{
-                  width: 14,
-                  height: 14,
-                  borderRadius: "50%",
-                  backgroundColor: "green",
-                  position: "absolute",
-                  bottom: 4,
-                  right: 4,
-                  border: "2px solid white",
-                }}
-              />
             </Box>
             <Typography variant="h6" sx={{ mt: 1 }}>
               {user.name}

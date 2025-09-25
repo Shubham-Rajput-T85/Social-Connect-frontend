@@ -118,7 +118,6 @@ export default function SuggestedFriend() {
       }}
     >
       <Paper
-        elevation={0}
         sx={{ display: "flex", flexDirection: "column", bgcolor: "background.paper", position: "relative" }}
       >
         <Box sx={{ p: 2, position: "sticky", top: 0, backgroundColor: "background.paper", zIndex: 2, borderRadius: "10px" }}>

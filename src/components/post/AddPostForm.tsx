@@ -146,7 +146,7 @@ const AddPostForm = () => {
   };
 
   return (
-    <div style={{ width: "800px" }}>
+    <div>
       {/* Show loader while uploading */}
       {loading && (
         <Box
