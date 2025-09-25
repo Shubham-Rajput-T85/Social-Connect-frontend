@@ -9,7 +9,7 @@ import {
   TextField,
   Divider,
 } from "@mui/material";
-import { Image as ImageIcon } from "@mui/icons-material";
+import { Image as ImageIcon, Close as CloseIcon } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { alertActions } from "../store/alert-slice";
 import Loader from "../ui/Loader"; // Import your custom loader
@@ -21,28 +21,47 @@ const AddPostForm = () => {
   const [postContent, setPostContent] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false); // NEW loading state
+  const [loading, setLoading] = useState(false);
 
   /** Handle file selection */
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-
+  
     if (!file) return;
-
+  
     // Validate file type
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "video/mp4", "video/webm"];
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "video/mp4",
+      "video/webm",
+    ];
     if (!allowedTypes.includes(file.type)) {
       dispatch(
         alertActions.showAlert({
           severity: "error",
-          message: "Only image (JPG, PNG, WEBP) or video (MP4, WEBM) files are allowed!",
+          message:
+            "Only image (JPG, PNG, WEBP) or video (MP4, WEBM) files are allowed!",
         })
       );
+      // Reset input value to allow same file to be selected again
+      e.target.value = "";
       return;
     }
-
+  
     setSelectedFile(file);
     setPreview(URL.createObjectURL(file));
+  
+    // **IMPORTANT: Reset the input value**
+    // This ensures selecting the same file again triggers onChange
+    e.target.value = "";
+  };
+
+  /** Clear the selected file and preview */
+  const handleClearPreview = () => {
+    setSelectedFile(null);
+    setPreview(null);
   };
 
   /** Submit new post */
@@ -130,7 +149,7 @@ const AddPostForm = () => {
     <div style={{ width: "800px" }}>
       {/* Show loader while uploading */}
       {loading && (
-        <Box 
+        <Box
           sx={{
             position: "absolute",
             top: 0,
@@ -149,9 +168,16 @@ const AddPostForm = () => {
       )}
 
       {/* Add Post Form */}
-      <Paper sx={{ padding: 2, position: "relative" }} component="form" onSubmit={handlePostSubmit}>
+      <Paper
+        sx={{ padding: 2, position: "relative" }}
+        component="form"
+        onSubmit={handlePostSubmit}
+      >
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-          <Avatar src={`http://localhost:8080${user.profileUrl}`} sx={{ mr: 2 }} />
+          <Avatar
+            src={`http://localhost:8080${user.profileUrl}`}
+            sx={{ mr: 2 }}
+          />
           <TextField
             variant="outlined"
             placeholder="What's on your mind?"
@@ -167,24 +193,66 @@ const AddPostForm = () => {
 
         {/* Preview of selected media */}
         {preview && (
-          <Box sx={{ mb: 2 }}>
+          <Box
+            sx={{
+              position: "relative",
+              mb: 2,
+              width: "100%",
+              maxHeight: "400px",
+              overflow: "hidden",
+              borderRadius: "10px",
+              border: "1px solid #ccc",
+              backgroundColor: "#f9f9f9",
+            }}
+          >
+            {/* Close button */}
+            <IconButton
+              onClick={handleClearPreview}
+              sx={{
+                position: "absolute",
+                top: 8,
+                right: 8,
+                backgroundColor: "rgba(0,0,0,0.6)",
+                color: "#fff",
+                "&:hover": {
+                  backgroundColor: "rgba(0,0,0,0.8)",
+                },
+                zIndex: 5,
+              }}
+              size="small"
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+
+            {/* Media Display */}
             {selectedFile?.type.startsWith("video") ? (
               <video
                 src={preview}
                 controls
-                style={{ width: "100%", borderRadius: 8 }}
+                style={{
+                  width: "100%",
+                  maxHeight: "400px",
+                  objectFit: "contain",
+                  display: "block",
+                }}
               />
             ) : (
               <img
                 src={preview}
                 alt="Preview"
-                style={{ width: "100%", borderRadius: 8 }}
+                style={{
+                  width: "100%",
+                  maxHeight: "400px",
+                  objectFit: "cover",
+                  display: "block",
+                }}
               />
             )}
           </Box>
         )}
 
         <Divider sx={{ mb: 2 }} />
+
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
           <Button startIcon={<ImageIcon />} component="label" disabled={loading}>
             Add Media

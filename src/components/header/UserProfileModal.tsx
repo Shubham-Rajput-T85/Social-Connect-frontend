@@ -18,6 +18,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
 import { alertActions } from "../store/alert-slice";
 import { PostService } from "../../api/services/post.service";
+import { BASE_URL } from "../../api/endpoints";
+import { RootState } from "../store/store";
 
 interface UserProfileModalProps {
   open: boolean;
@@ -48,10 +50,16 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [posts, setPosts] = useState<any[]>([]);
   const [followers, setFollowers] = useState<any[]>([]);
   const [following, setFollowing] = useState<any[]>([]);
+  
+  const onlineUsers = useSelector((state: RootState) => state.onlineUsers.users);
+
 
   const userIsPrivate = useSelector((state: any) => state.auth.user?.isPrivate) ?? true;
-  const user = useSelector((state: any) => state.auth.user);
-  console.log("log--------------------------------------------------------------------------------------------------: ",user , user.isPrivate);
+  console.log("userIsPrivate:", userIsPrivate);
+
+  const isOnline = onlineUsers.includes(userData._id);
+  console.log("isgiven user online:",isOnline);
+  
   // ===== Reset state whenever modal opens for a new user =====
   useEffect(() => {
     if (open) {
@@ -158,7 +166,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     };
 
     if (!userData?._id) return;
-    console.log("log user private:",userIsPrivate);
+    console.log("log user private:", userIsPrivate);
     if (activeTab === "followers" && (followState === "Following" || !userIsPrivate)) fetchFollowers();
     if (activeTab === "following" && (followState === "Following" || !userIsPrivate)) fetchFollowing();
     if (activeTab === "posts" && (followState === "Following" || !userIsPrivate)) fetchPosts();
@@ -291,16 +299,45 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
         >
           {/* Profile Info */}
           <Box sx={{ display: "flex", alignItems: "center", mb: 2, gap: 2 }}>
-            <Avatar
-              src={
-                userData?.profileUrl
-                  ? `http://localhost:8080${userData.profileUrl}`
-                  : undefined
-              }
-              sx={{ width: 110, height: 110 }}
-            >
-              {(userData.username?.[0] || "U").toUpperCase()}
-            </Avatar>
+            <Box sx={{
+              position: "relative",
+              // width: 110,
+              // height: 110,
+              borderRadius: "50%",          // make the wrapper circular
+              border: `3px solid ${isOnline ? "#00FF00" : "#FFC107"}`, // green/yellow ring
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "4px",               // <--- this creates white space between image and border
+              boxSizing: "border-box",      // ensures padding doesn’t increase total size
+              bgcolor: "white",             // optional: background for the white gap
+            }}>
+              <Avatar
+                src={
+                  userData?.profileUrl
+                    ? `${BASE_URL}${userData.profileUrl}`
+                    : undefined
+                }
+                sx={{
+                  width: 110,
+                  height: 110,
+                }}
+              >
+                {(userData.username?.[0] || "U").toUpperCase()}
+              </Avatar>
+              <Box
+                sx={{
+                  position: "absolute",
+                  bottom: 4,
+                  right: 4,
+                  width: 30,
+                  height: 30,
+                  borderRadius: "50%",
+                  bgcolor: isOnline ? "#00FF00" : "#FFC107",
+                  border: "2px solid white",
+                }}
+              />
+            </Box>
             <Box>
               <Typography variant="subtitle1">@{userData.username}</Typography>
               <Typography variant="subtitle1" color="text.secondary">
@@ -579,7 +616,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
           </Box>
         )}
       </Paper>
-    </Modal>
+    </Modal >
   );
 };
 
