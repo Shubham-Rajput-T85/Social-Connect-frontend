@@ -3,9 +3,7 @@ import ProfilePostList from '../../post/ProfilePostList'
 
 const MyPosts = () => {
   return (
-    <div style={{ width: "800px" }}>
     <ProfilePostList/>
-    </div>
   )
 }
 

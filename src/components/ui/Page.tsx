@@ -4,6 +4,8 @@ import Sidebar from './Sidebar';
 import FooterNav from '../footer/FooterNav';
 
 const Page: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  console.log("page called");
+  
   return (
     <Box
       sx={{

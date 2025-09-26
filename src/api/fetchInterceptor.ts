@@ -1,4 +1,3 @@
-
 import { authActions } from '../components/store/auth-slice';
 import { alertActions } from '../components/store/alert-slice';
 import { NavigateFunction } from 'react-router-dom';
@@ -28,11 +27,12 @@ export const initFetchInterceptor = (navigate: NavigateFunction) => {
 
       store.dispatch(authActions.clearUser());
       store.dispatch(
-        alertActions.showAlert({ message: 'Session expired. Please login again.', severity: 'error' })
+        alertActions.showAlert({ message: 'Session expired. Please login again.', severity: 'warning' })
       );
+      console.log("redirected to login when token expires");
       navigate('/login', { replace: true });
     }
 
     return response;
-  } as typeof window.fetch; // TS assertion
+  } as typeof window.fetch;
 };

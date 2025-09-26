@@ -100,7 +100,8 @@ const ProfilePostList: React.FC = () => {
         display: "flex",
         flexDirection: "column",
         gap: 2,
-        height: "600px",
+        height: "65vh",
+        // maxWidth:"800px"
       }}
     >
       {/* Scrollable container with hidden scrollbar */}

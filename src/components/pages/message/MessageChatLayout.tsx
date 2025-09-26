@@ -10,27 +10,46 @@ const MessageChatLayout: React.FC = () => {
     <Box
       sx={{
         display: 'grid',
-        gridTemplateColumns: { xs: '1fr', md: '1fr 3fr' },
+        gridTemplateColumns: {
+          xs: selectedUserId ? '1fr' : '1fr', // Mobile: show only 1 at a time
+          md: '1fr 3fr', // Desktop: show both side by side
+        },
         height: '100%',
         gap: 2,
       }}
     >
-      <MessageChatSidebar onSelectUser={setSelectedUserId} />
-      {selectedUserId ? (
-        <MessageChatMain userId={selectedUserId} />
-      ) : (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            bgcolor: 'background.paper',
-            borderRadius: "10px",
-          }}
-        >
-          Select a user to start chatting
-        </Box>
-      )}
+      {/* Sidebar */}
+      <Box
+        sx={{
+          display: {
+            xs: selectedUserId ? 'none' : 'block', // Hide on mobile when chat is open
+            md: 'block',
+            width: '100%',    // important
+            maxWidth: '100%', // constrain max width
+          },
+        }}
+      >
+        <MessageChatSidebar onSelectUser={setSelectedUserId} />
+      </Box>
+
+      {/* Chat */}
+      <Box
+        sx={{
+          display: {
+            xs: selectedUserId ? 'block' : 'none', // Show only when user selected
+            md: 'block',
+            width: '100%',    // important
+            maxWidth: '100%', // constrain max width
+          },
+        }}
+      >
+        {selectedUserId && (
+          <MessageChatMain
+            userId={selectedUserId}
+            onBack={() => setSelectedUserId(null)} // Back button handler
+          />
+        )}
+      </Box>
     </Box>
   );
 };

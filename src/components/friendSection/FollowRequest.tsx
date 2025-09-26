@@ -118,6 +118,7 @@ const FollowRequest: React.FC<FollowRequestProps> = ({ currentUserId }) => {
     fetchFollowRequests();
   }, [currentUserId, dispatch]);
 
+  console.log("calling followRequest");
   return (
     <Box
       sx={{

@@ -105,6 +105,7 @@ export default function SuggestedFriend() {
     }
   };
 
+  console.log("calling suggestedfriends");
   return (
     <Box
       sx={{

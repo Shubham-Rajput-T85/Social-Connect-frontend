@@ -147,7 +147,7 @@ const CommentList = forwardRef<CommentListHandle, CommentListProps>(
       <Box
         ref={scrollContainerRef}
         sx={{
-          // maxHeight: "250px",
+          maxHeight: "250px",
           overflowY: "auto",
           border: "1px solid #ddd",
           borderRadius: "10px",
