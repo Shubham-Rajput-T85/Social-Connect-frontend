@@ -12,7 +12,7 @@ import AuthRoute from "./components/auth/AuthRoute";
 import { useEffect } from 'react';
 import { authActions } from './components/store/auth-slice';
 import Home from './components/pages/Home/Home';
-import { Box } from '@mui/material';
+import { Box, Paper } from '@mui/material';
 import Sidebar from './components/ui/Sidebar';
 import Page from './components/ui/Page';
 import ProfilePage from './components/pages/profile/ProfilePage';
@@ -30,7 +30,6 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("redirected to login when token expires");
     initFetchInterceptor(navigate);
   }, [navigate]);
 
@@ -166,7 +165,7 @@ function App() {
             >
               <Sidebar />
               <Box sx={{ width: "100%" }}>
-                <div>Page not found</div>
+                <Paper sx={{ width: "100%" }}>Page not found</Paper>
               </Box>
             </Box>
           } />

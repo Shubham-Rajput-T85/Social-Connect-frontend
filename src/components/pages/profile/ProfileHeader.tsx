@@ -2,6 +2,7 @@ import React from "react";
 import { Box, Paper, Typography, Avatar, Button, Divider } from "@mui/material";
 import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
+import { BASE_URL } from "../../../api/endpoints";
 
 interface ProfileHeaderProps {
   stats: {
@@ -26,14 +27,22 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ stats }) => {
       <Box
         sx={{
           display: "flex",
+          flexDirection: { xs: "column", md: "row" },
           justifyContent: "space-between",
           alignItems: "center",
+          gap: 2
         }}
       >
         {/* Left - Avatar + Bio */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+        <Box sx={{ 
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          alignItems: { xs: "center", md: "flex-start" },
+          textAlign: { xs: "center", md: "left" },
+          gap: 2
+          }}>
           <Avatar
-            src={user?.profileUrl ? `http://localhost:8080${user.profileUrl}` : undefined}
+            src={user?.profileUrl ? `${BASE_URL}${user.profileUrl}` : undefined}
             alt="User Avatar"
             sx={{ width: 80, height: 80 }}
           />
@@ -80,7 +89,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ stats }) => {
       <Divider sx={{ my: 2 }} />
 
       {/* Tabs Navigation */}
-      <Box sx={{ display: "flex", gap: 2 }}>
+      <Box sx={{ display: "flex", gap: 2, justifyContent: { xs: "center", md: "flex-start" }, }}>
         <Button
           onClick={() => navigate("/profile/my-posts")}
           variant={activeTab === "my-posts" ? "contained" : "text"}

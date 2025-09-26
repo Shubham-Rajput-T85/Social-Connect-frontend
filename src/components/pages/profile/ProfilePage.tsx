@@ -30,9 +30,11 @@ const ProfilePage: React.FC = () => {
       />
 
       {/* Tab Content */}
-      {activeTab === "settings" && <ProfileLayout><SettingsMain /></ProfileLayout>}
-      {activeTab === "my-posts" && <ProfileLayout><MyPosts /></ProfileLayout>}
-      {activeTab === "add-post" && <ProfileLayout><AddPostForm /></ProfileLayout>}
+      <ProfileLayout>
+      {activeTab === "settings" && <SettingsMain />}
+      {activeTab === "my-posts" && <MyPosts />}
+      {activeTab === "add-post" && <AddPostForm />}
+      </ProfileLayout>
     </Box>
   );
 };

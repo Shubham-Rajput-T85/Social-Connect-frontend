@@ -1,4 +1,5 @@
-import { Avatar, Box, Typography } from '@mui/material';
+import { Avatar, Box, IconButton, Typography } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import React, { useEffect, useRef, useState } from 'react';
 import MessageChat from './MessageChat';
 import MessageChatInput from './MessageChatInput';
@@ -13,17 +14,30 @@ interface Message {
 
 interface Props {
   userId: string;
+  onBack: () => void;
 }
+
+const dummyMessage = `Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
+
+Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
+
+Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
+
+Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.
+
+Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.`;
 
 const dummyMessages: Message[] = Array.from({ length: 20 }).map((_, i) => ({
   id: `${i}`,
-  text: `This is message ${i + 1}`,
+  text: `This is message
+   ${dummyMessage} 
+   ${i + 1}`,
   sender: i % 2 === 0 ? 'me' : 'them',
-  timestamp: new Date(Date.now() - i * 1000 * 60 * 60 * 4).toISOString(), // simulate older msgs
+  timestamp: new Date(Date.now() - i * 1000 * 60 * 60 * 4).toISOString(),
   status: 'seen',
 }));
 
-const MessageChatMain: React.FC<Props> = ({ userId }) => {
+const MessageChatMain: React.FC<Props> = ({ userId, onBack }) => {
   const [messages, setMessages] = useState<Message[]>(dummyMessages);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -31,16 +45,11 @@ const MessageChatMain: React.FC<Props> = ({ userId }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
   }, [messages]);
 
-  // Helper: Determine if two timestamps are on the same day
-  const isSameDay = (d1: Date, d2: Date) => {
-    return (
-      d1.getFullYear() === d2.getFullYear() &&
-      d1.getMonth() === d2.getMonth() &&
-      d1.getDate() === d2.getDate()
-    );
-  };
+  const isSameDay = (d1: Date, d2: Date) =>
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate();
 
-  // Helper: Format date as Today, Yesterday, or full date
   const formatDate = (date: Date) => {
     const today = new Date();
     const yesterday = new Date();
@@ -74,17 +83,27 @@ const MessageChatMain: React.FC<Props> = ({ userId }) => {
           borderBottom: '1px solid #ddd',
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'space-between',
         }}
       >
+        {/* Left: User Info */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Avatar src="/avatar2.jpg" />
           <Box>
-            <Box fontWeight={600}>User Name</Box>
-            <Box fontSize={12} color="text.secondary">
+            <Typography fontWeight={600}>User Name</Typography>
+            <Typography fontSize={12} color="text.secondary">
               Online
-            </Box>
+            </Typography>
           </Box>
         </Box>
+
+        {/* Right: Back Button (Mobile Only) */}
+        <IconButton
+          onClick={onBack}
+          sx={{ display: { xs: 'inline-flex', md: 'none' } }}
+        >
+          <ArrowBackIcon />
+        </IconButton>
       </Box>
 
       {/* Messages */}
@@ -96,11 +115,11 @@ const MessageChatMain: React.FC<Props> = ({ userId }) => {
           display: 'flex',
           flexDirection: 'column',
           gap: 1,
+          maxWidth:"100%"
         }}
       >
         {messages.map((msg, index) => {
           const msgDate = new Date(msg.timestamp);
-
           const showDateSeparator =
             index === 0 ||
             !isSameDay(new Date(messages[index - 1].timestamp), msgDate);

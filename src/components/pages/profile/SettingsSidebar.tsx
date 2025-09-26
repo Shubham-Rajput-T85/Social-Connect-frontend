@@ -8,7 +8,7 @@ interface SettingsSidebarProps {
 
 const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ activeTab, setActiveTab }) => {
   return (
-    <List>
+    <List sx={{ width: "100%" }}>
       <ListItemButton
         selected={activeTab === "general"}
         onClick={() => setActiveTab("general")}
