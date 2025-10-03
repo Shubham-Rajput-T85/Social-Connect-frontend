@@ -7,6 +7,7 @@ import {
   Avatar,
   Button,
   Paper,
+  Tooltip,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { alertActions } from "../store/alert-slice";
@@ -124,24 +125,23 @@ const FollowRequest: React.FC<FollowRequestProps> = ({ currentUserId }) => {
       sx={{
         display: "flex",
         flexDirection: "column",
-        maxHeight: "300px",
+        maxHeight: "30vh",
         borderLeft: "1px solid #eee",
         overflow: "hidden",
         borderRadius: "10px",
-        mb: 2
+        mb: 2,
       }}
     >
-      {/* ---- TOP SECTION: Suggested Friends ---- */}
       <Paper
         elevation={0}
         sx={{
           display: "flex",
           flexDirection: "column",
           bgcolor: "background.paper",
-          position: "relative", // Required for fade positioning
+          position: "relative", // Needed for fade effect positioning
         }}
       >
-        {/* Sticky Heading */}
+        {/* Sticky Header */}
         <Box
           sx={{
             p: 2,
@@ -154,80 +154,137 @@ const FollowRequest: React.FC<FollowRequestProps> = ({ currentUserId }) => {
           }}
         >
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Follow Request
+            Follow Requests
           </Typography>
         </Box>
-        <hr style={{ color: "gray", margin:"10px", marginTop:"0" }} />
+
+        <hr style={{ color: "gray", margin: "10px", marginTop: "0" }} />
 
         {/* Scrollable List */}
         <Box
           ref={requestScrollRef}
-          onScroll={() => handleScroll((requestScrollRef as any), setShowFadeRequest)}
+          onScroll={() => handleScroll(requestScrollRef as any, setShowFadeRequest)}
           sx={{
             maxHeight: 200,
             overflowY: "auto",
-            px: 2,
             scrollbarWidth: "none",
             "&::-webkit-scrollbar": {
               display: "none",
             },
           }}
         >
-          <List>
+          <List sx={{ p: 0 }}>
             {requests.length > 0 ? (
               requests.map((user) => (
                 <ListItem
                   key={user._id}
                   sx={{
                     display: "flex",
-                    justifyContent: "space-between",
                     alignItems: "center",
+                    justifyContent: "space-between",
                     gap: 2,
+                    flexWrap: "nowrap",
                   }}
                 >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  {/* Avatar + Name + Username */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      flex: 1,
+                      minWidth: 0,
+                    }}
+                  >
                     <Avatar
                       src={user.profileUrl || ""}
-                      sx={{ width: 44, height: 44 }}
+                      sx={{
+                        width: 44,
+                        height: 44,
+                        flexShrink: 0,
+                      }}
                     >
                       {(user.username?.[0] || "U").toUpperCase()}
                     </Avatar>
-                    <Box>
-                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                        {user.name}
-                      </Typography>
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ display: "block" }}
-                      >
-                        @{user.username}
-                      </Typography>
+
+                    <Box
+                      sx={{
+                        overflow: "hidden",
+                        minWidth: 0,
+                        flex: 1,
+                        maxWidth: "70px",
+                      }}
+                    >
+                      <Tooltip title={user.name} arrow disableInteractive>
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            fontWeight: 500,
+                            lineHeight: 1.2,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {user.name}
+                        </Typography>
+                      </Tooltip>
+
+                      <Tooltip title={`@${user.username}`} arrow disableInteractive>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "block",
+                          }}
+                        >
+                          @{user.username}
+                        </Typography>
+                      </Tooltip>
                     </Box>
                   </Box>
-                  <Box sx={{ display: "flex", gap: 1 }}>
+
+                  {/* Action Buttons */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: 1,
+                      flexShrink: 0,
+                    }}
+                  >
                     <Button
                       variant="contained"
                       color="primary"
                       size="small"
                       onClick={() => handleAction("accept", user._id)}
-                      
+                      sx={{ minWidth: 36, px: 1 }}
                     >
-                      <DoneIcon/>
+                      <DoneIcon fontSize="small" />
                     </Button>
                     <Button
                       variant="outlined"
                       color="error"
                       size="small"
                       onClick={() => handleAction("reject", user._id)}
+                      sx={{ minWidth: 36, px: 1 }}
                     >
-                      <ClearIcon/>
+                      <ClearIcon fontSize="small" />
                     </Button>
                   </Box>
                 </ListItem>
               ))
             ) : (
-              <Typography sx={{ textAlign: "center", p: 2, pt:0, color: "text.secondary" }}>
+              <Typography
+                sx={{
+                  textAlign: "center",
+                  p: 2,
+                  pt: 0,
+                  color: "text.secondary",
+                }}
+              >
                 No follow requests
               </Typography>
             )}
@@ -235,7 +292,7 @@ const FollowRequest: React.FC<FollowRequestProps> = ({ currentUserId }) => {
         </Box>
 
         {/* Fade Effect */}
-        {(showFadeRequest) && (
+        {showFadeRequest && (
           <Box
             sx={{
               position: "absolute",
@@ -252,9 +309,7 @@ const FollowRequest: React.FC<FollowRequestProps> = ({ currentUserId }) => {
           />
         )}
       </Paper>
-
     </Box>
-
   );
 };
 

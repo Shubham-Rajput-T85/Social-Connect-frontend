@@ -29,15 +29,13 @@ export const connectSocket = () => {
   }
 };
 
-export const registerUser = (userId: string) => {
+export const registerUser = () => {
   const s = getSocket();
   console.log("socket: ",s);
-  console.log("userid:",userId);
-  console.log("s.connected:",s.connected);
   
   if (s.connected) {
-    s.emit("register", userId);
-    console.log("User registered on socket:", userId);
+    s.emit("register");
+    console.log("s.connected:",s.connected);
   }
 };
 

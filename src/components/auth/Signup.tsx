@@ -149,7 +149,7 @@ const Signup = () => {
           const errorData = await response.json();
           if (errorData.data && Array.isArray(errorData.data)) {
             errorMessage = errorData.data
-              .map((err: any) => `${err.path}: ${err.msg}`)
+              .map((err: any) => `${err.field}: ${err.message}`)
               .join(" | ");
           } else if (errorData.message) {
             errorMessage = errorData.message;

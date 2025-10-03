@@ -102,9 +102,6 @@ const GeneralSettingsForm: React.FC = () => {
   const formSubmitHandler = async (event: FormEvent) => {
     event.preventDefault();
 
-
-    // console.log("user:", user);
-
     if (!user._id) {
       dispatch(
         alertActions.showAlert({
@@ -153,9 +150,9 @@ const GeneralSettingsForm: React.FC = () => {
       }
 
       // Success
-      nameReset();
-      usernameReset();
-      bioReset();
+      // nameReset();
+      // usernameReset();
+      // bioReset();
       setProfilePic(null);
       setPreviewUrl(null);
 
@@ -172,7 +169,7 @@ const GeneralSettingsForm: React.FC = () => {
         })
       );
 
-      navigate("/", { replace: true });
+      // navigate("/", { replace: true });
     } catch (error) {
       dispatch(
         alertActions.showAlert({
@@ -183,136 +180,134 @@ const GeneralSettingsForm: React.FC = () => {
     }
   };
 
-
-
   return (
     <Card
-    sx={(theme) => ({
-      width: "100%",
-      boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", // Subtle soft shadow
-      border: `2px solid ${theme.palette.primary.main}`, // Primary color border
-      borderRadius: "16px", // Rounded edges
-      p: 2, // Space inside the border
-      backgroundColor: "transparent", // Keep transparent to show app background
-    })}
-  >
-    <form onSubmit={formSubmitHandler}>
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        General Settings
-      </Typography>
-
-      {/* Name */}
-      <TextField
-        value={nameValue}
-        error={!!nameError}
-        fullWidth
-        label="Name"
-        variant="outlined"
-        margin="normal"
-        onChange={nameInputHandler}
-        onBlur={nameBlurHandler}
-      />
-      {nameError && (
-        <Typography color="error" variant="caption" component="span">
-          Name must only contain letters *
+      sx={(theme) => ({
+        // width: "100%",
+        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", // Subtle soft shadow
+        border: `2px solid ${theme.palette.primary.main}`, // Primary color border
+        borderRadius: "16px", // Rounded edges
+        p: 2, // Space inside the border
+        backgroundColor: "transparent", // Keep transparent to show app background
+      })}
+    >
+      <form onSubmit={formSubmitHandler}>
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          General Settings
         </Typography>
-      )}
 
-      {/* Username */}
-      <TextField
-        fullWidth
-        label="Username"
-        variant="outlined"
-        value={usernameValue}
-        error={!!usernameError}
-        margin="normal"
-        onChange={usernameInputHandler}
-        onBlur={usernameBlurHandler}
-      />
-      {usernameError && (
-        <Typography color="error" variant="caption" component="span">
-          Username must start with a letter and be at least 3 characters *
-        </Typography>
-      )}
+        {/* Name */}
+        <TextField
+          value={nameValue}
+          error={!!nameError}
+          fullWidth
+          label="Name"
+          variant="outlined"
+          margin="normal"
+          onChange={nameInputHandler}
+          onBlur={nameBlurHandler}
+        />
+        {nameError && (
+          <Typography color="error" variant="caption" component="span">
+            Name must only contain letters *
+          </Typography>
+        )}
 
-      {/* Bio */}
-      <TextField
-        value={bioValue}
-        error={!!bioError}
-        fullWidth
-        multiline
-        rows={3}
-        label="Bio"
-        variant="outlined"
-        margin="normal"
-        onChange={bioInputHandler}
-        onBlur={bioBlurHandler}
-        helperText={`${bioValue.length}/150`}
-      />
+        {/* Username */}
+        <TextField
+          fullWidth
+          label="Username"
+          variant="outlined"
+          value={usernameValue}
+          error={!!usernameError}
+          margin="normal"
+          onChange={usernameInputHandler}
+          onBlur={usernameBlurHandler}
+        />
+        {usernameError && (
+          <Typography color="error" variant="caption" component="span">
+            Username must start with a letter and be at least 3 characters *
+          </Typography>
+        )}
 
-      {/* Profile Picture */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-        <Button variant="outlined" component="label">
-          Upload Picture
-          <input
-            type="file"
-            accept="image/*"
-            hidden
-            onChange={handleProfilePicChange}
-          />
+        {/* Bio */}
+        <TextField
+          value={bioValue}
+          error={!!bioError}
+          fullWidth
+          multiline
+          rows={3}
+          label="Bio"
+          variant="outlined"
+          margin="normal"
+          onChange={bioInputHandler}
+          onBlur={bioBlurHandler}
+          helperText={`${bioValue.length}/150`}
+        />
+
+        {/* Profile Picture */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+          <Button variant="outlined" component="label">
+            Upload Picture
+            <input
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleProfilePicChange}
+            />
+          </Button>
+          {previewUrl && (
+            <Box
+              sx={{
+                position: "relative",
+                display: "inline-block",
+              }}
+            >
+              <Avatar
+                src={previewUrl}
+                alt="Profile Preview"
+                sx={{ width: 56, height: 56 }}
+              />
+
+              {/* Cross Button */}
+              <IconButton
+                onClick={handleClearProfilePic}
+                size="small"
+                sx={{
+                  position: "absolute",
+                  top: -8,
+                  right: -8,
+                  backgroundColor: "rgba(0,0,0,0.6)",
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor: "rgba(0,0,0,0.8)",
+                  },
+                }}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          )}
+        </Box>
+
+        <Button type="submit" variant="contained" fullWidth
+          disabled={!isFormValid}
+          sx={(theme) => ({
+            mt: 3,
+            textTransform: "none",
+            backgroundColor: theme.palette.primary.main,
+            "&:hover": {
+              backgroundColor: theme.palette.primary.dark,
+            },
+            "&.Mui-disabled": {
+              backgroundColor: alpha(theme.palette.primary.main, 0.4),
+              color: alpha("#fff", 0.7),
+            },
+          })}
+        >
+          Save Changes
         </Button>
-        {previewUrl && (
-                  <Box
-                    sx={{
-                      position: "relative",
-                      display: "inline-block",
-                    }}
-                  >
-                    <Avatar
-                      src={previewUrl}
-                      alt="Profile Preview"
-                      sx={{ width: 56, height: 56 }}
-                    />
-
-                    {/* Cross Button */}
-                    <IconButton
-                      onClick={handleClearProfilePic}
-                      size="small"
-                      sx={{
-                        position: "absolute",
-                        top: -8,
-                        right: -8,
-                        backgroundColor: "rgba(0,0,0,0.6)",
-                        color: "#fff",
-                        "&:hover": {
-                          backgroundColor: "rgba(0,0,0,0.8)",
-                        },
-                      }}
-                    >
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-                )}
-      </Box>
-
-      <Button type="submit" variant="contained" fullWidth
-        disabled={!isFormValid}
-        sx={(theme) => ({
-          mt: 3,
-          textTransform: "none",
-          backgroundColor: theme.palette.primary.main,
-          "&:hover": {
-            backgroundColor: theme.palette.primary.dark,
-          },
-          "&.Mui-disabled": {
-            backgroundColor: alpha(theme.palette.primary.main, 0.4),
-            color: alpha("#fff", 0.7),
-          },
-        })}
-      >
-        Save Changes
-      </Button>
-    </form>
+      </form>
     </Card>
   );
 };

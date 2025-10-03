@@ -50,7 +50,7 @@ function App() {
 
         if (data.user && data.user._id) {
           connectSocket();
-          registerUser(data.user._id.toString());
+          registerUser();
         }
 
         dispatch(authActions.setUser(data.user));
@@ -61,7 +61,6 @@ function App() {
 
     fetchUser();
   }, [dispatch]);
-
 
   useEffect(() => {
     const socket = getSocket();
@@ -85,8 +84,6 @@ function App() {
       socket.off("userOffline");
     };
   }, [dispatch]);
-
-
 
   const handleOnClose = () => {
     if (alertState.callBack) {

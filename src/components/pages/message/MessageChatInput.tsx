@@ -11,14 +11,7 @@ const MessageChatInput: React.FC<Props> = ({ onSend }) => {
 
   const handleSend = () => {
     if (!text.trim()) return;
-    const msg = {
-      id: Date.now().toString(),
-      text,
-      sender: 'me',
-      timestamp: new Date().toISOString(),
-      status: 'sent',
-    };
-    onSend(msg);
+    onSend(text.trim());
     setText('');
   };
 
