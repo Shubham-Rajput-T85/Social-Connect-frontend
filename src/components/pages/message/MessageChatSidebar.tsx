@@ -6,23 +6,20 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
 
 interface Props {
-  onSelectUser: (id: string) => void;
+  onSelectConversation: (conversation: IConversation) => void;
 }
 
-const MessageChatSidebar: React.FC<Props> = ({ onSelectUser }) => {
+const MessageChatSidebar: React.FC<Props> = ({ onSelectConversation }) => {
   const [conversations, setConversations] = useState<IConversation[]>([]);
   const [loading, setLoading] = useState(true);
 
   const onlineUsers = useSelector((state: RootState) => state.onlineUsers.users);
-  console.log(onlineUsers);
-  console.log(onlineUsers.length);
 
   useEffect(() => {
     const fetchConversations = async () => {
       try {
         setLoading(true);
         const data = await ConversationService.getConversations();
-        console.log(data);
         setConversations(data);
       } catch (error) {
         console.error("Error fetching conversations:", error);
@@ -33,6 +30,8 @@ const MessageChatSidebar: React.FC<Props> = ({ onSelectUser }) => {
 
     fetchConversations();
   }, []);
+
+  const [activeConvId, setActiveConvId] = useState<string | null>(null);
 
   return (
     <Box
@@ -57,18 +56,25 @@ const MessageChatSidebar: React.FC<Props> = ({ onSelectUser }) => {
           <List>
             {conversations.map(conv =>{ 
             const isOnline = onlineUsers.includes(conv.user._id);
+            const isSelected = activeConvId === conv.conversationId;
             console.log(`conv.user._id:${conv.user._id} ${isOnline}` );
             return(
               <MessageChatUserItem
                 key={conv.conversationId}
                 user={{
                   id: conv.user._id,
-                  name: conv.user.username,
+                  name: conv.user.name,
+                  username: conv.user.username,
                   profile: conv.user.profileUrl,
                   online: isOnline,
                   unreadCount: conv.unreadCount,
                 }}
-                onClick={() => onSelectUser(conv.user._id)}
+                onClick={() =>{
+                  setActiveConvId(conv.conversationId);
+                  onSelectConversation(conv);
+                } 
+              }
+              selected={isSelected}
               />
             )}
             )}

@@ -5,6 +5,7 @@ import { BASE_URL } from '../../../api/endpoints';
 interface User {
   id: string;
   name: string;
+  username: string;
   profile: string;
   online: boolean;
   unreadCount: number;
@@ -13,12 +14,20 @@ interface User {
 interface Props {
   user: User;
   onClick: () => void;
+  selected?: boolean;
 }
 
-const MessageChatUserItem: React.FC<Props> = ({ user, onClick }) => {
-  console.log("user online or not: ",user.online);
+const MessageChatUserItem: React.FC<Props> = ({ user, onClick, selected }) => {
+  console.log("user online or not: ", user.online);
   return (
-    <ListItemButton onClick={onClick}>
+    <ListItemButton onClick={onClick}
+      sx={{
+        bgcolor: selected ? 'action.selected' : 'transparent',
+        '&:hover': {
+          bgcolor: 'action.hover',
+        },
+      }}
+    >
       <ListItemAvatar>
         <Badge
           overlap="circular"
@@ -32,7 +41,7 @@ const MessageChatUserItem: React.FC<Props> = ({ user, onClick }) => {
         >
           <Avatar
             src={user.profile ? BASE_URL + user.profile : "/default-avatar.png"}
-            alt={user.name}
+            alt={user.username}
             sx={{
               width: 48,
               height: 48,
@@ -43,7 +52,7 @@ const MessageChatUserItem: React.FC<Props> = ({ user, onClick }) => {
         </Badge>
       </ListItemAvatar>
       <ListItemText
-        primary={user.name}
+        primary={user.username}
         secondary={
           user.unreadCount > 0 ? (
             <Box component="span" sx={{ color: 'success.main', fontWeight: 'bold' }}>

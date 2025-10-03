@@ -17,6 +17,7 @@ export interface ConversationUser {
   username: string;
   profileUrl: string;
   online: boolean;
+  name: string;
 }
 
 export interface IConversation {

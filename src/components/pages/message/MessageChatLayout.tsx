@@ -2,16 +2,17 @@ import { Box, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import MessageChatSidebar from './MessageChatSidebar';
 import MessageChatMain from './MessageChatMain';
+import { IConversation } from '../../../api/services/conversation.service';
 
 const MessageChatLayout: React.FC = () => {
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<IConversation | null>(null);
 
   return (
     <Box
       sx={{
         display: 'grid',
         gridTemplateColumns: {
-          xs: selectedUserId ? '1fr' : '1fr', // Mobile: show only 1 at a time
+          xs: selectedConversation?.conversationId ? '1fr' : '1fr', // Mobile: show only 1 at a time
           md: '1fr 3fr', // Desktop: show both side by side
         },
         height: '100%',
@@ -22,32 +23,33 @@ const MessageChatLayout: React.FC = () => {
       <Box
         sx={{
           display: {
-            xs: selectedUserId ? 'none' : 'block', // Hide on mobile when chat is open
+            xs: selectedConversation?.conversationId ? 'none' : 'block', // Hide on mobile when chat is open
             md: 'block',
             width: '100%',    // important
           },
         }}
       >
-        <MessageChatSidebar onSelectUser={setSelectedUserId} />
+        <MessageChatSidebar onSelectConversation={setSelectedConversation} />
       </Box>
 
       {/* Chat */}
       <Box
         sx={{
           display: {
-            xs: selectedUserId ? 'block' : 'none', // Show only when user selected
+            xs: selectedConversation?.conversationId ? 'block' : 'none', // Show only when user selected
             md: 'block',
             width: '100%',    // important
           },
         }}
       >
-        {selectedUserId && (
+        {selectedConversation && (
           <MessageChatMain
-            userId={selectedUserId}
-            onBack={() => setSelectedUserId(null)} // Back button handler
+            conversation={selectedConversation}
+            // userData = {}
+            onBack={() => setSelectedConversation(null)} // Back button handler
           />
         )}
-        {!selectedUserId && (
+        {!selectedConversation?.conversationId && (
           <Box
             sx={{
               display: 'flex',

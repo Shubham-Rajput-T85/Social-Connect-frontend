@@ -1,81 +1,65 @@
 import { Box, Typography } from '@mui/material';
 import React from 'react';
-
-export interface Message {
-  id: string;
-  text: string;
-  sender: 'me' | 'them';
-  timestamp: string;
-  status: 'sent' | 'delivered' | 'seen';
-}
+import { IMessage } from '../../../api/services/message.service';
+import { useSelector } from 'react-redux';
 
 interface Props {
-  message: Message;
+  message: IMessage;
 }
 
 const MessageChat: React.FC<Props> = ({ message }) => {
-  const isMe = message.sender === 'me';
-  const date = new Date(message.timestamp);
-  const formatted = date.toLocaleString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-  });
+  const currentUserId = useSelector((state : any) => state.auth.user._id);
+  // console.log("current user id:", currentUserId);
+  
+  const isMe = message.sender._id === currentUserId;
+  // console.log("message sender :", message.sender._id);
+  // console.log("isMe:",isMe);
+
+  const date = message.createdAt ? new Date(message.createdAt) : new Date();
+  const formatted = isNaN(date.getTime())
+    ? ''
+    : date.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit' });
 
   return (
     <>
-      {/* Timestamp above message */}
       <Typography
         variant="caption"
-        sx={{
-          display: 'flex',
-          justifyContent: isMe ? 'flex-end' : 'flex-start',
-        }}
+        sx={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start' }}
       >
         {formatted}
       </Typography>
 
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: isMe ? 'flex-end' : 'flex-start',
-        }}
-      >
+      <Box sx={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start', width: '100%' }}>
         <Box
           sx={{
-            position: "relative",
+            position: 'relative',
             p: 1.5,
-            borderRadius: "10px",
-            borderTopRightRadius: isMe ? "0px":"10px",
-            borderTopLeftRadius: isMe ? "10px":"0px",
+            borderRadius: '10px',
+            borderTopRightRadius: isMe ? '0px' : '10px',
+            borderTopLeftRadius: isMe ? '10px' : '0px',
             bgcolor: isMe ? 'primary.main' : 'grey.200',
             color: isMe ? 'white' : 'text.primary',
-            maxWidth: "80vh",
-            width:"80%",
-            wordBreak: "break-word",      
-            overflowWrap: "break-word", 
-            whiteSpace: "pre-wrap",
+            maxWidth: '80vh',
+            width: '80%',
+            wordBreak: 'break-word',
+            overflowWrap: 'break-word',
+            whiteSpace: 'pre-wrap',
           }}
         >
-          <Typography variant="body2">
-            {message.text}
-          </Typography>
+          <Typography variant="body2">{message.text}</Typography>
 
-          {/* Message status (check marks) */}
-          <Typography
-            variant="caption"
-            sx={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              mt: 0.5,
-            }}
-          >
-            {isMe &&
-              (message.status === 'sent'
+          {isMe && (
+            <Typography
+              variant="caption"
+              sx={{ display: 'flex', justifyContent: 'flex-end', mt: 0.5 }}
+            >
+              {message.status === 'sent'
                 ? '✓'
                 : message.status === 'delivered'
-                  ? '✓✓'
-                  : '✓✓✔')}
-          </Typography>
+                ? '✓✓'
+                : '✓✓✔'}
+            </Typography>
+          )}
         </Box>
       </Box>
     </>
