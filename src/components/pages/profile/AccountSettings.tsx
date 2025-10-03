@@ -10,6 +10,7 @@ import {
     DialogActions,
     Switch,
     FormControlLabel,
+    Card,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -36,8 +37,8 @@ const AccountSettings: React.FC = () => {
         try {
             setLoading(true);
             const updatedUser = await userService.toggleAccountStatus();
-            console.log("update after db: ",updatedUser);
-            
+            console.log("update after db: ", updatedUser);
+
             // Update Redux state with new isPrivate value
             dispatch(authActions.updateUserPrivacyStatus(updatedUser.data.isPrivate));
 
@@ -98,7 +99,16 @@ const AccountSettings: React.FC = () => {
     };
 
     return (
-        <Box>
+        <Card
+        sx={(theme) => ({
+        //   width: "100%",
+          boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)", // Subtle soft shadow
+          border: `2px solid ${theme.palette.primary.main}`, // Primary color border
+          borderRadius: "16px", // Rounded edges
+          p: 2, // Space inside the border
+          backgroundColor: "transparent", // Keep transparent to show app background
+        })}
+      >
             {/* Account Status Section */}
             <Typography variant="h6" mb={2}>
                 Account Status
@@ -163,7 +173,7 @@ const AccountSettings: React.FC = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </Box>
+            </Card>
     );
 };
 

@@ -5,7 +5,6 @@ import {
   Typography,
   Divider,
   IconButton,
-  useTheme,
   useMediaQuery,
 } from "@mui/material";
 import {
@@ -22,8 +21,6 @@ type TabType = "general" | "account";
 const SettingsMain: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>("general");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  const theme = useTheme();
 
   /**
    * Custom breakpoint:

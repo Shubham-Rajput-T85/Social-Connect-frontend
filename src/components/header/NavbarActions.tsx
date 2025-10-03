@@ -6,12 +6,9 @@ import { useDispatch } from "react-redux";
 import { authActions } from "../store/auth-slice";
 import Notification from "./Notification";
 import { getSocket } from "../../socket";
-import { useSelector } from "react-redux";
-import { RootState } from "../store/store";
 
 const NavbarActions: React.FC = () => {
   const dispatch = useDispatch();
-  const user = useSelector((state : any) => state.auth.user);
 
   const logoutHandler = async () => {
     await fetch("http://localhost:8080/auth/logout", {
@@ -20,8 +17,7 @@ const NavbarActions: React.FC = () => {
     });
     dispatch(authActions.logout());
     const socket = getSocket();
-    const currentUserId = user._id;
-    socket.emit("logout", currentUserId);
+    socket.emit("logout");
   };
 
   return (

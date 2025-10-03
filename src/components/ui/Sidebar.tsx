@@ -26,7 +26,7 @@ interface SidebarLink {
 }
 
 const Sidebar = () => {
-  const user = useSelector((state:any) => state.auth.user);
+  const user = useSelector((state: any) => state.auth.user);
   console.log("user from sidebar:", user);
 
   const links: SidebarLink[] = [
@@ -36,7 +36,7 @@ const Sidebar = () => {
   ];
 
 
-  if(!user){
+  if (!user) {
     return <></>;
   }
 
@@ -56,8 +56,18 @@ const Sidebar = () => {
             <Typography variant="h6" sx={{ mt: 1 }}>
               {user.name}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {user.bio}
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                maxWidth:"150px",
+                whiteSpace: "normal",
+                wordBreak: "break-word",
+                textAlign: "center",
+                mx: "auto", 
+              }}
+            >
+              {user.bio || "No bio available"}
             </Typography>
           </Box>
           <Box>
@@ -65,11 +75,13 @@ const Sidebar = () => {
             <List>
               {links.map(({ label, path, icon }) => (
                 <ListItem key={path} disablePadding>
-                  <NavLink to={path} style={{ textDecoration: "none", width: "100%" }}>
+                  <NavLink
+                    to={path}
+                    style={{ textDecoration: "none", width: "100%" }}
+                  >
                     {({ isActive }: { isActive: boolean }) => (
-                      <ListItemButton 
-                      selected={ isActive }
-                      // onClick={() => setActiveTab("general")}
+                      <ListItemButton
+                        selected={isActive}
                         sx={{
                           color: isActive ? "primary.main" : "inherit",
                           "& .MuiListItemIcon-root": {

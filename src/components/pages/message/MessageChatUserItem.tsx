@@ -1,10 +1,11 @@
 import { ListItemButton, ListItemAvatar, Avatar, ListItemText, Badge, Box } from '@mui/material';
 import React from 'react';
+import { BASE_URL } from '../../../api/endpoints';
 
 interface User {
   id: string;
   name: string;
-  avatar: string;
+  profile: string;
   online: boolean;
   unreadCount: number;
 }
@@ -15,6 +16,7 @@ interface Props {
 }
 
 const MessageChatUserItem: React.FC<Props> = ({ user, onClick }) => {
+  console.log("user online or not: ",user.online);
   return (
     <ListItemButton onClick={onClick}>
       <ListItemAvatar>
@@ -22,9 +24,22 @@ const MessageChatUserItem: React.FC<Props> = ({ user, onClick }) => {
           overlap="circular"
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           variant="dot"
-          color={user.online ? 'success' : 'error'}
+          sx={{
+            '& .MuiBadge-badge': {
+              backgroundColor: user.online ? "#00FF00" : "#FFC107",
+            },
+          }}
         >
-          <Avatar src={user.avatar} />
+          <Avatar
+            src={user.profile ? BASE_URL + user.profile : "/default-avatar.png"}
+            alt={user.name}
+            sx={{
+              width: 48,
+              height: 48,
+              border: "2px solid #e0e0e0",
+              objectFit: "cover",
+            }}
+          />
         </Badge>
       </ListItemAvatar>
       <ListItemText

@@ -7,6 +7,7 @@ import {
   ListItem,
   Button,
   Avatar,
+  Tooltip,
 } from "@mui/material";
 import { userService } from "../../api/services/user.service";
 import { useSelector, useDispatch } from "react-redux";
@@ -111,7 +112,7 @@ export default function SuggestedFriend() {
       sx={{
         display: "flex",
         flexDirection: "column",
-        maxHeight: "300px",
+        maxHeight: "30vh",
         borderLeft: "1px solid #eee",
         overflow: "hidden",
         borderRadius: "10px",
@@ -133,40 +134,104 @@ export default function SuggestedFriend() {
           sx={{ maxHeight: 200, overflowY: "auto", px: 2, pb: 2, scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } }}
         >
           <List sx={{ p: 0 }}>
-            {suggestedFriends.map((friend) => (
-              <ListItem
-                key={friend._id}
+            {suggestedFriends.length > 0 ? (
+              suggestedFriends.map((friend) => (
+                <ListItem
+                  sx={{
+                    py: 1,
+                    px: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 2,
+                    flexWrap: "nowrap",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      flex: 1,
+                      minWidth: 0,
+                    }}
+                  >
+                    <Avatar
+                      src={(BASE_URL + friend.profileUrl) || `https://i.pravatar.cc/150?u=${friend._id}`}
+                      sx={{ width: 44, height: 44, flexShrink: 0 }}
+                    />
+
+                    <Box
+                      sx={{
+                        overflow: "hidden",
+                        minWidth: 0,
+                        flex: 1,
+                        maxWidth: "75px",
+                      }}
+                    >
+                      <Tooltip title={friend.name} arrow disableInteractive>
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            fontWeight: 500,
+                            lineHeight: 1.2,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {friend.name}
+                        </Typography>
+                      </Tooltip>
+
+                      <Tooltip title={`@${friend.username}`} arrow disableInteractive>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "block",
+                          }}
+                        >
+                          @{friend.username}
+                        </Typography>
+                      </Tooltip>
+                    </Box>
+                  </Box>
+
+
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    disabled={loadingIds.includes(friend._id)}
+                    onClick={() => handleFollowClick(friend._id)}
+                    sx={{
+                      textTransform: "none",
+                      fontSize: "0.75rem",
+                      px: 2,
+                      py: 0.5,
+                      ml: 2,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {loadingIds.includes(friend._id) ? "Loading..." : "Follow"}
+                  </Button>
+                </ListItem>
+
+              ))
+            ) : (
+              <Typography
                 sx={{
-                  py: 1,
-                  px: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 2,
+                  textAlign: "center",
+                  pt: 0,
+                  color: "text.secondary",
                 }}
               >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flex: 1, minWidth: 0 }}>
-                  <Avatar src={(BASE_URL + friend.profileUrl) || `https://i.pravatar.cc/150?u=${friend._id}`} sx={{ width: 44, height: 44 }} />
-                  <Box sx={{ overflow: "hidden" }}>
-                    <Typography variant="body1" sx={{ fontWeight: 500, lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                      {friend.name}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                      @{friend.username}
-                    </Typography>
-                  </Box>
-                </Box>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  disabled={loadingIds.includes(friend._id)}
-                  onClick={() => handleFollowClick(friend._id)}
-                  sx={{ textTransform: "none", fontSize: "0.75rem", px: 2, py: 0.5, ml: 2, flexShrink: 0 }}
-                >
-                  {loadingIds.includes(friend._id) ? "Loading..." : "Follow"}
-                </Button>
-              </ListItem>
-            ))}
+                No suggestion
+              </Typography>
+            )}
           </List>
         </Box>
         {showFadeFriends && (

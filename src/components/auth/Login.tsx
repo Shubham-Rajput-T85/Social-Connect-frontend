@@ -115,15 +115,13 @@ const Login = () => {
       emailReset();
       passwordReset();
 
-////////////////////////////////////////
       // ----------------------
       // REGISTER SOCKET HERE
       // ----------------------
       if (data.user && data.user._id) {
-        connectSocket();           // Establish connection only after login
-        registerUser(data.user._id.toString()); // Register the user
+        connectSocket();// Establish connection only after login
+        registerUser(); // Register the user
       }
-////////////////////////////////////////
 
       navigate("/", { replace: true });
     } catch (error) {

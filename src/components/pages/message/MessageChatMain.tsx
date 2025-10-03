@@ -73,6 +73,7 @@ const MessageChatMain: React.FC<Props> = ({ userId, onBack }) => {
         bgcolor: 'background.paper',
         borderRadius: '10px',
         height: '80vh',
+        width: "100%",
         overflow: 'hidden',
       }}
     >
@@ -115,7 +116,7 @@ const MessageChatMain: React.FC<Props> = ({ userId, onBack }) => {
           display: 'flex',
           flexDirection: 'column',
           gap: 1,
-          maxWidth:"100%"
+          width:"100%"
         }}
       >
         {messages.map((msg, index) => {

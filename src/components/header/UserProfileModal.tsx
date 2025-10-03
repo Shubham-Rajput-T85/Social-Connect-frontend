@@ -299,8 +299,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
           <Box sx={{ display: "flex", alignItems: "center", mb: 2, gap: 2 }}>
             <Box sx={{
               position: "relative",
-              // width: 110,
-              // height: 110,
               borderRadius: "50%",          // make the wrapper circular
               border: `3px solid ${isOnline ? "#00FF00" : "#FFC107"}`, // green/yellow ring
               display: "flex",

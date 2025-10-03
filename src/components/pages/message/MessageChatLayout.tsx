@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import MessageChatSidebar from './MessageChatSidebar';
 import MessageChatMain from './MessageChatMain';
@@ -25,7 +25,6 @@ const MessageChatLayout: React.FC = () => {
             xs: selectedUserId ? 'none' : 'block', // Hide on mobile when chat is open
             md: 'block',
             width: '100%',    // important
-            maxWidth: '100%', // constrain max width
           },
         }}
       >
@@ -39,7 +38,6 @@ const MessageChatLayout: React.FC = () => {
             xs: selectedUserId ? 'block' : 'none', // Show only when user selected
             md: 'block',
             width: '100%',    // important
-            maxWidth: '100%', // constrain max width
           },
         }}
       >
@@ -48,6 +46,23 @@ const MessageChatLayout: React.FC = () => {
             userId={selectedUserId}
             onBack={() => setSelectedUserId(null)} // Back button handler
           />
+        )}
+        {!selectedUserId && (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: "center",
+              alignItems: "center",
+              bgcolor: 'background.paper',
+              borderRadius: '10px',
+              height: '100%',
+              width: "110%",
+              overflow: 'hidden',
+            }}
+          >
+            <Typography variant='body1'>click on user to open chat</Typography>
+          </Box>
         )}
       </Box>
     </Box>

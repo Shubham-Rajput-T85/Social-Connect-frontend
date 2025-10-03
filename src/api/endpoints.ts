@@ -13,11 +13,6 @@ export const API_ENDPOINTS = {
     // PROFILE: (userId: string) => `${BASE_URL}/user/${userId}`,
     // UPDATE: `${BASE_URL}/user/update`,
   },
-  // MESSAGES: {
-  //   SEND: `${BASE_URL}/messages/send`,
-  //   FETCH_CONVERSATION: (conversationId: string) =>
-  //     `${BASE_URL}/messages/conversation/${conversationId}`,
-  // },
   POSTS: {
     // CREATE: `${BASE_URL}/posts/create`,
     FEED_MYPOST: `${BASE_URL}/posts/feed/myPost`,
@@ -44,5 +39,15 @@ export const API_ENDPOINTS = {
     GET: (userId: string) => `${BASE_URL}/notification?userId=${userId}`,
     CLEAR: (userId: string) => `${BASE_URL}/notification/clear?userId=${userId}`,
     READ: (notificationId: string) => `${BASE_URL}/notification/read?id=${notificationId}`,
+  },
+  CONVERSATION: {
+    GET: `${BASE_URL}/conversation`,
+    ADD: `${BASE_URL}/conversation`,
+    DELETE: (conversationId: string) => `${BASE_URL}/conversation/${conversationId}`
+  },
+  MESSAGE: {
+    GET: (conversationId: string, page: number, limit: number) => `${BASE_URL}/messages/${conversationId}?page=${page}&limit=${limit}`,
+    SEND: (conversationId: string) => `${BASE_URL}/messages/${conversationId}`,
+    UPDATE_STATUS: (messageId: string) => `${BASE_URL}/messages/${messageId}`
   }
 };
