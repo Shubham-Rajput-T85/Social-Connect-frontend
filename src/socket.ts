@@ -1,5 +1,6 @@
 // src/socket.ts
 import { io, Socket } from "socket.io-client";
+import store from "./components/store/store";
 
 let socket: Socket | null = null;
 
@@ -31,11 +32,18 @@ export const connectSocket = () => {
 
 export const registerUser = () => {
   const s = getSocket();
-  console.log("socket: ",s);
-  
-  if (s.connected) {
+  const state = store.getState();
+  const user = state.auth.user;
+
+  if (!user) return;
+
+  if (!s.connected) {
+    s.once("connect", () => {
+      console.log("Socket connected, registering user...");
+      s.emit("register");
+    });
+  } else {
     s.emit("register");
-    console.log("s.connected:",s.connected);
   }
 };
 

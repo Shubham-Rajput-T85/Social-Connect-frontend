@@ -46,7 +46,7 @@ const MessageChat: React.FC<Props> = ({ message }) => {
             whiteSpace: 'pre-wrap',
           }}
         >
-          <Typography variant="body2" sx={{ maxWidth: "80vh", flexWrap: "wrap"}} >{message.text}</Typography>
+          <Typography variant="body2" sx={{ maxWidth: "100vh", flexWrap: "wrap"}} >{message.text}</Typography>
 
           {isMe && (
             <Typography

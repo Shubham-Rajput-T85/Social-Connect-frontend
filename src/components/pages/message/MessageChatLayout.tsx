@@ -58,8 +58,8 @@ const MessageChatLayout: React.FC = () => {
               alignItems: "center",
               bgcolor: 'background.paper',
               borderRadius: '10px',
-              height: '100%',
-              width: "110%",
+              height: '80vh',
+              width: "100%",
               overflow: 'hidden',
             }}
           >

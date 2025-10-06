@@ -208,6 +208,7 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
         bgcolor: 'background.paper',
         borderRadius: '10px',
         height: '80vh',
+        width: "100%",
         overflow: 'hidden',
       }}
     >
@@ -249,7 +250,7 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
           display: 'flex',
           flexDirection: 'column',
           gap: 1,
-          maxWidth: '100%',
+          maxWidth:"85vh"
         }}
       >
         {loading && page > 1 && (
