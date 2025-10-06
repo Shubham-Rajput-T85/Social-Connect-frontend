@@ -29,7 +29,7 @@ const MessageChat: React.FC<Props> = ({ message }) => {
         {formatted}
       </Typography>
 
-      <Box sx={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start', width: '100%' }}>
+      <Box sx={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
         <Box
           sx={{
             position: 'relative',
@@ -39,14 +39,14 @@ const MessageChat: React.FC<Props> = ({ message }) => {
             borderTopLeftRadius: isMe ? '10px' : '0px',
             bgcolor: isMe ? 'primary.main' : 'grey.200',
             color: isMe ? 'white' : 'text.primary',
-            maxWidth: '80vh',
-            width: '80%',
+            maxWidth: '80%',
+            flexWrap: "wrap",
             wordBreak: 'break-word',
             overflowWrap: 'break-word',
             whiteSpace: 'pre-wrap',
           }}
         >
-          <Typography variant="body2">{message.text}</Typography>
+          <Typography variant="body2" sx={{ maxWidth: "80vh", flexWrap: "wrap"}} >{message.text}</Typography>
 
           {isMe && (
             <Typography
