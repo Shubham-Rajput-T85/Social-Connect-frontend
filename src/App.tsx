@@ -48,9 +48,10 @@ function App() {
 
         const data = await res.json();
 
-        if (data.user && data.user._id) {
-          connectSocket();
-          registerUser();
+        if (data.user?._id) {
+          const s = getSocket();
+          if (!s.connected) s.once("connect", () => s.emit("register"));
+          else s.emit("register");
         }
 
         dispatch(authActions.setUser(data.user));

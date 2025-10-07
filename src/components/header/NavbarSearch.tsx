@@ -306,10 +306,6 @@ const NavbarSearch: React.FC<NavbarSearchProps> = ({
         </Modal>
     );
 
-    // return isMobile ? mobileSearch : desktopSearch;
-    // console.log("ids: ", selectedUser, user?._id);
-    
-
     return (
         <>
             {isMobile ? mobileSearch : desktopSearch}
@@ -324,8 +320,6 @@ const NavbarSearch: React.FC<NavbarSearchProps> = ({
             )}
         </>
     );
-    /** */
-
 };
 
 export default NavbarSearch;
