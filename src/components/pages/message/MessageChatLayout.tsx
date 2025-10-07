@@ -6,7 +6,7 @@ import { IConversation } from '../../../api/services/conversation.service';
 
 const MessageChatLayout: React.FC = () => {
   const [selectedConversation, setSelectedConversation] = useState<IConversation | null>(null);
-
+  console.log("selected conversation:",selectedConversation);
   return (
     <Box
       sx={{
@@ -45,7 +45,6 @@ const MessageChatLayout: React.FC = () => {
         {selectedConversation && (
           <MessageChatMain
             conversation={selectedConversation}
-            // userData = {}
             onBack={() => setSelectedConversation(null)} // Back button handler
           />
         )}

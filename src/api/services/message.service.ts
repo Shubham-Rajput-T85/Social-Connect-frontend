@@ -51,12 +51,13 @@ export const MessageService = {
 
         return await response.json();
     },
-    updateStatus: async (messageId: string) => {
+    updateStatus: async (messageId: string, body: Object) => {
         const response = await fetch(API_ENDPOINTS.MESSAGE.UPDATE_STATUS(messageId), {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
             },
+            body: JSON.stringify(body),
             credentials: "include",
         });
 

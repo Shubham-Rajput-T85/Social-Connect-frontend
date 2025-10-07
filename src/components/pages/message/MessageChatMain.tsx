@@ -6,7 +6,7 @@ import MessageChatInput from './MessageChatInput';
 import { IMessage, MessageService } from '../../../api/services/message.service';
 import { getSocket } from '../../../socket';
 import { useSelector } from 'react-redux';
-import { IConversation } from '../../../api/services/conversation.service';
+import { IConversation, MessageStatus } from '../../../api/services/conversation.service';
 import { BASE_URL } from '../../../api/endpoints';
 
 interface Props {
@@ -15,7 +15,9 @@ interface Props {
 }
 
 const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
-  const currentUser: IMessage['sender'] = useSelector((state: any) => state.auth.user);
+  const currentUser = useSelector((state: any) => state.auth.user);
+  const onlineUsers = useSelector((state: any) => state.onlineUsers.users);
+  const isUserOnline = onlineUsers.includes(conversation.user._id);
 
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [page, setPage] = useState(1);
@@ -87,28 +89,34 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
     load();
   }, [conversation]);
 
-  // ✅ Socket listeners
   useEffect(() => {
-    const s = getSocket();
+    const socket = getSocket();
+    socket.emit("joinConversation", conversation.conversationId);
 
-    s.on('newMessage', (newMsg: IMessage) => {
-      if (newMsg.conversationId === conversation.conversationId) {
-        setMessages((prev) => [...prev, newMsg]);
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    socket.on("newMessage", (msg: IMessage) => {
+      setMessages((prev) => [...prev, msg]);
+      console.log("msg.sender._id:",msg.sender._id);
+      console.log("currentUser._id:",currentUser._id);
+      console.log(msg.sender._id !== currentUser._id);
+      // Mark delivered for receiver automatically
+      if (msg.sender._id !== currentUser._id) {
+        MessageService.updateStatus(msg._id,{ status:MessageStatus.DELIVERED });
       }
     });
 
-    s.on('messageStatusUpdated', ({ messageId, status }: any) => {
+    socket.on("messageStatusUpdated", ({ messageId, status }) => {
       setMessages((prev) =>
         prev.map((m) => (m._id === messageId ? { ...m, status } : m))
       );
     });
 
     return () => {
-      s.off('newMessage');
-      s.off('messageStatusUpdated');
+      socket.emit("leaveConversation", conversation.conversationId);
+      socket.off("newMessage");
+      socket.off("messageStatusUpdated");
     };
-  }, [conversation]);
+  }, [conversation.conversationId]);
+  
 
   // ✅ Restore scroll after new messages are prepended
   useLayoutEffect(() => {
@@ -160,7 +168,7 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
         status: res.message.status,
         createdAt: res.message.createdAt
       };
-      setMessages((prev) => [...prev, resMessage]);
+      // setMessages((prev) => [...prev, resMessage]);
     } catch (err) {
       console.error('Send failed', err);
     }
@@ -227,7 +235,7 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
           <Box>
             <Typography fontWeight={600}>{conversation.user.username}</Typography>
             <Typography fontSize={12} color="text.secondary">
-              {conversation.user.online ? `Online` : `Offline`}
+              {isUserOnline ? `Online` : `Offline`}
             </Typography>
           </Box>
         </Box>

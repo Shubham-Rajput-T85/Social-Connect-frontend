@@ -48,6 +48,6 @@ export const API_ENDPOINTS = {
   MESSAGE: {
     GET: (conversationId: string, page: number, limit: number) => `${BASE_URL}/messages/${conversationId}?page=${page}&limit=${limit}`,
     SEND: (conversationId: string) => `${BASE_URL}/messages/${conversationId}`,
-    UPDATE_STATUS: (messageId: string) => `${BASE_URL}/messages/${messageId}`
+    UPDATE_STATUS: (messageId: string) => `${BASE_URL}/messages/status/${messageId}`
   }
 };
