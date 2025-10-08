@@ -100,7 +100,7 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
       console.log(msg.sender._id !== currentUser._id);
       // Mark delivered for receiver automatically
       if (msg.sender._id !== currentUser._id) {
-        MessageService.updateStatus(msg._id,{ status:MessageStatus.DELIVERED });
+        MessageService.updateStatus(msg._id,{ status:MessageStatus.SEEN });
       }
     });
 
@@ -138,13 +138,11 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
     const container = messagesContainerRef.current;
     if (!container || !hasMore || loading) return;
 
-    if (container.scrollTop === 0) {
-      // store current scroll before loading
+    if (container.scrollTop < 200) {
       scrollRestoreRef.current = {
         prevHeight: container.scrollHeight,
         prevTop: container.scrollTop,
       };
-
       const nextPage = page + 1;
       setPage(nextPage);
       await fetchMessages(nextPage, true);

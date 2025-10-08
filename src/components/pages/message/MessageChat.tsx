@@ -9,11 +9,7 @@ interface Props {
 
 const MessageChat: React.FC<Props> = ({ message }) => {
   const currentUserId = useSelector((state : any) => state.auth.user._id);
-  // console.log("current user id:", currentUserId);
-
   const isMe = message.sender._id === currentUserId;
-  // console.log("message sender :", message.sender._id);
-  // console.log("isMe:",isMe);
 
   const date = message.createdAt ? new Date(message.createdAt) : new Date();
   const formatted = isNaN(date.getTime())
@@ -66,7 +62,7 @@ const MessageChat: React.FC<Props> = ({ message }) => {
             whiteSpace: 'pre-wrap',
           }}
         >
-          <Typography variant="body2" sx={{ maxWidth: "100vh", flexWrap: "wrap" }} >{message.text}</Typography>
+          <Typography variant="body2" sx={{ maxWidth: "60vh", flexWrap: "wrap" }} >{message.text}</Typography>
         </Box>
       </Box>
     </>

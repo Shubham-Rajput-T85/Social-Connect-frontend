@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import Loader from '../ui/Loader';
 import { Box } from '@mui/material';
 
-const AuthRoute:React.FC<{children: React.ReactNode}> = (props) => {
+const ProtectedRoute:React.FC<{children: React.ReactNode}> = (props) => {
     const {user, initialized} = useSelector((state: any) => state.auth);
     
     if (!initialized) {
@@ -34,4 +34,4 @@ const AuthRoute:React.FC<{children: React.ReactNode}> = (props) => {
     </>);
 }
 
-export default AuthRoute
+export default ProtectedRoute

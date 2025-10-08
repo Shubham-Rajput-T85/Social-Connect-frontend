@@ -5,7 +5,6 @@ import {
   Avatar,
   Typography,
   IconButton,
-  CircularProgress,
 } from "@mui/material";
 import {
   DeleteOutline as DeleteOutlineIcon,
@@ -13,6 +12,7 @@ import {
 import { useSelector } from "react-redux";
 import { IPost, PostService } from "../../api/services/post.service";
 import { BASE_URL } from "../../api/endpoints";
+import SkeletonPost from "../ui/SkeletonPost";
 
 const ProfilePostList: React.FC = () => {
   const [posts, setPosts] = useState<IPost[]>([]);
@@ -80,9 +80,7 @@ const ProfilePostList: React.FC = () => {
    */
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-        <CircularProgress />
-      </Box>
+        <SkeletonPost count={2} withMedia={true} />
     );
   }
 
@@ -153,7 +151,7 @@ const ProfilePostList: React.FC = () => {
               </Box>
               <hr />
               {/* Post Content */}
-              <Typography variant="body1" sx={{ mb: 1, whiteSpace: "pre-line" }}>
+              <Typography variant="body1" sx={{ mb: 1, whiteSpace: "pre-line",wordBreak: "break-word" }}>
                 {post.postContent}
               </Typography>
 
