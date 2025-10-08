@@ -8,18 +8,18 @@ import Login from './components/auth/Login';
 import { useDispatch, useSelector } from 'react-redux';
 import SnackbarAlert from './components/ui/SnackbarAlert';
 import { alertActions } from './components/store/alert-slice';
-import AuthRoute from "./components/auth/AuthRoute";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { useEffect } from 'react';
 import { authActions } from './components/store/auth-slice';
 import Home from './components/pages/Home/Home';
-import { Box, Paper } from '@mui/material';
-import Sidebar from './components/ui/Sidebar';
 import Page from './components/ui/Page';
 import ProfilePage from './components/pages/profile/ProfilePage';
-import { connectSocket, getSocket, initSocket, registerUser } from './socket';
+import { getSocket, initSocket } from './socket';
 import { initFetchInterceptor } from './api/fetchInterceptor';
 import { onlineUsersActions } from './components/store/onlineUsers-slice';
 import MessageChatLayout from './components/pages/message/MessageChatLayout';
+import PublicRoute from './components/auth/PublicRoute';
+import NotFoundPage from './components/ui/NotFoundPage';
 
 initSocket();
 
@@ -107,34 +107,34 @@ function App() {
         <SnackbarAlert severity={alertState.severity} message={alertState.message} onClose={handleOnClose} />
         <Routes>
           {/* Public Routes */}
-          <Route path='/signup' element={<Signup />} />
-          <Route path='/login' element={<Login />} />
+          <Route path='/signup' element={<PublicRoute><Signup /></PublicRoute>} />
+          <Route path='/login' element={<PublicRoute><Login /></PublicRoute>} />
 
           {/* Protected Routes */}
           <Route path='/'
             element={
               <Page>
-                <AuthRoute>
+                <ProtectedRoute>
                   <Home />
-                </AuthRoute>
+                </ProtectedRoute>
               </Page>
             }
           />
 
           {/* Redirect /Home → / */}
           <Route path='/home' element={
-            <AuthRoute>
+            <ProtectedRoute>
               <Navigate to="/" />
-            </AuthRoute>
+            </ProtectedRoute>
           } />
 
           <Route
             path="/profile/*"
             element={
               <Page>
-                <AuthRoute>
+                <ProtectedRoute>
                   <ProfilePage />
-                </AuthRoute>
+                </ProtectedRoute>
               </Page>
             }
           />
@@ -143,30 +143,16 @@ function App() {
             path="/message/*"
             element={
               <Page>
-                <AuthRoute>
+                <ProtectedRoute>
                   <MessageChatLayout />
-                </AuthRoute>
+                </ProtectedRoute>
               </Page>
             }
           />
 
           {/* Catch-all route */}
-          <Route path='/*' element={
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "1fr 4fr",
-                gap: 2,
-                padding: 2,
-                height: "100%"
-              }}
-            >
-              <Sidebar />
-              <Box sx={{ width: "100%" }}>
-                <Paper sx={{ width: "100%" }}>Page not found</Paper>
-              </Box>
-            </Box>
-          } />
+          <Route path="/*" element={<NotFoundPage />} />
+
         </Routes>
       </Main>
     </div>

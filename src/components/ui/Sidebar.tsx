@@ -18,6 +18,7 @@ import {
 import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { BASE_URL } from "../../api/endpoints";
+import SkeletonSidebar from "./SkeletonSidebar";
 
 interface SidebarLink {
   label: string;
@@ -35,9 +36,8 @@ const Sidebar = () => {
     { label: "Messages", path: "/message/1", icon: <MessageIcon /> },
   ];
 
-
   if (!user) {
-    return <></>;
+    return <SkeletonSidebar />;
   }
 
   return (
