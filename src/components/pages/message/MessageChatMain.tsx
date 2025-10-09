@@ -23,45 +23,21 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [editingMessage, setEditingMessage] = useState<{ id: string; text: string } | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
-
-  // for scroll preservation
   const scrollRestoreRef = useRef<{ prevHeight: number; prevTop: number } | null>(null);
 
-  // ✅ Format date without 3rd party libs
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const today = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(today.getDate() - 1);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-    if (date.toDateString() === today.toDateString()) return "Today";
-    if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
 
-    return date.toLocaleDateString("en-US", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
-  // ✅ Fetch messages
   const fetchMessages = async (pageNum: number, append = false) => {
     try {
       setLoading(true);
       const res = await MessageService.getMessages(conversation.conversationId, pageNum, 20);
-
-      if (res.messages.length < 20) {
-        setHasMore(false);
-      }
-
-      if (append) {
-        setMessages((prev) => [...res.messages, ...prev]);
-      } else {
-        setMessages(res.messages);
-      }
+      if (res.messages.length < 20) setHasMore(false);
+      setMessages((prev) => (append ? [...res.messages, ...prev] : res.messages));
     } catch (err) {
       console.error(err);
     } finally {
@@ -69,15 +45,13 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
     }
   };
 
-  // Initial load
   useEffect(() => {
     setMessages([]);
     setPage(1);
     setHasMore(true);
-  
+
     const load = async () => {
       await fetchMessages(1, false);
-      // Scroll to bottom after messages loaded
       requestAnimationFrame(() => {
         messagesContainerRef.current?.scrollTo({
           top: messagesContainerRef.current.scrollHeight,
@@ -85,97 +59,110 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
         });
       });
     };
-  
     load();
   }, [conversation]);
 
   useEffect(() => {
     const socket = getSocket();
-    socket.emit("joinConversation", conversation.conversationId);
+    socket.emit('joinConversation', conversation.conversationId);
 
-    socket.on("newMessage", (msg: IMessage) => {
+    socket.on('newMessage', (msg: IMessage) => {
       setMessages((prev) => [...prev, msg]);
-      console.log("msg.sender._id:",msg.sender._id);
-      console.log("currentUser._id:",currentUser._id);
-      console.log(msg.sender._id !== currentUser._id);
-      // Mark delivered for receiver automatically
       if (msg.sender._id !== currentUser._id) {
-        MessageService.updateStatus(msg._id,{ status:MessageStatus.SEEN });
+        MessageService.updateStatus(msg._id, { status: MessageStatus.SEEN });
       }
     });
 
-    socket.on("messageStatusUpdated", ({ messageId, status }) => {
-      setMessages((prev) =>
-        prev.map((m) => (m._id === messageId ? { ...m, status } : m))
-      );
+    socket.on('messageStatusUpdated', ({ messageId, status }) => {
+      setMessages((prev) => prev.map((m) => (m._id === messageId ? { ...m, status } : m)));
     });
 
     return () => {
-      socket.emit("leaveConversation", conversation.conversationId);
-      socket.off("newMessage");
-      socket.off("messageStatusUpdated");
+      socket.emit('leaveConversation', conversation.conversationId);
+      socket.off('newMessage');
+      socket.off('messageStatusUpdated');
     };
   }, [conversation.conversationId]);
-  
 
-  // ✅ Restore scroll after new messages are prepended
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        editingMessage &&
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setEditingMessage(null);
+      }
+    };
+  
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [editingMessage]);
+
   useLayoutEffect(() => {
     const container = messagesContainerRef.current;
     if (!container || !scrollRestoreRef.current) return;
-
     const { prevHeight, prevTop } = scrollRestoreRef.current;
     const newHeight = container.scrollHeight;
-
-    // restore scroll position
     container.scrollTop = newHeight - prevHeight + prevTop;
-
-    // clear restore data
     scrollRestoreRef.current = null;
   }, [messages]);
 
-  // ✅ Infinite scroll with scroll preservation
   const handleScroll = async () => {
     const container = messagesContainerRef.current;
     if (!container || !hasMore || loading) return;
-
     if (container.scrollTop < 200) {
-      scrollRestoreRef.current = {
-        prevHeight: container.scrollHeight,
-        prevTop: container.scrollTop,
-      };
+      scrollRestoreRef.current = { prevHeight: container.scrollHeight, prevTop: container.scrollTop };
       const nextPage = page + 1;
       setPage(nextPage);
       await fetchMessages(nextPage, true);
     }
   };
 
-  // ✅ Handle Send Message
   const handleSend = async (text: string) => {
     try {
-      const res = await MessageService.sendMessage(conversation.conversationId, { text });
-      const resMessage: IMessage = {
-        _id: res.message._id,
-        conversationId: res.message.conversationId,
-        sender: {
-          _id: res.message.sender._id,
-          name: res.message.sender.name,
-          username: res.message.sender.username,
-          profileUrl: res.message.sender.profileUrl
-        },
-        text: res.message.text,
-        status: res.message.status,
-        createdAt: res.message.createdAt
-      };
-      // setMessages((prev) => [...prev, resMessage]);
+      await MessageService.sendMessage(conversation.conversationId, { text });
     } catch (err) {
       console.error('Send failed', err);
     }
   };
 
-  // ✅ Render messages grouped by date
+  const handleEdit = (msg: IMessage) => {
+    setEditingMessage({ id: msg._id, text: msg.text });
+  };
+
+  const handleDelete = (msgId: string) => {
+    setMessages((prev) => prev.filter((m) => m._id !== msgId));
+  };
+
+  const handleEditSave = async (msgId: string, newText: string) => {
+    try {
+      const res = await MessageService.editMessage(msgId, { text: newText });
+      setMessages((prev) => prev.map((m) => (m._id === msgId ? { ...m, text: res.message.text } : m)));
+      setEditingMessage(null);
+    } catch (err) {
+      console.error('Edit failed', err);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessage(null);
+  };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+    if (date.toDateString() === today.toDateString()) return 'Today';
+    if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
+    return date.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+  };
+
   const renderMessagesWithDates = () => {
     const grouped: { [date: string]: IMessage[] } = {};
-
     messages.forEach((msg) => {
       const dateKey = new Date(msg.createdAt).toDateString();
       if (!grouped[dateKey]) grouped[dateKey] = [];
@@ -184,23 +171,22 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
 
     return Object.keys(grouped).map((dateKey) => (
       <React.Fragment key={dateKey}>
-        {/* Date Divider */}
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 1 }}>
           <Typography
             variant="caption"
-            sx={{
-              bgcolor: "#eee",
-              px: 2,
-              py: 0.5,
-              borderRadius: 2,
-              fontWeight: 500,
-            }}
+            sx={{ bgcolor: '#eee', px: 2, py: 0.5, borderRadius: 2, fontWeight: 500 }}
           >
             {formatDate(dateKey)}
           </Typography>
         </Box>
         {grouped[dateKey].map((msg) => (
-          <MessageChat key={msg._id} message={msg} />
+          <MessageChat
+            key={msg._id}
+            message={msg}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            isDimmed={!!editingMessage && editingMessage.id !== msg._id}
+          />
         ))}
       </React.Fragment>
     ));
@@ -208,17 +194,17 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
 
   return (
     <Box
+      ref={containerRef}
       sx={{
         display: 'flex',
         flexDirection: 'column',
         bgcolor: 'background.paper',
         borderRadius: '10px',
         height: '80vh',
-        width: "100%",
+        width: '100%',
         overflow: 'hidden',
       }}
     >
-      {/* Header */}
       <Box
         sx={{
           p: 2,
@@ -237,7 +223,6 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
             </Typography>
           </Box>
         </Box>
-
         {onBack && (
           <IconButton sx={{ display: { xs: 'inline-flex', md: 'none' } }} onClick={onBack}>
             <ArrowBackIcon />
@@ -245,7 +230,6 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
         )}
       </Box>
 
-      {/* Messages */}
       <Box
         ref={messagesContainerRef}
         onScroll={handleScroll}
@@ -256,20 +240,26 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
           display: 'flex',
           flexDirection: 'column',
           gap: 1,
-          maxWidth:"85vh"
+          maxWidth: '85vh',
         }}
       >
         {loading && page > 1 && (
           <Box sx={{ textAlign: 'center', my: 1 }}>
-            <Typography variant="caption" color="text.secondary">Loading...</Typography>
+            <Typography variant="caption" color="text.secondary">
+              Loading...
+            </Typography>
           </Box>
         )}
         {renderMessagesWithDates()}
         <div ref={messagesEndRef} />
       </Box>
 
-      {/* Input */}
-      <MessageChatInput onSend={handleSend} />
+      <MessageChatInput
+        onSend={handleSend}
+        onEditSave={handleEditSave}
+        editingMessage={editingMessage}
+        onCancelEdit={handleCancelEdit}
+      />
     </Box>
   );
 };

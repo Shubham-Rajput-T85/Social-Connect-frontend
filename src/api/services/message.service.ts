@@ -24,7 +24,7 @@ export type IMessage = {
 }
 
 export const MessageService = {
-    getMessages: async (conversationId: string, page: number = 1, limit: number = 20) => {
+    getMessages: async (conversationId: string, page: number = 1, limit: number = 50) => {
         const response = await fetch(API_ENDPOINTS.MESSAGE.GET(conversationId, page, limit), {
             method: "GET",
             headers: {
@@ -53,6 +53,20 @@ export const MessageService = {
     },
     updateStatus: async (messageId: string, body: Object) => {
         const response = await fetch(API_ENDPOINTS.MESSAGE.UPDATE_STATUS(messageId), {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+            credentials: "include",
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch messages");
+
+        return await response.json();
+    },
+    editMessage: async (messageId: string, body: Object) => {
+        const response = await fetch(API_ENDPOINTS.MESSAGE.EDIT(messageId), {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",

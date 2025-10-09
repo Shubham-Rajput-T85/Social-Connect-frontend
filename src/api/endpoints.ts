@@ -1,4 +1,3 @@
-// src/api/endpoints.ts
 export const BASE_URL = "http://localhost:8080";
 
 export const API_ENDPOINTS = {
@@ -48,6 +47,7 @@ export const API_ENDPOINTS = {
   MESSAGE: {
     GET: (conversationId: string, page: number, limit: number) => `${BASE_URL}/messages/${conversationId}?page=${page}&limit=${limit}`,
     SEND: (conversationId: string) => `${BASE_URL}/messages/${conversationId}`,
-    UPDATE_STATUS: (messageId: string) => `${BASE_URL}/messages/status/${messageId}`
+    UPDATE_STATUS: (messageId: string) => `${BASE_URL}/messages/status/${messageId}`,
+    EDIT: (messageId: string) => `${BASE_URL}/messages/edit/${messageId}`
   }
 };
