@@ -21,6 +21,7 @@ export type IMessage = {
     updatedAt?: string;
     deliveredTo?: string[];
     seenby?: string[];
+    editedAt?: string;
 }
 
 export const MessageService = {

@@ -18,7 +18,7 @@ const MessageChat: React.FC<Props> = ({ message, onEdit, onDelete, isDimmed }) =
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  const date = message.createdAt ? new Date(message.createdAt) : new Date();
+  const date = message.editedAt ? new Date(message.editedAt) : new Date(message.createdAt);
   const formatted = isNaN(date.getTime())
     ? ''
     : date.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit' });
@@ -49,7 +49,7 @@ const MessageChat: React.FC<Props> = ({ message, onEdit, onDelete, isDimmed }) =
       }}
     >
       <Box sx={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start', gap: 1 }}>
-        <Typography variant="caption">{formatted}</Typography>
+        <Typography variant="caption">{formatted} <b>{message.editedAt && "(edited)"}</b></Typography>
         {isMe && (
           <Typography
             variant="caption"
