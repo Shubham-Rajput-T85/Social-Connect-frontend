@@ -8,7 +8,7 @@ export enum MessageStatus {
 
 export type IMessage = {
     _id: string;
-    conversationId : string;
+    conversationId: string;
     sender: {
         _id: string;
         name: string;
@@ -22,6 +22,7 @@ export type IMessage = {
     deliveredTo?: string[];
     seenby?: string[];
     editedAt?: string;
+    isDeleted?: boolean;
 }
 
 export const MessageService = {
@@ -78,6 +79,14 @@ export const MessageService = {
 
         if (!response.ok) throw new Error("Failed to fetch messages");
 
+        return await response.json();
+    },
+    deleteMessage: async (messageId: string) => {
+        const response = await fetch(API_ENDPOINTS.MESSAGE.DELETE(messageId), {
+            method: "DELETE",
+            credentials: "include",
+        });
+        if (!response.ok) throw new Error("Failed to delete message");
         return await response.json();
     },
 }

@@ -8,6 +8,7 @@ import { getSocket } from '../../../socket';
 import { useSelector } from 'react-redux';
 import { IConversation, MessageStatus } from '../../../api/services/conversation.service';
 import { BASE_URL } from '../../../api/endpoints';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, } from "@mui/material";
 
 interface Props {
   conversation: IConversation;
@@ -30,6 +31,9 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
   const scrollRestoreRef = useRef<{ prevHeight: number; prevTop: number } | null>(null);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; messageId?: string }>({
+    open: false,
+  });
 
 
   const fetchMessages = async (pageNum: number, append = false) => {
@@ -86,11 +90,22 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
       setMessages((prev) => prev.map((m) => (m._id === messageId ? { ...m, status } : m)));
     });
 
+    socket.on("messageDeleted", ({ messageId }) => {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m._id === messageId
+            ? { ...m, text: "This message was deleted", isDeleted: true }
+            : m
+        )
+      );
+    });
+
     return () => {
       socket.emit('leaveConversation', conversation.conversationId);
       socket.off('newMessage');
       socket.off('messageStatusUpdated');
       socket.off('messageUpdated');
+      socket.off('messageDeleted');
     };
   }, [conversation.conversationId]);
 
@@ -104,7 +119,7 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
         setEditingMessage(null);
       }
     };
-  
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -143,9 +158,46 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
     setEditingMessage({ id: msg._id, text: msg.text });
   };
 
+  // const handleDelete = async (msgId: string) => {
+  //   try {
+  //     await MessageService.deleteMessage(msgId);
+  //     // Optionally remove it instantly if current user deleted it
+  //     setMessages((prev) =>
+  //       prev.map((m) =>
+  //         m._id === msgId ? { ...m, text: "This message was deleted", isDeleted: true } : m
+  //       )
+  //     );
+  //   } catch (err) {
+  //     console.error("Delete failed", err);
+  //   }
+  // };
+
   const handleDelete = (msgId: string) => {
-    setMessages((prev) => prev.filter((m) => m._id !== msgId));
+    setDeleteConfirm({ open: true, messageId: msgId });
   };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirm.messageId) return;
+    try {
+      await MessageService.deleteMessage(deleteConfirm.messageId);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m._id === deleteConfirm.messageId
+            ? { ...m, text: "This message was deleted", isDeleted: true }
+            : m
+        )
+      );
+    } catch (err) {
+      console.error("Delete failed", err);
+    } finally {
+      setDeleteConfirm({ open: false });
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteConfirm({ open: false });
+  };
+
 
   const handleEditSave = async (msgId: string, newText: string) => {
     try {
@@ -270,6 +322,28 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
         editingMessage={editingMessage}
         onCancelEdit={handleCancelEdit}
       />
+
+      <Dialog
+        open={deleteConfirm.open}
+        onClose={handleCancelDelete}
+        aria-labelledby="delete-dialog-title"
+      >
+        <DialogTitle id="delete-dialog-title">Delete Message?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            Are you sure you want to delete this message? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete} color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
     </Box>
   );
 };

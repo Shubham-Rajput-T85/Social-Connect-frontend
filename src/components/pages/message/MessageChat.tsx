@@ -50,7 +50,7 @@ const MessageChat: React.FC<Props> = ({ message, onEdit, onDelete, isDimmed }) =
     >
       <Box sx={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start', gap: 1 }}>
         <Typography variant="caption">{formatted} <b>{message.editedAt && "(edited)"}</b></Typography>
-        {isMe && (
+        {( isMe && !message.isDeleted ) && (
           <Typography
             variant="caption"
             sx={{
@@ -90,7 +90,7 @@ const MessageChat: React.FC<Props> = ({ message, onEdit, onDelete, isDimmed }) =
             wordBreak: 'break-word',
             overflowWrap: 'break-word',
             whiteSpace: 'pre-wrap',
-            '&:hover .menu-btn': { visibility: 'visible', color:"white" }, // show button on hover
+            '&:hover .menu-btn': { visibility: message.isDeleted ? 'hidden':'visible', color:"white" }, // show button on hover
           }}
         >
           <Typography variant="body2" sx={{ maxWidth: '60vh', flexWrap: 'wrap' }}>
