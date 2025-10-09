@@ -73,6 +73,15 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
       }
     });
 
+    socket.on('messageUpdated', (updatedMessage: IMessage) => {
+      setMessages((prev) =>
+        prev.map((m) => (m._id === updatedMessage._id ? { ...m, ...updatedMessage } : m))
+      );
+      if (updatedMessage.sender._id !== currentUser._id) {
+        MessageService.updateStatus(updatedMessage._id, { status: MessageStatus.SEEN });
+      }
+    });
+
     socket.on('messageStatusUpdated', ({ messageId, status }) => {
       setMessages((prev) => prev.map((m) => (m._id === messageId ? { ...m, status } : m)));
     });
@@ -81,6 +90,7 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
       socket.emit('leaveConversation', conversation.conversationId);
       socket.off('newMessage');
       socket.off('messageStatusUpdated');
+      socket.off('messageUpdated');
     };
   }, [conversation.conversationId]);
 
