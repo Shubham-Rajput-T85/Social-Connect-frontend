@@ -4,15 +4,8 @@ import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BASE_URL } from "../../../api/endpoints";
 
-interface ProfileHeaderProps {
-  stats: {
-    posts: number;
-    followers: number;
-    following: number;
-  };
-}
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({ stats }) => {
+const ProfileHeader = () => {
   const user = useSelector((state: any) => state.auth.user);
   const navigate = useNavigate();
   const location = useLocation();

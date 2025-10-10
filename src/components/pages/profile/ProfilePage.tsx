@@ -25,9 +25,7 @@ const ProfilePage: React.FC = () => {
 
   return (
     <Box>
-      <ProfileHeader
-        stats={{ posts: 1, followers: 2, following: 3 }}
-      />
+      <ProfileHeader />
 
       {/* Tab Content */}
       <ProfileLayout>
