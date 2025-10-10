@@ -1,19 +1,43 @@
 import { Box, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import MessageChatSidebar from './MessageChatSidebar';
 import MessageChatMain from './MessageChatMain';
 import { IConversation } from '../../../api/services/conversation.service';
+import { getSocket } from '../../../socket';
 
 const MessageChatLayout: React.FC = () => {
   const [selectedConversation, setSelectedConversation] = useState<IConversation | null>(null);
-  console.log("selected conversation:",selectedConversation);
+
+  // A ref function to increment unread count in sidebar
+  const incrementUnreadRef = useRef<((conversationId: string) => void) | null>(null);
+
+  // Register unread increment function from sidebar
+  const registerUnreadIncrement = (fn: (conversationId: string) => void) => {
+    incrementUnreadRef.current = fn;
+  };
+
+  // Listen to socket notification for unread count updates
+  useEffect(() => {
+    const socket = getSocket();
+  
+    socket.on('newMessageNotification', (notification) => {
+      console.log('Chat notification received:', notification);
+      incrementUnreadRef.current?.(notification.conversationId);
+    });
+  
+    return () => {
+      socket.off('newMessageNotification');
+    };
+  }, []);
+  
+
   return (
     <Box
       sx={{
         display: 'grid',
         gridTemplateColumns: {
-          xs: selectedConversation?.conversationId ? '1fr' : '1fr', // Mobile: show only 1 at a time
-          md: '1fr 3fr', // Desktop: show both side by side
+          xs: selectedConversation?.conversationId ? '1fr' : '1fr', // Mobile: toggle
+          md: '1fr 3fr', // Desktop: side-by-side
         },
         height: '100%',
         gap: 2,
@@ -23,46 +47,48 @@ const MessageChatLayout: React.FC = () => {
       <Box
         sx={{
           display: {
-            xs: selectedConversation?.conversationId ? 'none' : 'block', // Hide on mobile when chat is open
+            xs: selectedConversation?.conversationId ? 'none' : 'block',
             md: 'block',
-            width: '100%',    // important
+            width: '100%',
           },
         }}
       >
-        <MessageChatSidebar onSelectConversation={setSelectedConversation} />
+        <MessageChatSidebar
+          onSelectConversation={setSelectedConversation}
+          registerUnreadIncrement={registerUnreadIncrement}
+        />
       </Box>
 
-      {/* Chat */}
+      {/* Main Chat */}
       <Box
         sx={{
           display: {
-            xs: selectedConversation?.conversationId ? 'block' : 'none', // Show only when user selected
+            xs: selectedConversation?.conversationId ? 'block' : 'none',
             md: 'block',
-            width: '100%',    // important
+            width: '100%',
           },
         }}
       >
-        {selectedConversation && (
+        {selectedConversation ? (
           <MessageChatMain
             conversation={selectedConversation}
-            onBack={() => setSelectedConversation(null)} // Back button handler
+            onBack={() => setSelectedConversation(null)}
           />
-        )}
-        {!selectedConversation?.conversationId && (
+        ) : (
           <Box
             sx={{
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: "center",
-              alignItems: "center",
+              justifyContent: 'center',
+              alignItems: 'center',
               bgcolor: 'background.paper',
               borderRadius: '10px',
               height: '80vh',
-              width: "100%",
+              width: '100%',
               overflow: 'hidden',
             }}
           >
-            <Typography variant='body1'>click on user to open chat</Typography>
+            <Typography variant="body1">Click on a user to open chat</Typography>
           </Box>
         )}
       </Box>

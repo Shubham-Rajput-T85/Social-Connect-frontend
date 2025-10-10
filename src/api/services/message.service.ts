@@ -8,7 +8,7 @@ export enum MessageStatus {
 
 export type IMessage = {
     _id: string;
-    conversationId : string;
+    conversationId: string;
     sender: {
         _id: string;
         name: string;
@@ -21,10 +21,12 @@ export type IMessage = {
     updatedAt?: string;
     deliveredTo?: string[];
     seenby?: string[];
+    editedAt?: string;
+    isDeleted?: boolean;
 }
 
 export const MessageService = {
-    getMessages: async (conversationId: string, page: number = 1, limit: number = 20) => {
+    getMessages: async (conversationId: string, page: number = 1, limit: number = 50) => {
         const response = await fetch(API_ENDPOINTS.MESSAGE.GET(conversationId, page, limit), {
             method: "GET",
             headers: {
@@ -63,6 +65,28 @@ export const MessageService = {
 
         if (!response.ok) throw new Error("Failed to fetch messages");
 
+        return await response.json();
+    },
+    editMessage: async (messageId: string, body: Object) => {
+        const response = await fetch(API_ENDPOINTS.MESSAGE.EDIT(messageId), {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+            credentials: "include",
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch messages");
+
+        return await response.json();
+    },
+    deleteMessage: async (messageId: string) => {
+        const response = await fetch(API_ENDPOINTS.MESSAGE.DELETE(messageId), {
+            method: "DELETE",
+            credentials: "include",
+        });
+        if (!response.ok) throw new Error("Failed to delete message");
         return await response.json();
     },
 }
