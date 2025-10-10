@@ -15,7 +15,7 @@ import {
 import { useSelector } from "react-redux";
 import Loader from "../ui/Loader";
 
-import UserProfileModal from "./UserProfileModal"; 
+import UserProfileModal from "./UserProfileModal";
 
 export interface NavbarSearchProps {
     onClose: () => void; // Required for desktop close action
@@ -131,7 +131,7 @@ const NavbarSearch: React.FC<NavbarSearchProps> = ({
                         // if (isMobile && onCloseModal) onCloseModal();
                         // else onClose();
                         setSelectedUser(user);       // set clicked user
-                        setProfileModalOpen(true); 
+                        setProfileModalOpen(true);
                         /** */
                     }}
                     sx={{
@@ -309,7 +309,7 @@ const NavbarSearch: React.FC<NavbarSearchProps> = ({
     return (
         <>
             {isMobile ? mobileSearch : desktopSearch}
-    
+
             {selectedUser && (
                 <UserProfileModal
                     open={profileModalOpen}

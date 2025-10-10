@@ -1,25 +1,12 @@
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Paper,
-  Typography,
-  Avatar,
-  Button,
-  Divider,
-  IconButton,
-  Modal,
-  Backdrop,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-} from "@mui/material";
+import { Box, Paper, Typography, Avatar, Button, Divider, IconButton, Modal, Backdrop, List, ListItem, ListItemAvatar, ListItemText, } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
 import { alertActions } from "../store/alert-slice";
 import { PostService } from "../../api/services/post.service";
 import { BASE_URL } from "../../api/endpoints";
 import { RootState } from "../store/store";
+import { followService } from "../../api/services/follow.service";
 
 interface UserProfileModalProps {
   open: boolean;
@@ -50,13 +37,14 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [posts, setPosts] = useState<any[]>([]);
   const [followers, setFollowers] = useState<any[]>([]);
   const [following, setFollowing] = useState<any[]>([]);
-  
+  const [mutualFollowers, setMutualFollowers] = useState<any[]>([]);
+
   const onlineUsers = useSelector((state: RootState) => state.onlineUsers.users);
 
   const userIsPrivate = userData.isPrivate;
 
   const isOnline = onlineUsers.includes(userData._id);
-  console.log("is given user online:",isOnline);
+  console.log("is given user online:", isOnline);
 
   // ===== Reset state whenever modal opens for a new user =====
   useEffect(() => {
@@ -64,6 +52,28 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
       setActiveTab("posts");
     }
   }, [open, userData]);
+
+  useEffect(() => {
+    const fetchMutualFollowers = async () => {
+      if (!userData?._id) return;
+
+      try {
+        const data = await followService.getFollowedByUserList(userData._id);
+        setMutualFollowers(data.mutualFollowers || []);
+      } catch (error: any) {
+        dispatch(
+          alertActions.showAlert({
+            severity: "error",
+            message: error.message || "Error fetching mutual followers",
+          })
+        );
+      }
+    };
+
+    if (open) {
+      fetchMutualFollowers();
+    }
+  }, [open, userData, currentUserId, dispatch]);
 
   // ===== Fetch initial follow state =====
   useEffect(() => {
@@ -243,6 +253,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     }
   };
 
+console.log("mutualFollowes:",mutualFollowers);
+
   // ======= UI =======
   return (
     <Modal
@@ -339,6 +351,20 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
               <Typography variant="subtitle1" color="text.secondary">
                 {userData.bio ?? "bio"}
               </Typography>
+              {/* Mutual Followers Names */}
+              {mutualFollowers.length > 0 && (
+                <Box sx={{ mt: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Mutual Followers:{" "}
+                    {mutualFollowers
+                      .slice(0, 3)
+                      .map((f) => f.username)
+                      .join(", ")}
+                    {mutualFollowers.length > 3 &&
+                      ` +${mutualFollowers.length - 3} more`}
+                  </Typography>
+                </Box>
+              )}
             </Box>
           </Box>
 

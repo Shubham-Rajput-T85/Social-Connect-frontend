@@ -31,8 +31,9 @@ export const API_ENDPOINTS = {
     DELETE_COMMENTS: (postId: string, commentId: string) => `${BASE_URL}/posts/${postId}/comments/delete/${commentId}`
   },
   FOLLOW: {
-    getFollowState: (targetUserId: string) => `${BASE_URL}/user/followState?targetUserId=${targetUserId}`,
-    sendFollowRequest: (targetUserId: string) => `${BASE_URL}/user/follow/${targetUserId}`
+    GET_FOLLOW_STATE: (targetUserId: string) => `${BASE_URL}/user/followState?targetUserId=${targetUserId}`,
+    SEND_FOLLOW_REQUEST: (targetUserId: string) => `${BASE_URL}/user/follow/${targetUserId}`,
+    GET_FOLLOWED_BY_USER: (profileUserId: string) => `${BASE_URL}/user/getFollowedBy?profileUserId=${profileUserId}`
   },
   NOTIFICATION: {
     GET: (userId: string) => `${BASE_URL}/notification?userId=${userId}`,
