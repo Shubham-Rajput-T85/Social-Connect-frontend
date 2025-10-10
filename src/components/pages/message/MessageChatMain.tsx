@@ -49,6 +49,21 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
     }
   };
 
+  const scrollToBottom = (smooth = true) => {
+    messagesContainerRef.current?.scrollTo({
+      top: messagesContainerRef.current.scrollHeight,
+      behavior: smooth ? "smooth" : "auto",
+    });
+  };
+  
+  const checkIfNearBottom = () => {
+    const container = messagesContainerRef.current;
+    if (!container) return false;
+    const threshold = 150; // px distance from bottom
+    const position = container.scrollHeight - container.scrollTop - container.clientHeight;
+    return position < threshold;
+  };  
+
   useEffect(() => {
     setMessages([]);
     setPage(1);
@@ -70,12 +85,29 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
     const socket = getSocket();
     socket.emit('joinConversation', conversation.conversationId);
 
+    // socket.on('newMessage', (msg: IMessage) => {
+    //   setMessages((prev) => [...prev, msg]);
+    //   if (msg.sender._id !== currentUser._id) {
+    //     MessageService.updateStatus(msg._id, { status: MessageStatus.SEEN });
+    //   }
+    // });
+
     socket.on('newMessage', (msg: IMessage) => {
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev) => {
+        // const isUserNearBottom = checkIfNearBottom();
+        const updated = [...prev, msg];
+        requestAnimationFrame(() => {
+          // if (isUserNearBottom)
+             scrollToBottom();
+        });
+        return updated;
+      });
+    
       if (msg.sender._id !== currentUser._id) {
         MessageService.updateStatus(msg._id, { status: MessageStatus.SEEN });
       }
     });
+    
 
     socket.on('messageUpdated', (updatedMessage: IMessage) => {
       setMessages((prev) =>
