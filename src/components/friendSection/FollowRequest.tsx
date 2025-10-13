@@ -13,6 +13,8 @@ import { useDispatch } from "react-redux";
 import { alertActions } from "../store/alert-slice";
 import DoneIcon from '@mui/icons-material/Done';
 import ClearIcon from '@mui/icons-material/Clear';
+import { BASE_URL } from "../../api/endpoints";
+import { authActions } from "../store/auth-slice";
 
 interface IFollowRequest {
   _id: string;
@@ -87,6 +89,10 @@ const FollowRequest: React.FC<FollowRequestProps> = ({ currentUserId }) => {
           message: data.message,
         })
       );
+      if(action === "accept") {
+        dispatch(authActions.incrementFollowers());
+      }
+
     } catch (error: any) {
       dispatch(
         alertActions.showAlert({
@@ -197,7 +203,7 @@ const FollowRequest: React.FC<FollowRequestProps> = ({ currentUserId }) => {
                     }}
                   >
                     <Avatar
-                      src={user.profileUrl || ""}
+                      src={ `${BASE_URL}${user.profileUrl}` || ""}
                       sx={{
                         width: 44,
                         height: 44,
