@@ -7,6 +7,7 @@ import { PostService } from "../../api/services/post.service";
 import { BASE_URL } from "../../api/endpoints";
 import { RootState } from "../store/store";
 import { followService } from "../../api/services/follow.service";
+import { authActions } from "../store/auth-slice";
 
 interface UserProfileModalProps {
   open: boolean;
@@ -15,7 +16,7 @@ interface UserProfileModalProps {
   currentUserId: string;
 }
 
-type FollowState = "Follow" | "Requested" | "Following" | "Follow_Back";
+type FollowState = "Follow" | "Requested" | "Following" | "Follow Back";
 type ActiveTab = "posts" | "followers" | "following" | "";
 
 const UserProfileModal: React.FC<UserProfileModalProps> = ({
@@ -39,14 +40,17 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [following, setFollowing] = useState<any[]>([]);
   const [mutualFollowers, setMutualFollowers] = useState<any[]>([]);
 
+  const [followersCount, setFollowersCount] = useState<number>(userData.followersCount ?? 0);
+  const [followingCount, setFollowingCount] = useState<number>(userData.followingCount ?? 0);
+
   const onlineUsers = useSelector((state: RootState) => state.onlineUsers.users);
 
   const userIsPrivate = userData.isPrivate;
 
   const isOnline = onlineUsers.includes(userData._id);
-  console.log("is given user online:", isOnline);
+  // console.log("is given user online:", isOnline);
 
-  const showStatus = !userIsPrivate || ["Following", "Follow_Back"].includes(followState);
+  const showStatus = !userIsPrivate || ["Following", "Follow Back"].includes(followState);
 
   // ===== Reset state whenever modal opens for a new user =====
   useEffect(() => {
@@ -110,7 +114,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   // ===== Automatically set tab to posts when following =====
   useEffect(() => {
-    if (followState === "Following" || followState === "Follow_Back" || !userIsPrivate) {
+    if (followState === "Following" || followState === "Follow Back" || !userIsPrivate) {
       setActiveTab("posts");
     } else {
       setActiveTab("");
@@ -176,7 +180,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     };
 
     if (!userData?._id) return;
-    console.log("log user private:", userIsPrivate);
+    // console.log("log user private:", userIsPrivate);
     if (activeTab === "followers" && (followState === "Following" || !userIsPrivate)) fetchFollowers();
     if (activeTab === "following" && (followState === "Following" || !userIsPrivate)) fetchFollowing();
     if (activeTab === "posts" && (followState === "Following" || !userIsPrivate)) fetchPosts();
@@ -192,7 +196,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
           return { variant: "outlined", color: "secondary" };
         case "Following":
           return { variant: "outlined", color: "primary" };
-        case "Follow_Back":
+        case "Follow Back":
           return { variant: "contained", color: "secondary" };
         default:
           return { variant: "contained", color: "primary" };
@@ -209,7 +213,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     try {
       let url = "";
       let method = "POST";
-      if (followState === "Follow" || followState === "Follow_Back") {
+      if (followState === "Follow" || followState === "Follow Back") {
         url = "http://localhost:8080/user/follow";
         successMessage = "Follow Request sent";
         errorMessage = "Error while Follow User, action failed!";
@@ -236,7 +240,20 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Follow action failed");
 
+      const oldFollowState = followState;
       setFollowState(data.currentState);
+
+      if(data.currentState === "Following"){
+        dispatch(authActions.incrementFollowingUserCount());
+        setFollowersCount((prev) => prev + 1);
+      }
+      console.log(`followState === "Follow" || followState === "Follow Back") && oldFollowState === "Following"`,(followState === "Follow" || followState === "Follow Back") && oldFollowState === "Following");
+      
+      if((data.currentState === "Follow" || data.currentState === "Follow Back") && oldFollowState === "Following"){
+        dispatch(authActions.decrementFollowingUserCount());
+        setFollowersCount((prev) => prev - 1);
+      }
+
       dispatch(
         alertActions.showAlert({
           severity: "info",
@@ -255,7 +272,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     }
   };
 
-  console.log("mutualFollowes:", mutualFollowers);
+  // console.log("mutualFollowes:", mutualFollowers);
 
   // ======= UI =======
   return (
@@ -381,24 +398,24 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
               {
                 label: "Followers",
                 value: "followers",
-                count: userData.followersCount,
+                count: followersCount,
               },
               {
                 label: "Following",
                 value: "following",
-                count: userData.followingCount,
+                count: followingCount,
               },
             ].map((tab) => (
               <Box
                 key={tab.value}
                 onClick={() => {
-                  if (followState === "Following" || followState === "Follow_Back" || !userIsPrivate) {
+                  if (followState === "Following" || followState === "Follow Back" || !userIsPrivate) {
                     setActiveTab(tab.value as ActiveTab);
                   }
                 }}
                 sx={{
                   cursor:
-                    followState === "Following" || followState === "Follow_Back" || !userIsPrivate
+                    followState === "Following" || followState === "Follow Back" || !userIsPrivate
                       ? "pointer"
                       : "",
                   transition: "0.2s",
@@ -450,7 +467,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
 
         {/* Tab Content */}
-        {(followState === "Following" || followState === "Follow_Back" || !userIsPrivate) && (
+        {(followState === "Following" || followState === "Follow Back" || !userIsPrivate) && (
           <Box sx={{ mt: 2 }}>
             <Typography variant="h4" color="text.secondary" m={1}>
               {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
@@ -477,7 +494,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     const isVideo = post.media?.type === "video";
                     const hasMedia = Boolean(post.media?.url);
                     const mediaUrl = hasMedia
-                      ? `http://localhost:8080${post.media.url}`
+                      ? `${BASE_URL}${post.media.url}`
                       : null;
 
                     // Helper to truncate text

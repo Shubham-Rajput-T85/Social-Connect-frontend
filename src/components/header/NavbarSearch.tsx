@@ -16,6 +16,7 @@ import { useSelector } from "react-redux";
 import Loader from "../ui/Loader";
 
 import UserProfileModal from "./UserProfileModal";
+import { BASE_URL } from "../../api/endpoints";
 
 export interface NavbarSearchProps {
     onClose: () => void; // Required for desktop close action
@@ -66,6 +67,7 @@ const NavbarSearch: React.FC<NavbarSearchProps> = ({
             if (!response.ok) throw new Error("Failed to fetch users");
 
             const data = await response.json();
+            console.log("data user at nav search:", data.users);
             setResults(data.users || []);
             setShowDropdown(true);
         } catch (err) {
@@ -122,6 +124,7 @@ const NavbarSearch: React.FC<NavbarSearchProps> = ({
     const renderSearchResults = () => (
         <List>
             {results.map((user) => (
+                
                 <ListItem
                     key={user._id}
                     disablePadding
@@ -147,7 +150,7 @@ const NavbarSearch: React.FC<NavbarSearchProps> = ({
                     <ListItemAvatar>
                         <Avatar
                             src={
-                                user.profileUrl ? `http://localhost:8080${user.profileUrl}` : undefined
+                                user.profileUrl ? `${BASE_URL}${user.profileUrl}` : undefined
                             }
                             alt={user.username || "User"}
                         >

@@ -13,6 +13,8 @@ import { Image as ImageIcon, Close as CloseIcon } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { alertActions } from "../store/alert-slice";
 import Loader from "../ui/Loader"; // Import your custom loader
+import { authActions } from "../store/auth-slice";
+import { BASE_URL } from "../../api/endpoints";
 
 const AddPostForm = () => {
   const dispatch = useDispatch();
@@ -127,6 +129,7 @@ const AddPostForm = () => {
       setSelectedFile(null);
       setPreview(null);
 
+      dispatch(authActions.updateUser({ postCount: user.postCount + 1 }));
       dispatch(
         alertActions.showAlert({
           severity: "success",
@@ -175,7 +178,7 @@ const AddPostForm = () => {
       >
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
           <Avatar
-            src={`http://localhost:8080${user.profileUrl}`}
+            src={`${BASE_URL}${user.profileUrl}`}
             sx={{ mr: 2 }}
           />
           <TextField

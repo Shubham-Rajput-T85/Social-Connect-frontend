@@ -48,7 +48,7 @@ const Sidebar = () => {
           <Box sx={{ textAlign: "center" }}>
             <Box sx={{ position: "relative", display: "inline-block" }}>
               <Avatar
-                src={BASE_URL + user.profileUrl}
+                src={`${BASE_URL}${user.profileUrl}`}
                 alt="User Avatar"
                 sx={{ width: 80, height: 80, margin: "auto" }}
               />

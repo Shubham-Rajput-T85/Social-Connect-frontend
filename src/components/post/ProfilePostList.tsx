@@ -126,7 +126,7 @@ const ProfilePostList: React.FC = () => {
               {/* Header */}
               <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <Avatar src={`http://localhost:8080${user.profileUrl}`}
+                  <Avatar src={`${BASE_URL}${user.profileUrl}`}
                     sx={{ mr: 1 }}>
                     {post.userId.username.charAt(0).toUpperCase()}
                   </Avatar>
