@@ -1,7 +1,6 @@
 import { Box, Typography, Avatar, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
-import MessageChat from './MessageChat';
 import MessageChatInput from './MessageChatInput';
 import { IMessage, MessageService } from '../../../api/services/message.service';
 import { getSocket } from '../../../socket';
@@ -9,6 +8,8 @@ import { useSelector } from 'react-redux';
 import { IConversation, MessageStatus } from '../../../api/services/conversation.service';
 import { BASE_URL } from '../../../api/endpoints';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, } from "@mui/material";
+import SkeletonMessage from '../../ui/SkeletonMessage';
+import MessageChatList from './MessageChatList';
 
 interface Props {
   conversation: IConversation;
@@ -35,12 +36,14 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
     open: false,
   });
 
+  const [newMessageCount, setNewMessageCount] = useState(0);
 
   const fetchMessages = async (pageNum: number, append = false) => {
     try {
       setLoading(true);
-      const res = await MessageService.getMessages(conversation.conversationId, pageNum, 20);
-      if (res.messages.length < 20) setHasMore(false);
+      const messagePerPageLimit = 20;
+      const res = await MessageService.getMessages(conversation.conversationId, pageNum, messagePerPageLimit);
+      if (res.messages.length < messagePerPageLimit) setHasMore(false);
       setMessages((prev) => (append ? [...res.messages, ...prev] : res.messages));
     } catch (err) {
       console.error(err);
@@ -55,14 +58,14 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
       behavior: smooth ? "smooth" : "auto",
     });
   };
-  
+
   const checkIfNearBottom = () => {
     const container = messagesContainerRef.current;
     if (!container) return false;
-    const threshold = 150; // px distance from bottom
+    const threshold = 100; // px distance from bottom
     const position = container.scrollHeight - container.scrollTop - container.clientHeight;
     return position < threshold;
-  };  
+  };
 
   useEffect(() => {
     setMessages([]);
@@ -85,29 +88,28 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
     const socket = getSocket();
     socket.emit('joinConversation', conversation.conversationId);
 
-    // socket.on('newMessage', (msg: IMessage) => {
-    //   setMessages((prev) => [...prev, msg]);
-    //   if (msg.sender._id !== currentUser._id) {
-    //     MessageService.updateStatus(msg._id, { status: MessageStatus.SEEN });
-    //   }
-    // });
-
     socket.on('newMessage', (msg: IMessage) => {
       setMessages((prev) => {
-        // const isUserNearBottom = checkIfNearBottom();
+        const isUserNearBottom = checkIfNearBottom();
         const updated = [...prev, msg];
-        requestAnimationFrame(() => {
-          // if (isUserNearBottom)
-             scrollToBottom();
-        });
+
+        // Always scroll if current user sent the message
+        if (msg.sender._id === currentUser._id || isUserNearBottom) {
+          requestAnimationFrame(() => scrollToBottom());
+          setNewMessageCount(0);
+        } else {
+          // Increment unread count if not at bottom
+          setNewMessageCount((c) => c + 1);
+        }
+
         return updated;
       });
-    
+
       if (msg.sender._id !== currentUser._id) {
         MessageService.updateStatus(msg._id, { status: MessageStatus.SEEN });
       }
     });
-    
+
 
     socket.on('messageUpdated', (updatedMessage: IMessage) => {
       setMessages((prev) =>
@@ -159,6 +161,7 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
   }, [editingMessage]);
 
   useLayoutEffect(() => {
+    if (loading) return;
     const container = messagesContainerRef.current;
     if (!container || !scrollRestoreRef.current) return;
     const { prevHeight, prevTop } = scrollRestoreRef.current;
@@ -167,20 +170,27 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
     scrollRestoreRef.current = null;
   }, [messages]);
 
-  const handleScroll = async () => {
+  const handleScroll = () => {
     const container = messagesContainerRef.current;
     if (!container || !hasMore || loading) return;
+    console.log(container.scrollTop, "+", container.clientHeight, "=", container.scrollTop + container.clientHeight, ">= ", container.scrollHeight);
     if (container.scrollTop < 200) {
       scrollRestoreRef.current = { prevHeight: container.scrollHeight, prevTop: container.scrollTop };
       const nextPage = page + 1;
       setPage(nextPage);
-      await fetchMessages(nextPage, true);
+      fetchMessages(nextPage, true);
+    }
+    // If user scrolls down manually, hide new message bubble
+    if (checkIfNearBottom()) {
+      setNewMessageCount(0);
     }
   };
 
   const handleSend = async (text: string) => {
     try {
       await MessageService.sendMessage(conversation.conversationId, { text });
+      // Scroll unconditionally for own messages
+      requestAnimationFrame(() => scrollToBottom());
     } catch (err) {
       console.error('Send failed', err);
     }
@@ -189,20 +199,6 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
   const handleEdit = (msg: IMessage) => {
     setEditingMessage({ id: msg._id, text: msg.text });
   };
-
-  // const handleDelete = async (msgId: string) => {
-  //   try {
-  //     await MessageService.deleteMessage(msgId);
-  //     // Optionally remove it instantly if current user deleted it
-  //     setMessages((prev) =>
-  //       prev.map((m) =>
-  //         m._id === msgId ? { ...m, text: "This message was deleted", isDeleted: true } : m
-  //       )
-  //     );
-  //   } catch (err) {
-  //     console.error("Delete failed", err);
-  //   }
-  // };
 
   const handleDelete = (msgId: string) => {
     setDeleteConfirm({ open: true, messageId: msgId });
@@ -245,51 +241,11 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
     setEditingMessage(null);
   };
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const today = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(today.getDate() - 1);
-    if (date.toDateString() === today.toDateString()) return 'Today';
-    if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
-    return date.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
-  };
-
-  const renderMessagesWithDates = () => {
-    const grouped: { [date: string]: IMessage[] } = {};
-    messages.forEach((msg) => {
-      const dateKey = new Date(msg.createdAt).toDateString();
-      if (!grouped[dateKey]) grouped[dateKey] = [];
-      grouped[dateKey].push(msg);
-    });
-
-    return Object.keys(grouped).map((dateKey) => (
-      <React.Fragment key={dateKey}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 1 }}>
-          <Typography
-            variant="caption"
-            sx={{ bgcolor: '#eee', px: 2, py: 0.5, borderRadius: 2, fontWeight: 500 }}
-          >
-            {formatDate(dateKey)}
-          </Typography>
-        </Box>
-        {grouped[dateKey].map((msg) => (
-          <MessageChat
-            key={msg._id}
-            message={msg}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            isDimmed={!!editingMessage && editingMessage.id !== msg._id}
-          />
-        ))}
-      </React.Fragment>
-    ));
-  };
-
   return (
     <Box
       ref={containerRef}
       sx={{
+        position: "relative",
         display: 'flex',
         flexDirection: 'column',
         bgcolor: 'background.paper',
@@ -337,16 +293,49 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
           maxWidth: '85vh',
         }}
       >
-        {loading && page > 1 && (
-          <Box sx={{ textAlign: 'center', my: 1 }}>
-            <Typography variant="caption" color="text.secondary">
-              Loading...
-            </Typography>
+        {loading && page >= 1 && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {Array.from({ length: 5 }).map((_, idx) => (
+              <SkeletonMessage key={idx} isMe={idx % 2 === 0} />
+            ))}
           </Box>
         )}
-        {renderMessagesWithDates()}
+
+        <MessageChatList
+          messages={messages}
+          editingMessageId={editingMessage?.id}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+
         <div ref={messagesEndRef} />
       </Box>
+
+      {/* Floating New Messages Button */}
+      {newMessageCount > 0 && (
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 200, // adjust based on input height
+            left: '50%',
+            transform: 'translateX(-50%)',
+            bgcolor: 'primary.main',
+            color: 'white',
+            px: 2,
+            py: 0.5,
+            borderRadius: '20px',
+            cursor: 'pointer',
+            boxShadow: 3,
+            transition: 'all 0.3s ease', // inline transition
+          }}
+          onClick={() => {
+            scrollToBottom();
+            setNewMessageCount(0);
+          }}
+        >
+          {newMessageCount} New Message{newMessageCount > 1 ? 's' : ''}
+        </Box>
+      )}
 
       <MessageChatInput
         onSend={handleSend}

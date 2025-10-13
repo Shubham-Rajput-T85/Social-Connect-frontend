@@ -15,7 +15,7 @@ interface UserProfileModalProps {
   currentUserId: string;
 }
 
-type FollowState = "Follow" | "Requested" | "Following" | "Follow Back";
+type FollowState = "Follow" | "Requested" | "Following" | "Follow_Back";
 type ActiveTab = "posts" | "followers" | "following" | "";
 
 const UserProfileModal: React.FC<UserProfileModalProps> = ({
@@ -45,6 +45,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   const isOnline = onlineUsers.includes(userData._id);
   console.log("is given user online:", isOnline);
+
+  const showStatus = !userIsPrivate || ["Following", "Follow_Back"].includes(followState);
 
   // ===== Reset state whenever modal opens for a new user =====
   useEffect(() => {
@@ -108,7 +110,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   // ===== Automatically set tab to posts when following =====
   useEffect(() => {
-    if (followState === "Following" || followState === "Follow Back" || !userIsPrivate) {
+    if (followState === "Following" || followState === "Follow_Back" || !userIsPrivate) {
       setActiveTab("posts");
     } else {
       setActiveTab("");
@@ -190,7 +192,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
           return { variant: "outlined", color: "secondary" };
         case "Following":
           return { variant: "outlined", color: "primary" };
-        case "Follow Back":
+        case "Follow_Back":
           return { variant: "contained", color: "secondary" };
         default:
           return { variant: "contained", color: "primary" };
@@ -207,7 +209,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     try {
       let url = "";
       let method = "POST";
-      if (followState === "Follow" || followState === "Follow Back") {
+      if (followState === "Follow" || followState === "Follow_Back") {
         url = "http://localhost:8080/user/follow";
         successMessage = "Follow Request sent";
         errorMessage = "Error while Follow User, action failed!";
@@ -253,7 +255,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     }
   };
 
-console.log("mutualFollowes:",mutualFollowers);
+  console.log("mutualFollowes:", mutualFollowers);
 
   // ======= UI =======
   return (
@@ -312,7 +314,7 @@ console.log("mutualFollowes:",mutualFollowers);
             <Box sx={{
               position: "relative",
               borderRadius: "50%",          // make the wrapper circular
-              border: `3px solid ${isOnline ? "#00FF00" : "#FFC107"}`, // green/yellow ring
+              border: showStatus ? `3px solid ${isOnline ? "#00FF00" : "#FFC107"}` : "3px solid transparent",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -333,18 +335,20 @@ console.log("mutualFollowes:",mutualFollowers);
               >
                 {(userData.username?.[0] || "U").toUpperCase()}
               </Avatar>
-              <Box
-                sx={{
-                  position: "absolute",
-                  bottom: 4,
-                  right: 4,
-                  width: 30,
-                  height: 30,
-                  borderRadius: "50%",
-                  bgcolor: isOnline ? "#00FF00" : "#FFC107",
-                  border: "2px solid white",
-                }}
-              />
+              {showStatus && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    bottom: 4,
+                    right: 4,
+                    width: 30,
+                    height: 30,
+                    borderRadius: "50%",
+                    bgcolor: isOnline ? "#00FF00" : "#FFC107",
+                    border: "2px solid white",
+                  }}
+                />
+              )}
             </Box>
             <Box>
               <Typography variant="subtitle1">@{userData.username}</Typography>
@@ -355,13 +359,15 @@ console.log("mutualFollowes:",mutualFollowers);
               {mutualFollowers.length > 0 && (
                 <Box sx={{ mt: 1 }}>
                   <Typography variant="body2" color="text.secondary">
-                    Mutual Followers:{" "}
-                    {mutualFollowers
-                      .slice(0, 3)
-                      .map((f) => f.username)
-                      .join(", ")}
-                    {mutualFollowers.length > 3 &&
-                      ` +${mutualFollowers.length - 3} more`}
+                    Followed by {" "}
+                    <span style={{ fontWeight: "bold", color: "black" }}>
+                      {mutualFollowers
+                        .slice(0, 3)
+                        .map((f) => f.name)
+                        .join(", ")}
+                      {mutualFollowers.length > 3 &&
+                        ` +${mutualFollowers.length - 3} more`}
+                    </span>
                   </Typography>
                 </Box>
               )}
@@ -386,13 +392,13 @@ console.log("mutualFollowes:",mutualFollowers);
               <Box
                 key={tab.value}
                 onClick={() => {
-                  if (followState === "Following" || followState === "Follow Back" || !userIsPrivate) {
+                  if (followState === "Following" || followState === "Follow_Back" || !userIsPrivate) {
                     setActiveTab(tab.value as ActiveTab);
                   }
                 }}
                 sx={{
                   cursor:
-                    followState === "Following" || followState === "Follow Back" || !userIsPrivate
+                    followState === "Following" || followState === "Follow_Back" || !userIsPrivate
                       ? "pointer"
                       : "",
                   transition: "0.2s",
@@ -444,7 +450,7 @@ console.log("mutualFollowes:",mutualFollowers);
 
 
         {/* Tab Content */}
-        {(followState === "Following" || followState === "Follow Back" || !userIsPrivate) && (
+        {(followState === "Following" || followState === "Follow_Back" || !userIsPrivate) && (
           <Box sx={{ mt: 2 }}>
             <Typography variant="h4" color="text.secondary" m={1}>
               {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}

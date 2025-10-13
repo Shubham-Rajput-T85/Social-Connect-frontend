@@ -26,7 +26,7 @@ export type IMessage = {
 }
 
 export const MessageService = {
-    getMessages: async (conversationId: string, page: number = 1, limit: number = 50) => {
+    getMessages: async (conversationId: string, page: number = 1, limit: number = 20) => {
         const response = await fetch(API_ENDPOINTS.MESSAGE.GET(conversationId, page, limit), {
             method: "GET",
             headers: {
