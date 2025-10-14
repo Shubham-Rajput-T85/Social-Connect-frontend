@@ -5,6 +5,7 @@ import {
 import SuggestedFriend from "../../friendSection/SuggestedFriend";
 import AddPostForm from "../../post/AddPostForm";
 import HomePostFeed from "../../post/HomePostFeed";
+import FollowRequest from "../../friendSection/FollowRequest";
 
 const Home = () => {
   return (
@@ -29,6 +30,7 @@ const Home = () => {
         }}
       >
         <SuggestedFriend />
+        <FollowRequest />
       </Box>
     </Box>
   );

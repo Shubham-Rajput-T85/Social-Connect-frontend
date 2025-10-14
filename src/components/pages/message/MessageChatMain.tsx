@@ -11,6 +11,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, } from "@mui
 import SkeletonMessage from '../../ui/SkeletonMessage';
 import MessageChatList from './MessageChatList';
 import { alertActions } from '../../store/alert-slice';
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
 interface Props {
   conversation: IConversation;
@@ -65,7 +66,7 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
   const checkIfNearBottom = () => {
     const container = messagesContainerRef.current;
     if (!container) return false;
-    const threshold = 100; // px distance from bottom
+    const threshold = 200; // px distance from bottom
     const position = container.scrollHeight - container.scrollTop - container.clientHeight;
     return position < threshold;
   };
@@ -74,6 +75,7 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
     setMessages([]);
     setPage(1);
     setHasMore(true);
+    setNewMessageCount(0);
 
     const load = async () => {
       await fetchMessages(1, false);
@@ -336,13 +338,17 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
             cursor: 'pointer',
             boxShadow: 3,
             transition: 'all 0.3s ease', // inline transition
+            alignItems: 'center'
           }}
           onClick={() => {
             scrollToBottom();
             setNewMessageCount(0);
           }}
         >
-          {newMessageCount} New Message{newMessageCount > 1 ? 's' : ''}
+          <span style={{ alignItems: "center", justifyContent: "center" }}>
+          {newMessageCount} New Message{newMessageCount > 1 ? 's' : ''} 
+          <ArrowDownwardIcon fontSize="small" />
+          </span>
         </Box>
       )}
 

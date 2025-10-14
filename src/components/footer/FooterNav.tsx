@@ -1,16 +1,25 @@
 import React from "react";
-import { BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";
+import { Avatar, BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";
 import { Home as HomeIcon, Person as PersonIcon, Message as MessageIcon } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { BASE_URL } from "../../api/endpoints";
 
 const FooterNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const user = useSelector((state: any) => state.auth.user);
 
   const links = [
     { label: "Home", path: "/", icon: <HomeIcon /> },
-    { label: "Profile", path: "/profile", icon: <PersonIcon /> },
-    { label: "Messages", path: "/message/1", icon: <MessageIcon /> },
+    { label: "Profile", path: "/profile",
+       icon: user ?
+       <Avatar
+       src={`${BASE_URL}${user.profileUrl}`}
+       alt="User Avatar"
+     />:
+       <PersonIcon /> },
+    { label: "Messages", path: "/message", icon: <MessageIcon /> },
   ];
 
   // Determine which tab should be active

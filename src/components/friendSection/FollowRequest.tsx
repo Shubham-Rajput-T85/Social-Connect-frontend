@@ -9,7 +9,7 @@ import {
   Paper,
   Tooltip,
 } from "@mui/material";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { alertActions } from "../store/alert-slice";
 import DoneIcon from '@mui/icons-material/Done';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -24,11 +24,8 @@ interface IFollowRequest {
   profileUrl?: string;
 }
 
-interface FollowRequestProps {
-  currentUserId: string;
-}
 
-const FollowRequest: React.FC<FollowRequestProps> = ({ currentUserId }) => {
+const FollowRequest = () => {
   const [requests, setRequests] = useState<IFollowRequest[]>([]);
   const dispatch = useDispatch();
   // Explicitly type the refs for scrollable containers
@@ -36,6 +33,8 @@ const FollowRequest: React.FC<FollowRequestProps> = ({ currentUserId }) => {
 
   // State to control fade visibility
   const [showFadeRequest, setShowFadeRequest] = useState<boolean>(true);
+
+  const currentUserId = useSelector((state: any) => state.auth.user._id);
 
   useEffect(() => {
     const element = requestScrollRef.current;

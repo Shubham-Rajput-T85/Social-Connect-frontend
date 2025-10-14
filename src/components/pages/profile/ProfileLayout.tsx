@@ -25,7 +25,7 @@ const ProfileLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
       {/* Right Sections - visible only on md and above */}
       <Box sx={{ display: { xs: "none", md: "block" } }}>
-        <FollowRequest currentUserId={currentUserId} />
+        <FollowRequest />
         <SuggestedFriend />
       </Box>
     </Box>
