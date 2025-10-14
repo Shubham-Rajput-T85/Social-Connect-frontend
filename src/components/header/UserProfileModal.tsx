@@ -114,7 +114,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   // ===== Automatically set tab to posts when following =====
   useEffect(() => {
-    if (followState === "Following" || followState === "Follow Back" || !userIsPrivate) {
+    if (followState === "Following" || !userIsPrivate) {
       setActiveTab("posts");
     } else {
       setActiveTab("");
@@ -409,13 +409,13 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
               <Box
                 key={tab.value}
                 onClick={() => {
-                  if (followState === "Following" || followState === "Follow Back" || !userIsPrivate) {
+                  if (followState === "Following" || !userIsPrivate) {
                     setActiveTab(tab.value as ActiveTab);
                   }
                 }}
                 sx={{
                   cursor:
-                    followState === "Following" || followState === "Follow Back" || !userIsPrivate
+                    followState === "Following" || !userIsPrivate
                       ? "pointer"
                       : "",
                   transition: "0.2s",
@@ -467,7 +467,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
 
         {/* Tab Content */}
-        {(followState === "Following" || followState === "Follow Back" || !userIsPrivate) && (
+        {(followState === "Following" || !userIsPrivate) && (
           <Box sx={{ mt: 2 }}>
             <Typography variant="h4" color="text.secondary" m={1}>
               {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}

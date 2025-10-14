@@ -13,6 +13,7 @@ import { userService } from "../../api/services/user.service";
 import { useSelector, useDispatch } from "react-redux";
 import { BASE_URL } from "../../api/endpoints";
 import { alertActions } from "../store/alert-slice";
+import { authActions } from "../store/auth-slice";
 
 interface SuggestedUser {
   _id: string;
@@ -91,6 +92,10 @@ export default function SuggestedFriend() {
           message: "Follow request sent",
         })
       );
+
+      if(data.currentState === "Following"){
+        dispatch(authActions.incrementFollowingUserCount());
+      }
 
       // Remove user from suggested friends
       setSuggestedFriends((prev) => prev.filter((u) => u._id !== targetUserId));
