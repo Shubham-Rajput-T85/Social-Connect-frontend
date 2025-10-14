@@ -206,7 +206,7 @@ const NavbarSearch: React.FC<NavbarSearchProps> = ({
                     onFocus={() => query.trim() && setShowDropdown(true)}
                     sx={{
                         backgroundColor: "white",
-                        borderRadius: 2,
+                        borderRadius: "20px",
                         boxShadow: showDropdown ? "0 4px 10px rgba(0,0,0,0.1)" : "none",
                     }}
                 />
@@ -270,7 +270,7 @@ const NavbarSearch: React.FC<NavbarSearchProps> = ({
                     maxWidth: 400,
                     p: 2,
                     outline: "none",
-                    borderRadius: 2,
+                    borderRadius: "20px",
                 }}
             >
                 <TextField

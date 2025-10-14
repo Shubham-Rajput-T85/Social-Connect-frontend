@@ -137,6 +137,7 @@ export default function SuggestedFriend() {
             {suggestedFriends.length > 0 ? (
               suggestedFriends.map((friend) => (
                 <ListItem
+                key={friend._id}
                   sx={{
                     py: 1,
                     px: 0,

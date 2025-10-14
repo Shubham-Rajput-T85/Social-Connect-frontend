@@ -4,12 +4,13 @@ import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import MessageChatInput from './MessageChatInput';
 import { IMessage, MessageService } from '../../../api/services/message.service';
 import { getSocket } from '../../../socket';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { IConversation, MessageStatus } from '../../../api/services/conversation.service';
 import { BASE_URL } from '../../../api/endpoints';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, } from "@mui/material";
 import SkeletonMessage from '../../ui/SkeletonMessage';
 import MessageChatList from './MessageChatList';
+import { alertActions } from '../../store/alert-slice';
 
 interface Props {
   conversation: IConversation;
@@ -37,6 +38,8 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
   });
 
   const [newMessageCount, setNewMessageCount] = useState(0);
+
+  const dispatch = useDispatch();
 
   const fetchMessages = async (pageNum: number, append = false) => {
     try {
@@ -193,6 +196,12 @@ const MessageChatMain: React.FC<Props> = ({ conversation, onBack }) => {
       requestAnimationFrame(() => scrollToBottom());
     } catch (err) {
       console.error('Send failed', err);
+      dispatch(
+        alertActions.showAlert({
+          severity: "error",
+          message: "conversation doesnt exist",
+        })
+      );
     }
   };
 
