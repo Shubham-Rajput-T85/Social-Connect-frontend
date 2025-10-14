@@ -64,7 +64,7 @@ const AddCommentForm: React.FC<{ postId: string,
         dispatch(
           alertActions.showAlert({
             severity: "error",
-            message: "Network error: " + error,
+            message: "Error: " + error,
           })
         );
       } finally {

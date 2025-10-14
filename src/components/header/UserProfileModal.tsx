@@ -483,10 +483,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   gap: 2,
                   pb: 2,
                   scrollBehavior: "smooth",
-                  "&::-webkit-scrollbar": {
-                    display: "none",
-                  },
-                  scrollbarWidth: "none",
                 }}
               >
                 {posts.length > 0 ? (
@@ -513,7 +509,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                           minWidth: { xs: 220, sm: 250 },
                           height: { xs: 140, sm: 160 },
                           borderRadius: "10px",
-                          overflow: "hidden",
+                          // overflow: "hidden",
                           flexShrink: 0,
                           cursor: "pointer",
                           backgroundColor: hasMedia ? "#000" : "#f5f5f5",
@@ -572,6 +568,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                               overflow: "hidden",
                               textOverflow: "ellipsis",
                               width: "100%",
+                              wordBreak: "break-all", 
+                              WebkitLineClamp: 2,
                             }}
                           >
                             {truncateText(post.postContent || "No content", 5)}
@@ -598,7 +596,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                               textOverflow: "ellipsis",
                             }}
                           >
-                            {truncateText(post.postContent, 8)}
+                            {truncateText(post.postContent, 5)}
                           </Box>
                         )}
                       </Box>
