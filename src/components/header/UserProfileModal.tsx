@@ -52,7 +52,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   const showStatus = !userIsPrivate || ["Following", "Follow Back"].includes(followState);
 
-  // ===== Reset state whenever modal opens for a new user =====
   useEffect(() => {
     if (open) {
       setActiveTab("posts");
@@ -81,7 +80,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     }
   }, [open, userData, currentUserId, dispatch]);
 
-  // ===== Fetch initial follow state =====
   useEffect(() => {
     const fetchFollowState = async () => {
       try {
@@ -112,7 +110,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     }
   }, [open, userData, dispatch, currentUserId, userIsPrivate]);
 
-  // ===== Automatically set tab to posts when following =====
   useEffect(() => {
     if (followState === "Following" || !userIsPrivate) {
       setActiveTab("posts");
@@ -121,7 +118,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     }
   }, [followState, userIsPrivate]);
 
-  // ===== Fetch tab data dynamically =====
   useEffect(() => {
     const fetchFollowers = async () => {
       try {
@@ -186,7 +182,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     if (activeTab === "posts" && (followState === "Following" || !userIsPrivate)) fetchPosts();
   }, [activeTab, userData, dispatch, userIsPrivate]);
 
-  // ===== Dynamic button styling =====
   useEffect(() => {
     const getButtonStyles = () => {
       switch (followState) {
@@ -217,11 +212,13 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
         url = "http://localhost:8080/user/follow";
         successMessage = "Follow Request sent";
         errorMessage = "Error while Follow User, action failed!";
-      } else if (followState === "Following") {
+      } 
+      else if (followState === "Following") {
         url = "http://localhost:8080/user/unfollow";
         successMessage = "Unfollowing User";
         errorMessage = "Error while Unfollow User, action failed!";
-      } else if (followState === "Requested") {
+      } 
+      else if (followState === "Requested") {
         url = "http://localhost:8080/user/cancel";
         successMessage = "Cancel Follow Request";
         errorMessage = "Error in Cancelling follow request, action failed!";
@@ -272,9 +269,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     }
   };
 
-  // console.log("mutualFollowes:", mutualFollowers);
-
-  // ======= UI =======
   return (
     <Modal
       open={open}
@@ -463,8 +457,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
         >
           {loading ? "Processing..." : followState}
         </Button>
-
-
 
         {/* Tab Content */}
         {(followState === "Following" || !userIsPrivate) && (
@@ -659,7 +651,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
           </Box>
         )}
       </Paper>
-    </Modal >
+    </Modal>
   );
 };
 

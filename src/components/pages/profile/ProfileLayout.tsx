@@ -2,11 +2,8 @@ import React from "react";
 import { Box } from "@mui/material";
 import SuggestedFriend from "../../friendSection/SuggestedFriend";
 import FollowRequest from "../../friendSection/FollowRequest";
-import { useSelector } from "react-redux";
 
 const ProfileLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const currentUserId = useSelector((state: any) => state.auth.user._id);
-
   return (
     <Box
       sx={{

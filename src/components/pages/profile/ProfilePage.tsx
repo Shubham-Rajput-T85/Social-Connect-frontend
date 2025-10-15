@@ -20,7 +20,7 @@ const ProfilePage: React.FC = () => {
 
   // Redirect /profile → /profile/settings
   if (location.pathname === "/profile") {
-    return <Navigate to="/profile/settings" replace />;
+    return <Navigate to="/profile/my-posts" replace />;
   }
 
   return (
