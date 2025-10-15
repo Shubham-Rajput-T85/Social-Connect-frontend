@@ -121,13 +121,14 @@ function App() {
             }
           />
 
-          {/* Redirect /Home → / */}
+          {/* Redirect /Home -> / */}
           <Route path='/home' element={
             <ProtectedRoute>
               <Navigate to="/" />
             </ProtectedRoute>
           } />
 
+          {/* Redirect /Profile -> / */}
           <Route
             path="/profile/*"
             element={
@@ -139,6 +140,7 @@ function App() {
             }
           />
 
+          {/* Redirect /Message -> / */}
           <Route
             path="/message/*"
             element={

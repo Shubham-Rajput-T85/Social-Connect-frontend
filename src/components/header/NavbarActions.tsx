@@ -42,7 +42,7 @@ const NavbarActions: React.FC = () => {
       </Button>
 
       {/* Profile Icon */}
-      <IconButton sx={{ color: "primary.main" }} onClick={() => navigate("/profile")}>
+      <IconButton sx={{ color: "primary.main" }} onClick={() => navigate("/profile/my-posts")}>
         {user &&
           <Avatar
             src={`${BASE_URL}${user.profileUrl}`}

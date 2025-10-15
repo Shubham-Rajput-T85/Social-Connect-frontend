@@ -8,6 +8,7 @@ import {
   Button,
   Avatar,
   Tooltip,
+  ButtonProps,
 } from "@mui/material";
 import { userService } from "../../api/services/user.service";
 import { useSelector, useDispatch } from "react-redux";
@@ -19,99 +20,134 @@ interface SuggestedUser {
   _id: string;
   name: string;
   username: string;
-  bio?: string;
   profileUrl?: string;
-  followersCount: number;
-  followingCount: number;
-  isPrivate: boolean;
 }
 
-export default function SuggestedFriend() {
-  const friendsScrollRef = useRef<HTMLDivElement | null>(null);
-  const [showFadeFriends, setShowFadeFriends] = useState<boolean>(true);
-  const [suggestedFriends, setSuggestedFriends] = useState<SuggestedUser[]>([]);
-  const [loadingIds, setLoadingIds] = useState<string[]>([]); // track loading per user
-  const currentUserId = useSelector((state: any) => state.auth.user._id);
-  const dispatch = useDispatch();
+type FollowState = "Follow" | "Requested" | "Following" | "Follow Back";
 
-  // Fetch suggested friends on mount
+const SuggestedFriend = () => {
+  const dispatch = useDispatch();
+  const [suggestedFriends, setSuggestedFriends] = useState<SuggestedUser[]>([]);
+  const [followStates, setFollowStates] = useState<Record<string, FollowState>>({});
+  const [loadingIds, setLoadingIds] = useState<string[]>([]);
+  const [showFadeFriends, setShowFadeFriends] = useState(true);
+
+  const friendsScrollRef = useRef<HTMLDivElement | null>(null);
+  const currentUserId = useSelector((state: any) => state.auth?.user?._id);
+
+  // Fetch suggested users and their follow states
   useEffect(() => {
     const fetchSuggested = async () => {
       try {
         const res = await userService.getSuggestedFriends();
-        setSuggestedFriends(res.users || []);
+        const users = res?.users ?? [];
+        setSuggestedFriends(users);
+
+        if (!currentUserId) return;
+
+        const states: Record<string, FollowState> = {};
+        for (const user of users) {
+          try {
+            const followRes = await fetch(
+              `http://localhost:8080/user/followState?currentUserId=${currentUserId}&targetUserId=${user._id}`,
+              { credentials: "include" }
+            );
+            const data = await followRes.json();
+            states[user._id] = (data?.state as FollowState) ?? "Follow";
+          } catch {
+            states[user._id] = "Follow";
+          }
+        }
+        setFollowStates(states);
       } catch (err) {
         console.error("Failed to fetch suggested friends:", err);
       }
     };
 
     fetchSuggested();
-  }, []);
+  }, [currentUserId]);
 
-  // Show fade only if scrollable
   useEffect(() => {
-    const element = friendsScrollRef.current;
-    if (element) {
-      setShowFadeFriends(element.scrollHeight > element.clientHeight);
-    }
+    const el = friendsScrollRef.current;
+    if (el) setShowFadeFriends(el.scrollHeight > el.clientHeight);
   }, [suggestedFriends]);
 
   const handleScroll = (
     ref: React.RefObject<HTMLDivElement>,
-    setShowFade: React.Dispatch<React.SetStateAction<boolean>>
+    setShow: React.Dispatch<React.SetStateAction<boolean>>
   ) => {
-    const element = ref.current;
-    if (!element) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = element;
-
-    setShowFade(!(scrollTop + clientHeight >= scrollHeight - 2));
+    const el = ref.current;
+    if (!el) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    setShow(!(scrollTop + clientHeight >= scrollHeight - 2));
   };
 
-  // Follow button click handler
   const handleFollowClick = async (targetUserId: string) => {
+    if (!currentUserId) {
+      dispatch(alertActions.showAlert({ severity: "error", message: "You must be logged in" }));
+      return;
+    }
+
+    const currentState = (followStates[targetUserId] as FollowState) || "Follow";
     setLoadingIds((prev) => [...prev, targetUserId]);
+
     try {
-      const res = await fetch("http://localhost:8080/user/follow", {
+      let url = "";
+      let successMessage = "";
+
+      if (currentState === "Follow" || currentState === "Follow Back") {
+        url = "http://localhost:8080/user/follow";
+        successMessage = "Follow request sent";
+      } else if (currentState === "Following") {
+        url = "http://localhost:8080/user/unfollow";
+        successMessage = "Unfollowed";
+      } else if (currentState === "Requested") {
+        url = "http://localhost:8080/user/cancel";
+        successMessage = "Cancelled request";
+      }
+
+      const res = await fetch(url, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          currentUserId,
-          targetUserId,
-        }),
+        body: JSON.stringify({ currentUserId, targetUserId }),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Follow action failed");
+      if (!res.ok) throw new Error(data?.message || "Follow action failed");
 
-      // Show success alert
-      dispatch(
-        alertActions.showAlert({
-          severity: "success",
-          message: "Follow request sent",
-        })
-      );
+      const newState = (data?.currentState as FollowState) || "Follow";
+      setFollowStates((prev) => ({ ...prev, [targetUserId]: newState }));
 
-      if(data.currentState === "Following"){
+      if (newState === "Following") {
         dispatch(authActions.incrementFollowingUserCount());
+      } else if ((newState === "Follow" || newState === "Follow Back") && currentState === "Following") {
+        dispatch(authActions.decrementFollowingUserCount());
       }
 
-      // Remove user from suggested friends
-      setSuggestedFriends((prev) => prev.filter((u) => u._id !== targetUserId));
-    } catch (error: any) {
-      dispatch(
-        alertActions.showAlert({
-          severity: "error",
-          message: error.message || "Error while sending follow request",
-        })
-      );
+      dispatch(alertActions.showAlert({ severity: "info", message: successMessage }));
+    } catch (err: any) {
+      dispatch(alertActions.showAlert({ severity: "error", message: err?.message || "Action failed" }));
     } finally {
-      setLoadingIds((prev) => prev.filter((id) => id !== targetUserId));
+      setLoadingIds((p) => p.filter((id) => id !== targetUserId));
     }
   };
 
-  console.log("calling suggestedfriends");
+  const getButtonProps = (state: FollowState): Pick<ButtonProps, "variant" | "color"> => {
+    switch (state) {
+      case "Follow":
+        return { variant: "contained", color: "primary" };
+      case "Requested":
+        return { variant: "outlined", color: "secondary" };
+      case "Following":
+        return { variant: "outlined", color: "primary" };
+      case "Follow Back":
+        return { variant: "contained", color: "secondary" };
+      default:
+        return { variant: "contained", color: "primary" };
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -125,121 +161,151 @@ export default function SuggestedFriend() {
       }}
     >
       <Paper
-        sx={{ display: "flex", flexDirection: "column", bgcolor: "background.paper", position: "relative" }}
+        elevation={0}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          bgcolor: "background.paper",
+          position: "relative",
+        }}
       >
-        <Box sx={{ p: 2, position: "sticky", top: 0, backgroundColor: "background.paper", zIndex: 2, borderRadius: "10px" }}>
+        {/* Header */}
+        <Box
+          sx={{
+            p: 2,
+            pb: 2,
+            position: "sticky",
+            top: 0,
+            backgroundColor: "background.paper",
+            zIndex: 2,
+            borderRadius: "10px",
+          }}
+        >
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             Suggested Friends
           </Typography>
         </Box>
-        <hr style={{ color: "gray", margin: "10px", marginTop: "0" }} />
+
+        <hr style={{ color: "gray", margin: "10px", marginTop: 0 }} />
+
+        {/* Scrollable List */}
         <Box
           ref={friendsScrollRef}
           onScroll={() => handleScroll(friendsScrollRef as any, setShowFadeFriends)}
-          sx={{ maxHeight: 200, overflowY: "auto", px: 2, pb: 2, scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } }}
+          sx={{
+            maxHeight: 200,
+            overflowY: "auto",
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": { display: "none" },
+          }}
         >
           <List sx={{ p: 0 }}>
             {suggestedFriends.length > 0 ? (
-              suggestedFriends.map((friend) => (
-                <ListItem
-                key={friend._id}
-                  sx={{
-                    py: 1,
-                    px: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 2,
-                    flexWrap: "nowrap",
-                  }}
-                >
-                  <Box
+              suggestedFriends.map((friend) => {
+                const state = (followStates[friend._id] as FollowState) || "Follow";
+                const isLoading = loadingIds.includes(friend._id);
+                const btnProps = getButtonProps(state);
+
+                return (
+                  <ListItem
+                    key={friend._id}
                     sx={{
                       display: "flex",
                       alignItems: "center",
-                      gap: 1.5,
-                      flex: 1,
-                      minWidth: 0,
+                      justifyContent: "space-between",
+                      gap: 2,
+                      flexWrap: "nowrap",
                     }}
                   >
-                    <Avatar
-                      src={(BASE_URL + friend.profileUrl) || `https://i.pravatar.cc/150?u=${friend._id}`}
-                      sx={{ width: 44, height: 44, flexShrink: 0 }}
-                    />
-
+                    {/* Avatar + Name */}
                     <Box
                       sx={{
-                        overflow: "hidden",
-                        minWidth: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
                         flex: 1,
-                        maxWidth: "75px",
+                        minWidth: 0,
                       }}
                     >
-                      <Tooltip title={friend.name} arrow disableInteractive>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontWeight: 500,
-                            lineHeight: 1.2,
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {friend.name}
-                        </Typography>
-                      </Tooltip>
+                      <Avatar
+                        src={friend.profileUrl ? `${BASE_URL}${friend.profileUrl}` : ""}
+                        sx={{ width: 44, height: 44, flexShrink: 0 }}
+                      >
+                        {(friend.username?.[0] || "U").toUpperCase()}
+                      </Avatar>
 
-                      <Tooltip title={`@${friend.username}`} arrow disableInteractive>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            display: "block",
-                          }}
-                        >
-                          @{friend.username}
-                        </Typography>
-                      </Tooltip>
+                      <Box
+                        sx={{
+                          overflow: "hidden",
+                          minWidth: 0,
+                          flex: 1,
+                          maxWidth: "70px",
+                        }}
+                      >
+                        <Tooltip title={friend.name} arrow disableInteractive>
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              fontWeight: 500,
+                              lineHeight: 1.2,
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {friend.name}
+                          </Typography>
+                        </Tooltip>
+
+                        <Tooltip title={`@${friend.username}`} arrow disableInteractive>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              display: "block",
+                            }}
+                          >
+                            @{friend.username}
+                          </Typography>
+                        </Tooltip>
+                      </Box>
                     </Box>
-                  </Box>
 
-
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    disabled={loadingIds.includes(friend._id)}
-                    onClick={() => handleFollowClick(friend._id)}
-                    sx={{
-                      textTransform: "none",
-                      fontSize: "0.75rem",
-                      px: 2,
-                      py: 0.5,
-                      ml: 2,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {loadingIds.includes(friend._id) ? "Loading..." : "Follow"}
-                  </Button>
-                </ListItem>
-
-              ))
+                    {/* Follow Button */}
+                    <Box sx={{ flexShrink: 0 }}>
+                      <Button
+                        variant={btnProps.variant}
+                        color={btnProps.color}
+                        size="small"
+                        onClick={() => handleFollowClick(friend._id)}
+                        disabled={isLoading}
+                        sx={{ minWidth: 36, px: 1, textTransform: "none", fontSize: "0.75rem" }}
+                      >
+                        {isLoading ? "..." : state}
+                      </Button>
+                    </Box>
+                  </ListItem>
+                );
+              })
             ) : (
               <Typography
                 sx={{
                   textAlign: "center",
+                  p: 2,
                   pt: 0,
                   color: "text.secondary",
                 }}
               >
-                No suggestion
+                No suggestions
               </Typography>
             )}
           </List>
         </Box>
+
+        {/* Fade effect */}
         {showFadeFriends && (
           <Box
             sx={{
@@ -258,4 +324,6 @@ export default function SuggestedFriend() {
       </Paper>
     </Box>
   );
-}
+};
+
+export default SuggestedFriend;

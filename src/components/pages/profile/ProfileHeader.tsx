@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, Paper, Typography, Avatar, Button, Divider } from "@mui/material";
 import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BASE_URL } from "../../../api/endpoints";
+import FollowModal from "./FollowModal";
 
 
 const ProfileHeader = () => {
@@ -10,7 +11,10 @@ const ProfileHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
   console.log(user);
-  
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<"followers" | "following">("followers");
+
   // Extract the last segment of the path to determine active tab
   const path = location.pathname.split("/").pop();
   const activeTab = path === "my-posts" ? "my-posts" : path === "add-post" ? "add-post" : "settings";
@@ -27,13 +31,13 @@ const ProfileHeader = () => {
         }}
       >
         {/* Left - Avatar + Bio */}
-        <Box sx={{ 
+        <Box sx={{
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
           alignItems: { xs: "center", md: "flex-start" },
           textAlign: { xs: "center", md: "left" },
           gap: 2
-          }}>
+        }}>
           <Avatar
             src={user?.profileUrl ? `${BASE_URL}${user.profileUrl}` : undefined}
             alt="User Avatar"
@@ -60,7 +64,13 @@ const ProfileHeader = () => {
               Posts
             </Typography>
           </Box>
-          <Box>
+          <Box
+            sx={{ cursor: "pointer" }}
+            onClick={() => {
+              setModalType("followers");
+              setModalOpen(true);
+            }}
+          >
             <Typography variant="h6" align="center">
               {user.followersCount}
             </Typography>
@@ -68,7 +78,13 @@ const ProfileHeader = () => {
               Followers
             </Typography>
           </Box>
-          <Box>
+          <Box
+            sx={{ cursor: "pointer" }}
+            onClick={() => {
+              setModalType("following");
+              setModalOpen(true);
+            }}
+          >
             <Typography variant="h6" align="center">
               {user.followingCount}
             </Typography>
@@ -104,6 +120,8 @@ const ProfileHeader = () => {
           Settings
         </Button>
       </Box>
+
+      <FollowModal open={modalOpen} onClose={() => setModalOpen(false)} userId={user._id} type={modalType} />
     </Paper>
   );
 };
