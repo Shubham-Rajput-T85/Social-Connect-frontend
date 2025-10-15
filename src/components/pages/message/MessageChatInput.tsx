@@ -2,6 +2,8 @@ import { Box, TextField, IconButton, Button } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import SendIcon from '@mui/icons-material/Send';
 import CancelIcon from '@mui/icons-material/Cancel';
+import { useDispatch } from 'react-redux';
+import { alertActions } from '../../store/alert-slice';
 
 interface Props {
   onSend: (msg: string) => void;
@@ -12,6 +14,7 @@ interface Props {
 
 const MessageChatInput: React.FC<Props> = ({ onSend, onEditSave, editingMessage, onCancelEdit }) => {
   const [text, setText] = useState('');
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (editingMessage) setText(editingMessage.text);
@@ -19,7 +22,15 @@ const MessageChatInput: React.FC<Props> = ({ onSend, onEditSave, editingMessage,
   }, [editingMessage]);
 
   const handleSend = () => {
-    if (!text.trim()) return;
+    if (!text.trim()) {
+      dispatch(
+        alertActions.showAlert({
+          severity: "error",
+          message: "message cannot be empty.",
+        })
+      );
+      return;
+    }
 
     if (editingMessage) {
       onEditSave(editingMessage.id, text.trim());
