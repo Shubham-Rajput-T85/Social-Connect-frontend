@@ -74,11 +74,6 @@ const ProfileHeader = () => {
               />
             </Box>
           </Box>
-          <Avatar
-            src={user?.profileUrl ? `${BASE_URL}${user.profileUrl}` : undefined}
-            alt="User Avatar"
-            sx={{ width: 80, height: 80 }}
-          />
           <Box>
             <Typography variant="h6">{user?.name}</Typography>
             <Typography variant="body1" color="gray">
