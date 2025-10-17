@@ -41,7 +41,7 @@ const Sidebar = () => {
 
   const links: SidebarLink[] = [
     { label: "Home", path: "/", icon: <HomeIcon /> },
-    { label: "Profile", path: "/profile", icon: <PersonIcon /> },
+    { label: "Profile", path: "/profile/my-posts", icon: <PersonIcon /> },
     { label: "Messages", path: "/message", icon: <MessageIcon /> },
   ];
 

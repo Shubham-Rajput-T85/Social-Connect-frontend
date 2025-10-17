@@ -8,6 +8,8 @@ import { authActions } from "../../store/auth-slice";
 import { alertActions } from "../../store/alert-slice";
 import StoryModal from "../../story/StoryModal";
 import StoryViewerModal from "../../story/StoryViewerModal";
+import FollowModal from "./FollowModal";
+
 
 const ProfileHeader = () => {
   const user = useSelector((state: any) => state.auth.user);
@@ -18,6 +20,9 @@ const ProfileHeader = () => {
   console.log(user);
 
   const dispatch = useDispatch();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<"followers" | "following">("followers");
+
   // Extract the last segment of the path to determine active tab
   const path = location.pathname.split("/").pop();
   const activeTab = path === "my-posts" ? "my-posts" : path === "add-post" ? "add-post" : "settings";
@@ -69,6 +74,11 @@ const ProfileHeader = () => {
               />
             </Box>
           </Box>
+          <Avatar
+            src={user?.profileUrl ? `${BASE_URL}${user.profileUrl}` : undefined}
+            alt="User Avatar"
+            sx={{ width: 80, height: 80 }}
+          />
           <Box>
             <Typography variant="h6">{user?.name}</Typography>
             <Typography variant="body1" color="gray">
@@ -90,7 +100,13 @@ const ProfileHeader = () => {
               Posts
             </Typography>
           </Box>
-          <Box>
+          <Box
+            sx={{ cursor: "pointer" }}
+            onClick={() => {
+              setModalType("followers");
+              setModalOpen(true);
+            }}
+          >
             <Typography variant="h6" align="center">
               {user.followersCount}
             </Typography>
@@ -98,7 +114,13 @@ const ProfileHeader = () => {
               Followers
             </Typography>
           </Box>
-          <Box>
+          <Box
+            sx={{ cursor: "pointer" }}
+            onClick={() => {
+              setModalType("following");
+              setModalOpen(true);
+            }}
+          >
             <Typography variant="h6" align="center">
               {user.followingCount}
             </Typography>
@@ -148,6 +170,7 @@ const ProfileHeader = () => {
         onClose={() => setOpenViewer(false)}
         userId={user._id}
       />
+      <FollowModal open={modalOpen} onClose={() => setModalOpen(false)} userId={user._id} type={modalType} />
     </Paper>
   );
 };
