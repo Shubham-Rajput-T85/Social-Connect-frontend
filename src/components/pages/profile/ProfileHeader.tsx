@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import { Box, Paper, Typography, Avatar, Button, Divider } from "@mui/material";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BASE_URL } from "../../../api/endpoints";
+import StoryRing from "../../ui/StoryRing";
+import { authActions } from "../../store/auth-slice";
+import { alertActions } from "../../store/alert-slice";
+import StoryModal from "../../story/StoryModal";
+import StoryViewerModal from "../../story/StoryViewerModal";
 import FollowModal from "./FollowModal";
 
 
@@ -10,14 +15,28 @@ const ProfileHeader = () => {
   const user = useSelector((state: any) => state.auth.user);
   const navigate = useNavigate();
   const location = useLocation();
+  const [openStoryModal, setOpenStoryModal] = useState(false);
+  const [openViewer, setOpenViewer] = useState(false);
   console.log(user);
 
+  const dispatch = useDispatch();
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<"followers" | "following">("followers");
 
   // Extract the last segment of the path to determine active tab
   const path = location.pathname.split("/").pop();
   const activeTab = path === "my-posts" ? "my-posts" : path === "add-post" ? "add-post" : "settings";
+
+  const handleAddStory = () => setOpenStoryModal(true);
+  const handleViewStory = () => user.storyCount > 0 && setOpenViewer(true);
+
+  const handleStoryAdded = () => {
+    dispatch(authActions.incrementStoryCount());
+    dispatch(alertActions.showAlert({
+      severity: "success",
+      message: "Story added successfully!",
+    }));
+  };
 
   return (
     <Paper sx={{ p: 3, mb: 3 }}>
@@ -38,6 +57,23 @@ const ProfileHeader = () => {
           textAlign: { xs: "center", md: "left" },
           gap: 2
         }}>
+          <Box>
+            <Box sx={{ display: { xs: "none", sm: "block" } }}>
+              <Avatar
+                src={user?.profileUrl ? `${BASE_URL}${user.profileUrl}` : undefined}
+                alt="User Avatar"
+                sx={{ width: 80, height: 80 }}
+              />
+            </Box>
+            <Box sx={{ display: { xs: "block", sm: "none" } }}>
+              <StoryRing
+                profileUrl={user.profileUrl}
+                storyCount={user.storyCount}
+                onAddStory={handleAddStory}
+                onViewStory={handleViewStory}
+              />
+            </Box>
+          </Box>
           <Avatar
             src={user?.profileUrl ? `${BASE_URL}${user.profileUrl}` : undefined}
             alt="User Avatar"
@@ -121,6 +157,19 @@ const ProfileHeader = () => {
         </Button>
       </Box>
 
+      {/* Story Modal */}
+      <StoryModal
+        open={openStoryModal}
+        onClose={() => setOpenStoryModal(false)}
+        onStoryAdded={handleStoryAdded}
+      />
+
+      {/* Story Viewer */}
+      <StoryViewerModal
+        open={openViewer}
+        onClose={() => setOpenViewer(false)}
+        userId={user._id}
+      />
       <FollowModal open={modalOpen} onClose={() => setModalOpen(false)} userId={user._id} type={modalType} />
     </Paper>
   );

@@ -57,14 +57,14 @@ const SettingsMain: React.FC = () => {
 
       <Divider sx={{ mb: 2 }} />
 
-      <Box sx={{ display: "flex", position: "relative", minHeight: 400 }}>
+      <Box sx={{ display: "flex", position: "relative", minHeight: 400, gap: sidebarOpen ? 3 : 0, }}>
         {/* Sidebar */}
         <Box
           sx={{
             width: sidebarOpen ? 200 : 0,
             transition: "width 0.3s ease",
             overflow: "hidden",
-            mr: sidebarOpen ? 3 : 0,
+            // mr: sidebarOpen ? 3 : 0,
             borderRight: sidebarOpen ? "1px solid #ddd" : "none",
             backgroundColor: "#fafafa",
           }}

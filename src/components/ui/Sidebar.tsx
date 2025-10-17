@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Paper,
@@ -17,8 +17,13 @@ import {
 } from "@mui/icons-material";
 import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { BASE_URL } from "../../api/endpoints";
 import SkeletonSidebar from "./SkeletonSidebar";
+import StoryRing from "./StoryRing";
+import { alertActions } from "../store/alert-slice";
+import { useDispatch } from "react-redux";
+import { authActions } from "../store/auth-slice";
+import StoryModal from "../story/StoryModal";
+import StoryViewerModal from "../story/StoryViewerModal";
 
 interface SidebarLink {
   label: string;
@@ -28,6 +33,10 @@ interface SidebarLink {
 
 const Sidebar = () => {
   const user = useSelector((state: any) => state.auth.user);
+  const [openStoryModal, setOpenStoryModal] = useState(false);
+  const [openViewer, setOpenViewer] = useState(false);
+
+  const dispatch = useDispatch();
   console.log("user from sidebar:", user);
 
   const links: SidebarLink[] = [
@@ -39,6 +48,19 @@ const Sidebar = () => {
   if (!user) {
     return <SkeletonSidebar />;
   }
+  console.log("profile:",user.profileUrl);
+  
+
+  const handleAddStory = () => setOpenStoryModal(true);
+  const handleViewStory = () => user.storyCount > 0 && setOpenViewer(true);
+
+  const handleStoryAdded = () => {
+    dispatch(authActions.incrementStoryCount());
+    dispatch(alertActions.showAlert({
+      severity: "success",
+      message: "Story added successfully!",
+    }));
+  };
 
   return (
     <>
@@ -47,10 +69,11 @@ const Sidebar = () => {
         <Paper sx={{ padding: 2, mb: 2 }}>
           <Box sx={{ textAlign: "center" }}>
             <Box sx={{ position: "relative", display: "inline-block" }}>
-              <Avatar
-                src={`${BASE_URL}${user.profileUrl}`}
-                alt="User Avatar"
-                sx={{ width: 80, height: 80, margin: "auto" }}
+              <StoryRing
+                profileUrl={user.profileUrl}
+                storyCount={user.storyCount}
+                onAddStory={handleAddStory}
+                onViewStory={handleViewStory}
               />
             </Box>
             <Typography variant="h6" sx={{ mt: 1 }}>
@@ -60,16 +83,31 @@ const Sidebar = () => {
               variant="body2"
               color="text.secondary"
               sx={{
-                maxWidth:"150px",
+                maxWidth: "150px",
                 whiteSpace: "normal",
                 wordBreak: "break-word",
                 textAlign: "center",
-                mx: "auto", 
+                mx: "auto",
               }}
             >
               {user.bio || "No bio available"}
             </Typography>
           </Box>
+
+          {/* Story Modal */}
+          <StoryModal
+            open={openStoryModal}
+            onClose={() => setOpenStoryModal(false)}
+            onStoryAdded={handleStoryAdded}
+          />
+
+          {/* Story Viewer */}
+          <StoryViewerModal
+            open={openViewer}
+            onClose={() => setOpenViewer(false)}
+            userId={user._id}
+          />
+
           <Box>
             {/* Navigation */}
             <List>

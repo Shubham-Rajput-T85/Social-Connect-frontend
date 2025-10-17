@@ -56,17 +56,14 @@ const authSlice = createSlice({
         decrementFollowingUserCount: (state: any) => {
             state.user.followingCount -= 1;
         },
+        incrementStoryCount: (state: any) => {
+            state.user.storyCount += 1;
+        },
+        decrementStoryCount: (state: any) => {
+            state.user.storyCount -= 1;
+        },
     }
 });
 
 export const authActions = authSlice.actions;
 export default authSlice;
-
-// // After creating a new post
-// dispatch(authActions.updateUser({ postCount: user.postCount + 1 }));
-
-// // After accepting a follow request
-// dispatch(authActions.updateUser({ followersCount: user.followersCount + 1 }));
-
-// // After unfollowing someone
-// dispatch(authActions.updateUser({ followingCount: user.followingCount - 1 }));
