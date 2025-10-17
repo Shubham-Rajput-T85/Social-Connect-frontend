@@ -7,7 +7,7 @@ export const API_ENDPOINTS = {
     // LOGOUT: `${BASE_URL}/auth/logout`,
   },
   USER: {
-    TOGGLE_ACCOUNT_STATUS:`${BASE_URL}/user/updateAccountStatus`,
+    TOGGLE_ACCOUNT_STATUS: `${BASE_URL}/user/updateAccountStatus`,
     SUGGESTED_FRIEND: `${BASE_URL}/user/suggestedFriends`
     // PROFILE: (userId: string) => `${BASE_URL}/user/${userId}`,
     // UPDATE: `${BASE_URL}/user/update`,
@@ -51,5 +51,14 @@ export const API_ENDPOINTS = {
     UPDATE_STATUS: (messageId: string) => `${BASE_URL}/messages/status/${messageId}`,
     EDIT: (messageId: string) => `${BASE_URL}/messages/edit/${messageId}`,
     DELETE: (messageId: string) => `${BASE_URL}/messages/delete/${messageId}`,
+  },
+  STORY: {
+    ADD: () => `${BASE_URL}/story/add`,
+    FEED: (userId?: string) =>
+      userId
+        ? `${BASE_URL}/story/feed/${userId}`
+        : `${BASE_URL}/story/feed`,
+    VIEW: (storyId: string) => `${BASE_URL}/story/${storyId}/view`,
+    DELETE: (storyId: string) => `${BASE_URL}/story/${storyId}/delete`,
   }
 };
