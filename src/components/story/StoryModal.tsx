@@ -123,7 +123,7 @@ const StoryModal: React.FC<Props> = ({ open, onClose, onStoryAdded }) => {
     <Modal open={open} onClose={handleClose}>
       <Box
         sx={{
-          width: { xs: "92%", sm: 420 },
+          width: { xs: "90%", sm: 420 },
           bgcolor: "background.paper",
           mx: "auto",
           mt: { xs: 6, sm: 10 },
@@ -192,13 +192,13 @@ const StoryModal: React.FC<Props> = ({ open, onClose, onStoryAdded }) => {
                   <img
                     src={previewUrl}
                     alt="preview"
-                    style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: 10, objectFit: "contain" }}
+                    style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: "10px", objectFit: "contain" }}
                   />
                 ) : (
                   <video
                     src={previewUrl}
                     controls
-                    style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: 10, objectFit: "contain" }}
+                    style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: "10px", objectFit: "contain" }}
                   />
                 )}
               </Box>

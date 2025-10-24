@@ -37,7 +37,6 @@ const Sidebar = () => {
   const [openViewer, setOpenViewer] = useState(false);
 
   const dispatch = useDispatch();
-  console.log("user from sidebar:", user);
 
   const links: SidebarLink[] = [
     { label: "Home", path: "/", icon: <HomeIcon /> },
@@ -52,6 +51,7 @@ const Sidebar = () => {
   
 
   const handleAddStory = () => setOpenStoryModal(true);
+  console.log("story count: ",user.storyCount, " openViewer: ",openViewer);
   const handleViewStory = () => user.storyCount > 0 && setOpenViewer(true);
 
   const handleStoryAdded = () => {

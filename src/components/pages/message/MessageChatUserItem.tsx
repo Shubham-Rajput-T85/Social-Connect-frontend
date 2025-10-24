@@ -9,6 +9,7 @@ interface User {
   profile: string;
   online: boolean;
   unreadCount: number;
+  storyCount: number;
 }
 
 interface Props {
@@ -18,7 +19,6 @@ interface Props {
 }
 
 const MessageChatUserItem: React.FC<Props> = ({ user, onClick, selected }) => {
-  console.log("user online or not: ", user.online);
   return (
     <ListItemButton onClick={onClick}
       sx={{

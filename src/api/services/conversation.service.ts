@@ -25,6 +25,7 @@ export interface IConversation {
   user: ConversationUser;
   lastMessage: LastMessage | null;
   unreadCount: number;
+  storyCount: number;
 }
 
 export const ConversationService = {

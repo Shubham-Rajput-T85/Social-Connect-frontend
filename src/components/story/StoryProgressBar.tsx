@@ -1,42 +1,13 @@
-import React, { useEffect, useState, useRef } from "react";
+import React from "react";
 import { Box, LinearProgress } from "@mui/material";
 
 interface Props {
   stories: any[];
   currentIndex: number;
-  duration?: number;
-  isPaused?: boolean;
+  progress: number; // 0 - 100 for the current story
 }
 
-const StoryProgressBar: React.FC<Props> = ({
-  stories,
-  currentIndex,
-  duration = 5000,
-  isPaused = false,
-}) => {
-  const [progress, setProgress] = useState(0);
-  const progressRef = useRef<number>(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    setProgress(0);
-    progressRef.current = 0;
-  }, [currentIndex]);
-
-  useEffect(() => {
-    const interval = 50;
-    const step = (interval / duration) * 100;
-
-    if (!isPaused) {
-      timerRef.current = setInterval(() => {
-        progressRef.current += step;
-        setProgress(Math.min(progressRef.current, 100));
-      }, interval);
-    }
-
-    return () => clearInterval(timerRef.current as NodeJS.Timeout);
-  }, [isPaused, currentIndex, duration]);
-
+const StoryProgressBar: React.FC<Props> = ({ stories, currentIndex, progress }) => {
   return (
     <Box
       sx={{
