@@ -1,6 +1,8 @@
 import { ListItemButton, ListItemAvatar, Avatar, ListItemText, Badge, Box } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import { BASE_URL } from '../../../api/endpoints';
+import StoryRing from '../../ui/StoryRing';
+import StoryViewerModal from '../../story/StoryViewerModal';
 
 interface User {
   id: string;
@@ -19,6 +21,9 @@ interface Props {
 }
 
 const MessageChatUserItem: React.FC<Props> = ({ user, onClick, selected }) => {
+  const [openViewer, setOpenViewer] = useState(false);
+  console.log("-----------------story count:--------",user);
+  const handleViewStory = () => user.storyCount > 0 && setOpenViewer(true);
   return (
     <ListItemButton onClick={onClick}
       sx={{
@@ -39,16 +44,22 @@ const MessageChatUserItem: React.FC<Props> = ({ user, onClick, selected }) => {
             },
           }}
         >
-          <Avatar
-            src={user.profile ? BASE_URL + user.profile : "/default-avatar.png"}
-            alt={user.username}
-            sx={{
-              width: 48,
-              height: 48,
-              border: "2px solid #e0e0e0",
-              objectFit: "cover",
-            }}
-          />
+          <StoryRing
+            keepAddButton={false}
+            storyCount={user.storyCount}
+            onAddStory={() => {}}
+            onViewStory={handleViewStory}>
+            <Avatar
+              src={user.profile ? BASE_URL + user.profile : "/default-avatar.png"}
+              alt={user.username}
+              sx={{
+                width: 48,
+                height: 48,
+                border: "2px solid #e0e0e0",
+                objectFit: "cover",
+              }}
+            />
+          </StoryRing>
         </Badge>
       </ListItemAvatar>
       <ListItemText
@@ -60,6 +71,12 @@ const MessageChatUserItem: React.FC<Props> = ({ user, onClick, selected }) => {
             </Box>
           ) : null
         }
+      />
+      {/* Story Viewer */}
+      <StoryViewerModal
+        open={openViewer}
+        onClose={() => setOpenViewer(false)}
+        userId={user.id}
       />
     </ListItemButton>
   );

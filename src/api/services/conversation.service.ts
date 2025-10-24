@@ -13,6 +13,7 @@ export interface LastMessage {
 }
 
 export interface ConversationUser {
+  storyCount: any;
   _id: string;
   username: string;
   profileUrl: string;

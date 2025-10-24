@@ -16,6 +16,7 @@ import { BASE_URL } from "../../api/endpoints";
 import { useDispatch } from "react-redux";
 import { alertActions } from "../store/alert-slice";
 import { authActions } from "../store/auth-slice";
+import { useSelector } from "react-redux";
 
 interface Props {
   open: boolean;
@@ -48,7 +49,10 @@ const StoryViewerModal: React.FC<Props> = ({
   const [progress, setProgress] = useState(0); // 0 - 100%
 
   const touchStartX = useRef<number | null>(null);
+  const loggedUserId = useSelector((state : any) => state.auth.user._id);
   // Load stories when modal opens
+  console.log("currentUser id: userid: ",currentUserId,userId);
+  
   useEffect(() => {
     if (!open) return;
     setCurrentIndex(0);
@@ -58,7 +62,9 @@ const StoryViewerModal: React.FC<Props> = ({
       setViewers(s[0]?.views || []);
 
       // Update story count in redux
-      dispatch(authActions.updateStoryCount(s.length));
+      // if(loggedUserId === userId){
+        dispatch(authActions.updateStoryCount(s.length));
+      // }
     });
   }, [open, userId]);
 
@@ -347,26 +353,28 @@ const StoryViewerModal: React.FC<Props> = ({
               )}
 
               {/* Actions */}
-              <Box
-                sx={{
-                  mt: 2,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  justifyContent: "center",
-                }}
-              >
-                <IconButton
-                  sx={{ color: "white" }}
-                  onClick={handleViewersClick}
-                  title="View viewers"
+              {loggedUserId === story.userId._id &&
+                <Box
+                  sx={{
+                    mt: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                    justifyContent: "center",
+                  }}
                 >
-                  <VisibilityIcon />
-                  <Typography variant="body2" ml={0.5}>
-                    {story.viewsCount}
-                  </Typography>
-                </IconButton>
-              </Box>
+                  <IconButton
+                    sx={{ color: "white" }}
+                    onClick={handleViewersClick}
+                    title="View viewers"
+                  >
+                    <VisibilityIcon />
+                    <Typography variant="body2" ml={0.5}>
+                      {story.viewsCount}
+                    </Typography>
+                  </IconButton>
+                </Box>
+              }
 
               {/* Navigation */}
               {currentIndex > 0 && (
@@ -407,8 +415,7 @@ const StoryViewerModal: React.FC<Props> = ({
               />
             </>)}
         </Box>
-      </Modal>
-
+      </Modal >
     </>
   );
 };

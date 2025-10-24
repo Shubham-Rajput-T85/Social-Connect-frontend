@@ -9,6 +9,7 @@ import { alertActions } from "../../store/alert-slice";
 import StoryModal from "../../story/StoryModal";
 import StoryViewerModal from "../../story/StoryViewerModal";
 import FollowModal from "./FollowModal";
+import { Person as PersonIcon } from "@mui/icons-material";
 
 
 const ProfileHeader = () => {
@@ -67,11 +68,27 @@ const ProfileHeader = () => {
             </Box>
             <Box sx={{ display: { xs: "block", sm: "none" } }}>
               <StoryRing
-                profileUrl={user.profileUrl}
+                keepAddButton={true}
                 storyCount={user.storyCount}
                 onAddStory={handleAddStory}
-                onViewStory={handleViewStory}
-              />
+                onViewStory={handleViewStory}>
+                <Avatar
+                  src={user.profileUrl ? `${BASE_URL}${user.profileUrl}` : undefined}
+                  alt="profile"
+                  sx={{
+                    width: 80,
+                    height: 80,
+                    margin: "auto",
+                    borderRadius: "50%",
+                    bgcolor: !user.profileUrl ? "grey.400" : undefined,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {!user.profileUrl && <PersonIcon sx={{ fontSize: 40 }} />}
+                </Avatar>
+              </StoryRing>
             </Box>
           </Box>
           <Box>
