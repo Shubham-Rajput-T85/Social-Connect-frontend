@@ -22,7 +22,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   userId: string;
-  onStoryCountChange?: (count: number) => void;
+  onStoryCountChange?: (count: number, allSeen: boolean) => void;
 }
 
 const StoryViewerModal: React.FC<Props> = ({
@@ -231,7 +231,7 @@ const StoryViewerModal: React.FC<Props> = ({
     if (currentIndex < stories.length - 1) {
       setCurrentIndex((i) => i + 1);
     } else {
-      onStoryCountChange?.(stories.length);
+      onStoryCountChange?.(stories.length, true);
       onClose();
     }
   };
@@ -278,7 +278,7 @@ const StoryViewerModal: React.FC<Props> = ({
       const updated = stories.filter((s) => s._id !== story._id);
       setStories(updated);
       if (updated.length === 0) {
-        onStoryCountChange?.(stories.length);
+        onStoryCountChange?.(stories.length, false);
         onClose();
       } else if (currentIndex >= updated.length) {
         setCurrentIndex(updated.length - 1);
@@ -335,7 +335,8 @@ const StoryViewerModal: React.FC<Props> = ({
         <IconButton
           sx={{ position: "absolute", top: 10, right: 10, color: "white", zIndex: 9999  }}
           onClick={() => {
-            onStoryCountChange?.(stories.length);
+            const allSeen = stories.every((s) => hasViewed[s._id]);
+            onStoryCountChange?.(stories.length, allSeen); 
             onClose();
           }}
         >

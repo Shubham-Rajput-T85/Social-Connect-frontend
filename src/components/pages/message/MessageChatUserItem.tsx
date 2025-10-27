@@ -12,6 +12,7 @@ interface User {
   online: boolean;
   unreadCount: number;
   storyCount: number;
+  allStoriesSeen: boolean;
 }
 
 interface Props {
@@ -23,6 +24,7 @@ interface Props {
 const MessageChatUserItem: React.FC<Props> = ({ user, onClick, selected }) => {
   const [openViewer, setOpenViewer] = useState(false);
   const [storyCount, setStoryCount] = useState(user.storyCount || 0);
+  const [allStoriesSeen, setAllStoriesSeen] = useState(user.allStoriesSeen);
   console.log("-----------------story count:--------",user);
   const handleViewStory = () => user.storyCount > 0 && setOpenViewer(true);
   return (
@@ -47,7 +49,7 @@ const MessageChatUserItem: React.FC<Props> = ({ user, onClick, selected }) => {
         >
           <StoryRing
             keepAddButton={false}
-            // storyCount={user.storyCount}
+            seen={allStoriesSeen}
             storyCount={storyCount}
             onAddStory={() => {}}
             onViewStory={handleViewStory}>
@@ -79,7 +81,10 @@ const MessageChatUserItem: React.FC<Props> = ({ user, onClick, selected }) => {
         open={openViewer}
         onClose={() => setOpenViewer(false)}
         userId={user.id}
-        onStoryCountChange={(count) => setStoryCount(count)}
+        onStoryCountChange={(count, allSeen) => {
+          setStoryCount(count);
+          if (allSeen) setAllStoriesSeen(true); // 👈 instantly gray-out ring
+        }}
       />
     </ListItemButton>
   );

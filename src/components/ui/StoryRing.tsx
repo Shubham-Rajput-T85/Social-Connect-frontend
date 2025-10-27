@@ -8,6 +8,7 @@ interface Props {
   storyCount?: number;
   onAddStory: () => void;
   onViewStory: () => void;
+  seen?: boolean;
 }
 
 const COLORS = ["#ff0050", "#ff7a00", "#ffb400"];
@@ -18,19 +19,26 @@ const StoryRing: React.FC<Props> = ({
   storyCount = 0,
   onAddStory,
   onViewStory,
+  seen
 }) => {
   const segments = Math.max(0, Math.min(12, storyCount)); // limit to 12 for visual sanity
   const gapPct = 2; // percent gap between segments
   const segPct = segments > 0 ? 100 / segments : 100;
 
   let background: string;
+  const ringColor = seen ? "gray" : undefined;
 
   if (segments === 0) {
     background = "transparent";
-  } else if (segments === 1) {
+  }
+  else if (seen) {
+    background = `conic-gradient(${ringColor} 0%, ${ringColor} 100%)`;
+  }  
+  else if (segments === 1) {
     // For one story → smooth gradient ring
     background = `conic-gradient(from -90deg, ${COLORS[0]}, ${COLORS[1]}, ${COLORS[2]}, ${COLORS[0]})`;
-  } else {
+  } 
+  else {
     // For multiple stories → clear segmented conic gradient
     const gradientStops = Array.from({ length: segments })
       .map((_, i) => {

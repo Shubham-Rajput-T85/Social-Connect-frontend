@@ -85,7 +85,8 @@ const MessageChatSidebar: React.FC<Props> = ({ onSelectConversation, registerUnr
                     profile: conv.user.profileUrl,
                     online: isOnline,
                     unreadCount: conv.unreadCount,
-                    storyCount: conv.user.storyCount ?? 0
+                    storyCount: conv.user.storyCount ?? 0,
+                    allStoriesSeen: conv.user.allStoriesSeen ?? true,
                   }}
                   onClick={() => {
                     setActiveConvId(conv.conversationId);
