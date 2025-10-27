@@ -22,6 +22,7 @@ interface Props {
 
 const MessageChatUserItem: React.FC<Props> = ({ user, onClick, selected }) => {
   const [openViewer, setOpenViewer] = useState(false);
+  const [storyCount, setStoryCount] = useState(user.storyCount || 0);
   console.log("-----------------story count:--------",user);
   const handleViewStory = () => user.storyCount > 0 && setOpenViewer(true);
   return (
@@ -46,7 +47,8 @@ const MessageChatUserItem: React.FC<Props> = ({ user, onClick, selected }) => {
         >
           <StoryRing
             keepAddButton={false}
-            storyCount={user.storyCount}
+            // storyCount={user.storyCount}
+            storyCount={storyCount}
             onAddStory={() => {}}
             onViewStory={handleViewStory}>
             <Avatar
@@ -77,6 +79,7 @@ const MessageChatUserItem: React.FC<Props> = ({ user, onClick, selected }) => {
         open={openViewer}
         onClose={() => setOpenViewer(false)}
         userId={user.id}
+        onStoryCountChange={(count) => setStoryCount(count)}
       />
     </ListItemButton>
   );

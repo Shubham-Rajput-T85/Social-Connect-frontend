@@ -17,19 +17,20 @@ import { useDispatch } from "react-redux";
 import { alertActions } from "../store/alert-slice";
 import { authActions } from "../store/auth-slice";
 import { useSelector } from "react-redux";
+import Loader from "../ui/Loader";
 
 interface Props {
   open: boolean;
   onClose: () => void;
   userId: string;
-  currentUserId?: string; // for checking story ownership
+  onStoryCountChange?: (count: number) => void;
 }
 
 const StoryViewerModal: React.FC<Props> = ({
   open,
   onClose,
   userId,
-  currentUserId,
+  onStoryCountChange
 }) => {
   const dispatch = useDispatch();
   const [stories, setStories] = useState<IStory[]>([]);
@@ -39,6 +40,8 @@ const StoryViewerModal: React.FC<Props> = ({
   const [isPaused, setIsPaused] = useState(false);
   const [hasViewed, setHasViewed] = useState<Record<string, boolean>>({});
   const [loadingDelete, setLoadingDelete] = useState(false);
+  const [loadingStories, setLoadingStories] = useState(false);
+
 
   // Timing refs owned by modal:
   const durationRef = useRef<number>(5000); // default, per story type we update
@@ -49,24 +52,34 @@ const StoryViewerModal: React.FC<Props> = ({
   const [progress, setProgress] = useState(0); // 0 - 100%
 
   const touchStartX = useRef<number | null>(null);
-  const loggedUserId = useSelector((state : any) => state.auth.user._id);
+  const loggedUserId = useSelector((state: any) => state.auth.user._id);
   // Load stories when modal opens
-  console.log("currentUser id: userid: ",currentUserId,userId);
-  
+
   useEffect(() => {
     if (!open) return;
     setCurrentIndex(0);
-    StoryService.getStoriesFeed(userId).then((res) => {
-      const s = res.stories || [];
-      setStories(s);
-      setViewers(s[0]?.views || []);
+    setLoadingStories(true); // 👈 start loading
+    StoryService.getStoriesFeed(userId)
+      .then((res) => {
+        const s = res.stories || [];
+        console.log("---------- stories ------------", s);
+        setStories(s);
+        setViewers(s[0]?.views || []);
 
-      // Update story count in redux
-      // if(loggedUserId === userId){
-        dispatch(authActions.updateStoryCount(s.length));
-      // }
-    });
+        if (loggedUserId === userId) {
+          dispatch(authActions.updateStoryCount(s.length));
+        }
+      })
+      .catch((err) => {
+        dispatch(
+          alertActions.showAlert({ severity: "error", message: err })
+        );
+      })
+      .finally(() => {
+        setLoadingStories(false); // 👈 stop loading
+      });
   }, [open, userId]);
+
 
   // When currentIndex or stories change: reset timers for that story
   useEffect(() => {
@@ -184,6 +197,7 @@ const StoryViewerModal: React.FC<Props> = ({
     if (currentIndex < stories.length - 1) {
       setCurrentIndex((i) => i + 1);
     } else {
+      if (onStoryCountChange) onStoryCountChange(stories.length);
       onClose();
     }
   };
@@ -213,13 +227,6 @@ const StoryViewerModal: React.FC<Props> = ({
     // Pause before confirm so progress freezes during the blocking dialog
     setIsPaused(true);
     // Give a small tick to ensure pause effects applied (optional but helps in some browsers)
-    await new Promise((r) => setTimeout(r, 10));
-    const confirmed = window.confirm("Are you sure you want to delete this story?");
-    // After confirm, keep it paused until we handle deletion result
-    if (!confirmed) {
-      setIsPaused(false);
-      return;
-    }
 
     try {
       setLoadingDelete(true);
@@ -235,6 +242,7 @@ const StoryViewerModal: React.FC<Props> = ({
       const updated = stories.filter((s) => s._id !== story._id);
       setStories(updated);
       if (updated.length === 0) {
+        if (onStoryCountChange) onStoryCountChange(stories.length);
         onClose();
       } else if (currentIndex >= updated.length) {
         setCurrentIndex(updated.length - 1);
@@ -251,8 +259,10 @@ const StoryViewerModal: React.FC<Props> = ({
         })
       );
     } finally {
+
       setLoadingDelete(false);
       setIsPaused(false); // resume after deletion handling
+      handleCloseViewers();
     }
   };
 
@@ -296,12 +306,19 @@ const StoryViewerModal: React.FC<Props> = ({
           {/* Close */}
           <IconButton
             sx={{ position: "absolute", top: 10, right: 10, color: "white" }}
-            onClick={onClose}
+            onClick={() => {
+              if (onStoryCountChange) onStoryCountChange(stories.length);
+              onClose();
+            }}
           >
             <CloseIcon />
           </IconButton>
 
-          {stories.length === 0 ? (
+          {loadingStories ? (
+            <Typography variant="h6" textAlign="center">
+              <Loader/>
+            </Typography>
+          ) : stories.length === 0 ? (
             <Typography variant="h6" textAlign="center">
               No stories found.
             </Typography>
@@ -353,7 +370,7 @@ const StoryViewerModal: React.FC<Props> = ({
               )}
 
               {/* Actions */}
-              {loggedUserId === story.userId._id &&
+              {loggedUserId === story.userId &&
                 <Box
                   sx={{
                     mt: 2,
@@ -409,13 +426,12 @@ const StoryViewerModal: React.FC<Props> = ({
                 open={openViewers}
                 onClose={handleCloseViewers}
                 viewers={viewers}
-                currentUserId={currentUserId}
-                storyOwnerId={story.userId._id}
+                storyOwnerId={story.userId.toString()}
                 onDeleteStory={handleDeleteStory}
               />
             </>)}
         </Box>
-      </Modal >
+      </Modal>
     </>
   );
 };
