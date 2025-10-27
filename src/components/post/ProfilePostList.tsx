@@ -13,6 +13,7 @@ import { useSelector } from "react-redux";
 import { IPost, PostService } from "../../api/services/post.service";
 import { BASE_URL } from "../../api/endpoints";
 import SkeletonPost from "../ui/SkeletonPost";
+import ConfirmDialog from "../ui/ConfirmDialog";
 
 const ProfilePostList: React.FC = () => {
   const [posts, setPosts] = useState<IPost[]>([]);
@@ -20,6 +21,9 @@ const ProfilePostList: React.FC = () => {
   const [error, setError] = useState<string>("");
   const user = useSelector((state: any) => state.auth.user);
   const userId = user._id;
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [targetPostId, setTargetPostId] = useState<string | null>(null);
 
   /**
    * Fetch posts from backend
@@ -80,7 +84,7 @@ const ProfilePostList: React.FC = () => {
    */
   if (loading) {
     return (
-        <SkeletonPost count={2} withMedia={true} />
+      <SkeletonPost count={2} withMedia={true} />
     );
   }
 
@@ -145,13 +149,18 @@ const ProfilePostList: React.FC = () => {
                 </Box>
 
                 {/* Delete Button */}
-                <IconButton onClick={() => handleDeletePost(post._id)}>
+                <IconButton
+                  onClick={() => {
+                    setTargetPostId(post._id);
+                    setConfirmOpen(true);
+                  }}
+                >
                   <DeleteOutlineIcon />
                 </IconButton>
               </Box>
               <hr />
               {/* Post Content */}
-              <Typography variant="body1" sx={{ mb: 1, whiteSpace: "pre-line",wordBreak: "break-word" }}>
+              <Typography variant="body1" sx={{ mb: 1, whiteSpace: "pre-line", wordBreak: "break-word" }}>
                 {post.postContent}
               </Typography>
 
@@ -203,6 +212,18 @@ const ProfilePostList: React.FC = () => {
           ))
         )}
       </Box>
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Delete Post?"
+        description="Do you really want to delete this post? This cannot be undone."
+        onConfirm={async () => {
+          if (targetPostId) await handleDeletePost(targetPostId);
+          setConfirmOpen(false);
+        }}
+        onCancel={() => setConfirmOpen(false)}
+        confirmText="Delete"
+        color="error"
+      />
     </Box>
   );
 };

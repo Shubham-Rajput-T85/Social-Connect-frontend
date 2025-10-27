@@ -16,6 +16,10 @@ import { getRelativeTimeWithEdit } from "../../api/services/common";
 import { useSelector } from "react-redux";
 import { alertActions } from "../store/alert-slice";
 import { useDispatch } from "react-redux";
+import ConfirmDialog from "../ui/ConfirmDialog";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { Menu, MenuItem } from "@mui/material";
+
 
 const COMMENT_PAGE_SIZE = 10;
 
@@ -47,6 +51,12 @@ const CommentList = forwardRef<CommentListHandle, CommentListProps>(
 
     const loadingRef = useRef(loading);
     const hasMoreRef = useRef(hasMore);
+
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [targetCommentId, setTargetCommentId] = useState<string | null>(null);
+
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [menuCommentId, setMenuCommentId] = useState<string | null>(null);
 
     const dispatch = useDispatch();
 
@@ -151,6 +161,16 @@ const CommentList = forwardRef<CommentListHandle, CommentListProps>(
       },
     }));
 
+    const handleMenuClick = (event: React.MouseEvent<HTMLElement>, commentId: string) => {
+      setAnchorEl(event.currentTarget);
+      setMenuCommentId(commentId);
+    };
+
+    const handleMenuClose = () => {
+      setAnchorEl(null);
+      setMenuCommentId(null);
+    };
+
     if (comments.length === 0) return <></>;
 
     return (
@@ -182,7 +202,7 @@ const CommentList = forwardRef<CommentListHandle, CommentListProps>(
               alignItems: "flex-start",
               gap: 1.5,
               position: "relative",
-              "&:hover .comment-actions": { display: "flex" },
+              "&:hover .comment-actions": { display: "block", p: 1 },
             }}
           >
             <Avatar
@@ -240,21 +260,58 @@ const CommentList = forwardRef<CommentListHandle, CommentListProps>(
             </Box>
 
             {/* Actions */}
+            {((currentUserId === comment.userId._id && editingCommentId !== comment._id) || (currentUserId === comment.userId._id || currentUserId === postOwnerUserId)) && (
             <Box
               className="comment-actions"
-              sx={{ display: "none", gap: 0.5, position: "absolute", top: 4, right: 4 }}
+              sx={{ display: "none" }}
+            >
+            <IconButton
+              size="small"
+              onClick={(e) => handleMenuClick(e, comment._id)}
+              sx={{
+                position: "absolute",
+                top: 5,
+                right: 5,
+                transition: "0.2s",
+              }}
+              className="menu-btn"
+            >
+              <MoreVertIcon fontSize="small" />
+            </IconButton>
+            </Box>
+            )}
+            {/* Hover More Icon */}
+
+            {/* The Dropdown Menu */}
+            <Menu
+              anchorEl={anchorEl}
+              open={menuCommentId === comment._id}
+              onClose={handleMenuClose}
             >
               {currentUserId === comment.userId._id && editingCommentId !== comment._id && (
-                <IconButton size="small" onClick={() => handleEditStart(comment)}>
-                  <Edit fontSize="small" />
-                </IconButton>
+                <MenuItem
+                  onClick={() => {
+                    handleEditStart(comment);
+                    handleMenuClose();
+                  }}
+                >
+                  Edit
+                </MenuItem>
               )}
               {(currentUserId === comment.userId._id || currentUserId === postOwnerUserId) && (
-                <IconButton size="small" onClick={() => handleDelete(comment._id)}>
-                  <Delete fontSize="small" />
-                </IconButton>
+                <MenuItem
+                  sx={{ color: "error.main" }}
+                  onClick={() => {
+                    handleMenuClose();
+                    setTargetCommentId(comment._id);
+                    setConfirmOpen(true);
+                  }}
+                >
+                  Delete
+                </MenuItem>
               )}
-            </Box>
+            </Menu>
+
           </Paper>
         ))}
 
@@ -268,6 +325,19 @@ const CommentList = forwardRef<CommentListHandle, CommentListProps>(
             You've reached the end of the comments
           </Typography>
         )}
+
+        <ConfirmDialog
+          open={confirmOpen}
+          title="Delete Comment?"
+          description="Are you sure you want to delete this comment? This action cannot be undone."
+          onConfirm={async () => {
+            if (targetCommentId) await handleDelete(targetCommentId);
+            setConfirmOpen(false);
+          }}
+          onCancel={() => setConfirmOpen(false)}
+          confirmText="Delete"
+          color="error"
+        />
       </Box>
     );
   }
