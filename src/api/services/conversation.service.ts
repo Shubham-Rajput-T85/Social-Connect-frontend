@@ -13,6 +13,7 @@ export interface LastMessage {
 }
 
 export interface ConversationUser {
+  storyCount: any;
   _id: string;
   username: string;
   profileUrl: string;
@@ -25,6 +26,7 @@ export interface IConversation {
   user: ConversationUser;
   lastMessage: LastMessage | null;
   unreadCount: number;
+  storyCount: number;
 }
 
 export const ConversationService = {

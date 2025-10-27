@@ -1,6 +1,8 @@
 import { ListItemButton, ListItemAvatar, Avatar, ListItemText, Badge, Box } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import { BASE_URL } from '../../../api/endpoints';
+import StoryRing from '../../ui/StoryRing';
+import StoryViewerModal from '../../story/StoryViewerModal';
 
 interface User {
   id: string;
@@ -9,6 +11,7 @@ interface User {
   profile: string;
   online: boolean;
   unreadCount: number;
+  storyCount: number;
 }
 
 interface Props {
@@ -18,7 +21,10 @@ interface Props {
 }
 
 const MessageChatUserItem: React.FC<Props> = ({ user, onClick, selected }) => {
-  console.log("user online or not: ", user.online);
+  const [openViewer, setOpenViewer] = useState(false);
+  const [storyCount, setStoryCount] = useState(user.storyCount || 0);
+  console.log("-----------------story count:--------",user);
+  const handleViewStory = () => user.storyCount > 0 && setOpenViewer(true);
   return (
     <ListItemButton onClick={onClick}
       sx={{
@@ -39,16 +45,23 @@ const MessageChatUserItem: React.FC<Props> = ({ user, onClick, selected }) => {
             },
           }}
         >
-          <Avatar
-            src={user.profile ? BASE_URL + user.profile : "/default-avatar.png"}
-            alt={user.username}
-            sx={{
-              width: 48,
-              height: 48,
-              border: "2px solid #e0e0e0",
-              objectFit: "cover",
-            }}
-          />
+          <StoryRing
+            keepAddButton={false}
+            // storyCount={user.storyCount}
+            storyCount={storyCount}
+            onAddStory={() => {}}
+            onViewStory={handleViewStory}>
+            <Avatar
+              src={user.profile ? BASE_URL + user.profile : "/default-avatar.png"}
+              alt={user.username}
+              sx={{
+                width: 48,
+                height: 48,
+                border: "2px solid #e0e0e0",
+                objectFit: "cover",
+              }}
+            />
+          </StoryRing>
         </Badge>
       </ListItemAvatar>
       <ListItemText
@@ -60,6 +73,13 @@ const MessageChatUserItem: React.FC<Props> = ({ user, onClick, selected }) => {
             </Box>
           ) : null
         }
+      />
+      {/* Story Viewer */}
+      <StoryViewerModal
+        open={openViewer}
+        onClose={() => setOpenViewer(false)}
+        userId={user.id}
+        onStoryCountChange={(count) => setStoryCount(count)}
       />
     </ListItemButton>
   );

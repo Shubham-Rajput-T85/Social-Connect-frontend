@@ -73,7 +73,8 @@ const MessageChatSidebar: React.FC<Props> = ({ onSelectConversation, registerUnr
             {conversations.map((conv) => {
               const isOnline = onlineUsers.includes(conv.user._id);
               const isSelected = activeConvId === conv.conversationId;
-
+              console.log("story count:---",conv.user.storyCount);
+              
               return (
                 <MessageChatUserItem
                   key={conv.conversationId}
@@ -84,6 +85,7 @@ const MessageChatSidebar: React.FC<Props> = ({ onSelectConversation, registerUnr
                     profile: conv.user.profileUrl,
                     online: isOnline,
                     unreadCount: conv.unreadCount,
+                    storyCount: conv.user.storyCount ?? 0
                   }}
                   onClick={() => {
                     setActiveConvId(conv.conversationId);

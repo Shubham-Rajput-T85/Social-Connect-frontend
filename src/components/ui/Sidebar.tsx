@@ -24,6 +24,7 @@ import { useDispatch } from "react-redux";
 import { authActions } from "../store/auth-slice";
 import StoryModal from "../story/StoryModal";
 import StoryViewerModal from "../story/StoryViewerModal";
+import { BASE_URL } from "../../api/endpoints";
 
 interface SidebarLink {
   label: string;
@@ -37,7 +38,6 @@ const Sidebar = () => {
   const [openViewer, setOpenViewer] = useState(false);
 
   const dispatch = useDispatch();
-  console.log("user from sidebar:", user);
 
   const links: SidebarLink[] = [
     { label: "Home", path: "/", icon: <HomeIcon /> },
@@ -52,6 +52,7 @@ const Sidebar = () => {
   
 
   const handleAddStory = () => setOpenStoryModal(true);
+  console.log("story count: ",user.storyCount, " openViewer: ",openViewer);
   const handleViewStory = () => user.storyCount > 0 && setOpenViewer(true);
 
   const handleStoryAdded = () => {
@@ -69,12 +70,28 @@ const Sidebar = () => {
         <Paper sx={{ padding: 2, mb: 2 }}>
           <Box sx={{ textAlign: "center" }}>
             <Box sx={{ position: "relative", display: "inline-block" }}>
-              <StoryRing
-                profileUrl={user.profileUrl}
+            <StoryRing
+                keepAddButton={true}
                 storyCount={user.storyCount}
                 onAddStory={handleAddStory}
-                onViewStory={handleViewStory}
-              />
+                onViewStory={handleViewStory}>
+                <Avatar
+                  src={user.profileUrl ? `${BASE_URL}${user.profileUrl}` : undefined}
+                  alt="profile"
+                  sx={{
+                    width: 80,
+                    height: 80,
+                    margin: "auto",
+                    borderRadius: "50%",
+                    bgcolor: !user.profileUrl ? "grey.400" : undefined,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {!user.profileUrl && <PersonIcon sx={{ fontSize: 40 }} />}
+                </Avatar>
+              </StoryRing>
             </Box>
             <Typography variant="h6" sx={{ mt: 1 }}>
               {user.name}

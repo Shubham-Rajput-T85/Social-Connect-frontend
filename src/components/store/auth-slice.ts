@@ -62,6 +62,11 @@ const authSlice = createSlice({
         decrementStoryCount: (state: any) => {
             state.user.storyCount -= 1;
         },
+        updateStoryCount: (state: any, action: PayloadAction<number>) => {
+            if (state.user) {
+                state.user.storyCount = action.payload;
+            }
+        }
     }
 });
 

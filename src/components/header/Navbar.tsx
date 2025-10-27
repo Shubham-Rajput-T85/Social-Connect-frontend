@@ -10,11 +10,14 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { authActions } from "../store/auth-slice";
 import { getSocket } from "../../socket";
+import ConfirmDialog from "../ui/ConfirmDialog";
 
 const Navbar: React.FC = () => {
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
+
+  const [confirmLogout, setConfirmLogout] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -97,13 +100,26 @@ const Navbar: React.FC = () => {
         <MenuItem onClick={goToProfile}>
           <Typography>Profile</Typography>
         </MenuItem>
-        <MenuItem onClick={logoutHandler}>
+        <MenuItem onClick={() => setConfirmLogout(true)}>
           <Typography>Logout</Typography>
         </MenuItem>
       </Menu>
 
       {/* Mobile Search */}
       <NavbarSearch onClose={function (): void { }} isMobile={true} openModal={searchModalOpen} onCloseModal={() => setSearchModalOpen(false)} />
+    
+      <ConfirmDialog
+        open={confirmLogout}
+        title="Logout?"
+        description="Are you sure you want to log out of your account?"
+        onConfirm={() => {
+          setConfirmLogout(false);
+          logoutHandler();
+        }}
+        onCancel={() => setConfirmLogout(false)}
+        confirmText="Logout"
+        color="error"
+      />    
     </AppBar>
   );
 }
