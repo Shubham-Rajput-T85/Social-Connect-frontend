@@ -19,6 +19,7 @@ export interface ConversationUser {
   profileUrl: string;
   online: boolean;
   name: string;
+  allStoriesSeen: boolean;
 }
 
 export interface IConversation {

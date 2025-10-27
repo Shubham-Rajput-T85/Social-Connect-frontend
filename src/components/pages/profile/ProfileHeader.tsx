@@ -6,7 +6,7 @@ import { BASE_URL } from "../../../api/endpoints";
 import StoryRing from "../../ui/StoryRing";
 import { authActions } from "../../store/auth-slice";
 import { alertActions } from "../../store/alert-slice";
-import StoryModal from "../../story/StoryModal";
+import StoryModal from "../../story/AddStoryModal";
 import StoryViewerModal from "../../story/StoryViewerModal";
 import FollowModal from "./FollowModal";
 import { Person as PersonIcon } from "@mui/icons-material";

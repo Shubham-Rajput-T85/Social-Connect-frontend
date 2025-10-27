@@ -22,7 +22,7 @@ import StoryRing from "./StoryRing";
 import { alertActions } from "../store/alert-slice";
 import { useDispatch } from "react-redux";
 import { authActions } from "../store/auth-slice";
-import StoryModal from "../story/StoryModal";
+import StoryModal from "../story/AddStoryModal";
 import StoryViewerModal from "../story/StoryViewerModal";
 import { BASE_URL } from "../../api/endpoints";
 
