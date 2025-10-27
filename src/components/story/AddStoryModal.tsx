@@ -34,7 +34,7 @@ export const getMediaTypeFromUrl = (url: string): "image" | "video" | null => {
   return null;
 };
 
-const StoryModal: React.FC<Props> = ({ open, onClose, onStoryAdded }) => {
+const AddStoryModal: React.FC<Props> = ({ open, onClose, onStoryAdded }) => {
   const dispatch = useDispatch();
   const [file, setFile] = useState<File | null>(null);
   const [caption, setCaption] = useState("");
@@ -58,7 +58,23 @@ const StoryModal: React.FC<Props> = ({ open, onClose, onStoryAdded }) => {
       img.src = objectUrl;
     } else if (file.type.startsWith("video/")) {
       const v = document.createElement("video");
-      v.onloadedmetadata = () => setIsPortrait(v.videoHeight > v.videoWidth);
+      v.preload = "metadata";
+      v.onloadedmetadata = () => {
+        setIsPortrait(v.videoHeight > v.videoWidth);
+
+        // ✅ Duration check (<= 30 seconds)
+        if (v.duration > 30) {
+          dispatch(
+            alertActions.showAlert({
+              severity: "error",
+              message: "Video duration must be 30 seconds or less.",
+            })
+          );
+          setFile(null);
+          setPreviewUrl(null);
+          setIsPortrait(null);
+        }
+      };
       v.src = objectUrl;
     } else {
       setIsPortrait(false);
@@ -103,7 +119,10 @@ const StoryModal: React.FC<Props> = ({ open, onClose, onStoryAdded }) => {
       onClose();
     } catch (error: any) {
       dispatch(
-        alertActions.showAlert({ severity: "error", message: error.message || "Upload failed" })
+        alertActions.showAlert({
+          severity: "error",
+          message: error.message || "Upload failed",
+        })
       );
     } finally {
       setLoading(false);
@@ -111,13 +130,12 @@ const StoryModal: React.FC<Props> = ({ open, onClose, onStoryAdded }) => {
   };
 
   const handleClose = () => {
-    console.log("handlclose called");
     setFile(null);
     setCaption("");
     setPreviewUrl(null);
     setIsPortrait(null);
     onClose();
-  };  
+  };
 
   return (
     <Modal open={open} onClose={handleClose}>
@@ -146,14 +164,26 @@ const StoryModal: React.FC<Props> = ({ open, onClose, onStoryAdded }) => {
           Create Story
         </Typography>
 
-        <Box sx={{ display: "flex", gap: 1, flexDirection: "column", alignItems: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1,
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
           <Button
             variant="outlined"
             component="label"
             sx={{ textTransform: "none", width: "100%" }}
           >
             Choose File
-            <input type="file" accept="image/*,video/*" hidden onChange={handleFileChange} />
+            <input
+              type="file"
+              accept="image/*,video/*"
+              hidden
+              onChange={handleFileChange}
+            />
           </Button>
 
           {previewUrl && (
@@ -192,13 +222,23 @@ const StoryModal: React.FC<Props> = ({ open, onClose, onStoryAdded }) => {
                   <img
                     src={previewUrl}
                     alt="preview"
-                    style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: "10px", objectFit: "contain" }}
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "100%",
+                      borderRadius: "10px",
+                      objectFit: "contain",
+                    }}
                   />
                 ) : (
                   <video
                     src={previewUrl}
                     controls
-                    style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: "10px", objectFit: "contain" }}
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "100%",
+                      borderRadius: "10px",
+                      objectFit: "contain",
+                    }}
                   />
                 )}
               </Box>
@@ -229,4 +269,4 @@ const StoryModal: React.FC<Props> = ({ open, onClose, onStoryAdded }) => {
   );
 };
 
-export default StoryModal;
+export default AddStoryModal;
