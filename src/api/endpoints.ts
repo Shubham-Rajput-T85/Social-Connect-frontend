@@ -8,7 +8,8 @@ export const API_ENDPOINTS = {
   },
   USER: {
     TOGGLE_ACCOUNT_STATUS: `${BASE_URL}/user/updateAccountStatus`,
-    SUGGESTED_FRIEND: `${BASE_URL}/user/suggestedFriends`
+    SUGGESTED_FRIEND: `${BASE_URL}/user/suggestedFriends`,
+    USER_FOLLOW_COUNTS: (userId: string) => `${BASE_URL}/user/getUsersCount/${userId}`
     // PROFILE: (userId: string) => `${BASE_URL}/user/${userId}`,
     // UPDATE: `${BASE_URL}/user/update`,
   },

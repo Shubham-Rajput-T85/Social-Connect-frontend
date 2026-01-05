@@ -8,6 +8,7 @@ import { BASE_URL } from "../../api/endpoints";
 import { RootState } from "../store/store";
 import { followService } from "../../api/services/follow.service";
 import { authActions } from "../store/auth-slice";
+import { userService } from "../../api/services/user.service";
 
 interface UserProfileModalProps {
   open: boolean;
@@ -40,8 +41,24 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [following, setFollowing] = useState<any[]>([]);
   const [mutualFollowers, setMutualFollowers] = useState<any[]>([]);
 
+  const [postCount, setPostCount] = useState<number>(userData.postCount ?? 0);
   const [followersCount, setFollowersCount] = useState<number>(userData.followersCount ?? 0);
   const [followingCount, setFollowingCount] = useState<number>(userData.followingCount ?? 0);
+
+    useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const res = await userService.getUserFollowCount(userData._id); // or getUserCounts()
+        setPostCount(res.data.postCount);
+        setFollowersCount(res.data.followersCount);
+        setFollowingCount(res.data.followingCount);
+      } catch (error) {
+        console.error("Failed to fetch user counts", error);
+      }
+    };
+
+    fetchCounts();
+  }, []);
 
   const onlineUsers = useSelector((state: RootState) => state.onlineUsers.users);
 

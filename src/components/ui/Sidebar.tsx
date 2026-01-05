@@ -41,7 +41,7 @@ const Sidebar = () => {
 
   const links: SidebarLink[] = [
     { label: "Home", path: "/", icon: <HomeIcon /> },
-    { label: "Profile", path: "/profile/my-posts", icon: <PersonIcon /> },
+    { label: "Profile", path: "/profile/", icon: <PersonIcon /> },
     { label: "Messages", path: "/message", icon: <MessageIcon /> },
   ];
 
@@ -77,7 +77,7 @@ const Sidebar = () => {
                 onViewStory={handleViewStory}>
                 <Avatar
                   src={user.profileUrl ? `${BASE_URL}${user.profileUrl}` : undefined}
-                  alt="profile"
+                  alt={user.name.charAt(0)}
                   sx={{
                     width: 80,
                     height: 80,
