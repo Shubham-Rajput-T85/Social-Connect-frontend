@@ -27,4 +27,17 @@ export const userService = {
 
         return await response.json();
     },
+    getUserFollowCount: async (userId: string) => {
+        const response = await fetch(API_ENDPOINTS.USER.USER_FOLLOW_COUNTS(userId), {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+        });
+
+        if (!response.ok) throw new Error("Failed to like post");
+
+        return await response.json();
+    },
 }

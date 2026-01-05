@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Paper, Typography, Avatar, Button, Divider } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -10,6 +10,7 @@ import StoryModal from "../../story/AddStoryModal";
 import StoryViewerModal from "../../story/StoryViewerModal";
 import FollowModal from "./FollowModal";
 import { Person as PersonIcon } from "@mui/icons-material";
+import { userService } from "../../../api/services/user.service";
 
 
 const ProfileHeader = () => {
@@ -18,11 +19,29 @@ const ProfileHeader = () => {
   const location = useLocation();
   const [openStoryModal, setOpenStoryModal] = useState(false);
   const [openViewer, setOpenViewer] = useState(false);
-  console.log(user);
+  console.log("user :.................................",user);
+  const [userFollowCount, setUserFollowCount] = useState({
+    postCount: user.postCount,
+    followersCount: user.followersCount,
+    followingCount: user.followingCount
+  });
 
   const dispatch = useDispatch();
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<"followers" | "following">("followers");
+
+    useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const res = await userService.getUserFollowCount(user._id); // or getUserCounts()
+        setUserFollowCount(res.data);
+      } catch (error) {
+        console.error("Failed to fetch user counts", error);
+      }
+    };
+
+    fetchCounts();
+  }, []);
 
   // Extract the last segment of the path to determine active tab
   const path = location.pathname.split("/").pop();
@@ -106,7 +125,7 @@ const ProfileHeader = () => {
         <Box sx={{ display: "flex", gap: 4 }}>
           <Box>
             <Typography variant="h6" align="center">
-              {user.postCount}
+              {userFollowCount.postCount}
             </Typography>
             <Typography variant="body2" color="text.secondary" align="center">
               Posts
@@ -120,7 +139,7 @@ const ProfileHeader = () => {
             }}
           >
             <Typography variant="h6" align="center">
-              {user.followersCount}
+              {userFollowCount.followersCount}
             </Typography>
             <Typography variant="body2" color="text.secondary" align="center">
               Followers
@@ -134,7 +153,7 @@ const ProfileHeader = () => {
             }}
           >
             <Typography variant="h6" align="center">
-              {user.followingCount}
+              {userFollowCount.followingCount}
             </Typography>
             <Typography variant="body2" color="text.secondary" align="center">
               Following
